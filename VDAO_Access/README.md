@@ -128,7 +128,12 @@ myVideo.SkipAndSaveFrames(1, 14, 2, '/media/rafael/Databases', True)
 
 You can set the last parameter to True if you want to show details of the frame, otherwise set it to False or don't pass anything. See the images below as examples:
 
-[Add images]
+<!--- Showing examples of frames with and without information--->
+<div style="text-align:center">
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_withWithoutInfo.jpg" alt="AAAAAA" style="width: 30px;"/>
+<p align="center">Example of frames with info (showInfo=True) and without info (showInfo=False) respectively </p>
+</div>
+
 
 **Example 04: Play a VDAO video**
 
@@ -170,10 +175,14 @@ aloi = ObjectDatabase('/media/rafael/Databases/databases/ALOI/png4', \
                       '/media/rafael/Databases/databases/ALOI/mask4')
 # Get a random object and its mask
 [mergedImage, (min_x, min_y, max_x, max_y)] = aloi.getRandomObject()
-# [mergedImage, (min_x, min_y, max_x, max_y)] = aloi.getRandomCroppedObject_ZeroDegrees(2)
 cv2.rectangle(mergedImage,(min_x,min_y),(max_x,max_y),(0,255,0),1)
 cv2.imshow('ROI', mergedImage)
 cv2.waitKey(0)
 ```
+The image below shows the application of the function ```getRandomObject```. The rectangle in the ouput image was added as demonstraded in the previous example.
 
-[Add images]
+<!--- Example of input and output of the function getRandomObject--->
+<p align="center">
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_mergedImages.jpg" alt="AAAAAA" style="width: 30px;"/>
+<p align="center">Random image from the ALOI database was chosen and merged with its mask using the getRandomObject function. It results in the 3rd image (the bounding box was added afterwards)</p>
+</div>
