@@ -12,6 +12,8 @@ See [here](http://www02.smt.ufrj.br/~tvdigital/database/objects/docs/an_annotate
 
 Or if you prefer, you can download the videos and annotations directly from [here](VDAO.md). The links just point to the official distribution.
 
+You can have a bunch of useful tools to play with VDAO database in the **[VDAO_Access Project](https://github.com/rafaelpadilla/DeepLearning-VDAO/tree/master/VDAO_Access)**.
+
 The images below show examples of **reference frames** (no object) and **target frames** (with objects to be detected).
 
 <!--- Showing examples of frames --->
