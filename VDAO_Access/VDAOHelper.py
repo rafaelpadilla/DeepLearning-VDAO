@@ -235,6 +235,18 @@ class VDAOInfo:
             val = self._pixelFormat
         return val
 
+    def getFrameRateFloat(self):
+        """Gets number of frames that are displayed per second in float format"""
+        val = self.getFrameRate()
+        if val is not None:
+            idx = val.find('/')
+            if idx == -1:
+                return None
+            num = float(val[:idx])
+            den = float(val[idx+1:])            
+            return num/den
+        return val
+
     def getFrameRate(self):
         """Gets number of frames that are displayed per second in the format X/1"""
         val = None
@@ -242,8 +254,9 @@ class VDAOInfo:
             val = self._frameRate
         return val
 
-    def getFramesPerSecond(self):
-        """Gets number of frames that are displayed per second"""
+    def getFramesPerSecond(self): #WRONG!
+        return None # Make it useless
+        """Gets number of frames that are displayed per second ????? TO REVIEW!"""
         val = None
         if self._idxVideoInfo is not None:
             val = self._framesPerSecond
@@ -274,7 +287,7 @@ class VDAOInfo:
         """Gets the number of frames of the whole video ????"""
         val = None
         if self._idxVideoInfo is not None:
-            val = self._numberOfFrames
+            val = int(self._numberOfFrames)
         return val
 
     def printAllInformation(self):

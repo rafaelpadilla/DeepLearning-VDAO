@@ -117,12 +117,13 @@ class VDAOVideo:
             
         # Check if frame exist within the video
         if frameNumber < 1 or frameNumber > int(maxNumberFrames):
-            raise IOError('Frame number must be between 1 and '+self.videoInfo.getNumberOfFrames())
+            raise IOError('Frame number must be between 1 and '+str(self.videoInfo.getNumberOfFrames()))
 
         cap = cv2.VideoCapture(self.videoPath)
-        fr = int(self.videoInfo.getFramesPerSecond())
-        frameTime = 1000 * (frameNumber-1)/fr
+        fr = self.videoInfo.getFrameRateFloat() 
+        frameTime = 1000 * (frameNumber-1)/fr 
         cap.set(cv2.CAP_PROP_POS_MSEC, frameTime)
+
         ret,frame = cap.read()
         cap.release()
         if ret & withInfo:
@@ -174,13 +175,13 @@ class VDAOVideo:
         # Return frame with information
         return framedImage
     
-    def SkipAndSaveFrames(self, startingFrame, endingFrame, framesToSkip, outputFolder, showInfo=False):
+    def SkipAndSaveFrames(self, startingFrame, endingFrame, framesToSkip, outputFolder, filePrefix='frame_', showInfo=False):
         for i in range(startingFrame,endingFrame,framesToSkip):
             # Get the ith frame
             res,frame = self.GetFrame(i, showInfo)
             # Check if frame was successfully retrieved and save it
             if res: 
-                foldeAndFile = outputFolder+'/frame%d.jpg'%i
+                foldeAndFile = outputFolder+'/%s%d.jpg'%(filePrefix,i)
                 cv2.imwrite(foldeAndFile, frame)
                 print("File sucessfully saved: %s" % foldeAndFile)
             else:
