@@ -6,21 +6,21 @@ You can also download the database videos directly from the tables below:
 
 | # | Type | Illumination |
 | :---: | :---: | :---: |
-| 1 | [Single objects 1](#single_objects_1) | Normal |
-| 2 | [Single objects 2](#single_objects_2) | Normal |
-| 3 | [Single objects 3](#single_objects_3) | Normal |
-| 4 | [Single objects 4](#single_objects_ei_1) | Extra |
-| 5 | [Single objects 5](#single_objects_ei_2) | Extra |
-| 6 | [Single objects 6](#single_objects_ei_3) | Extra |
+| 1 | [Single object 1](#single_object_1) | Normal |
+| 2 | [Single object 2](#single_object_2) | Normal |
+| 3 | [Single object 3](#single_object_3) | Normal |
+| 4 | [Single object 4](#single_object_ei_1) | Extra |
+| 5 | [Single object 5](#single_object_ei_2) | Extra |
+| 6 | [Single object 6](#single_object_ei_3) | Extra |
 | 7 | [Multiple objects 1](#multiple_objs_1) | Normal |
 | 8 | [Multiple objects 2](#multiple_objs_2) | Normal |
-| 9 | [Multiple objects 1](#multiple_objs_ei_1) | Extra |
-| 10 | [Multiple objects 1](#multiple_objs_ei_2) | Extra |
+| 9 | [Multiple objects 3](#multiple_objs_ei_1) | Extra |
+| 10 | [Multiple objects 4](#multiple_objs_ei_2) | Extra |
 
 Single Objects 
 ======
 
-<a name="single_objects_1"></a>
+**Single object 1 (normal illumination)** <a name="single_object_1"></a>
 
 | # | Type |Description | Download | Annotation file | 
 | :---: | :---: | :---: | :---: | :---: |
@@ -37,7 +37,7 @@ Single Objects
 | 11 | Lost object | Camera box - Position 2 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video09.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-amb-part01-video09.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video09.txt) |
 | 12 | Lost object | Camera box - Position 3 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video10.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-amb-part01-video10.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video10.txt) |
 
-<a name="single_objects_2"></a>
+**Single object 2 (normal illumination)** <a name="single_object_2"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
@@ -48,7 +48,7 @@ Single Objects
 | 5 | Lost object | Brown box - Position 2 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video04.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-amb-part02-video04.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video04.txt) |
 | 6 | Lost object | Brown box - Position 3 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video05.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-amb-part02-video05.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video05.txt) |
 
-<a name="single_objects_3"></a>
+**Single object 3 (normal illumination)** <a name="single_object_3"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
@@ -72,10 +72,10 @@ Single Objects
 | 18 | Lost object | Black backpack - Position 3 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part03-video17.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-amb-part03-video13.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part03-video17.txt) |
 
 
-Single Objects with Extra Illumination <a name="single_objects_ei"></a>
+Single Object with Extra Illumination <a name="single_object_ei"></a>
 ======
 
-<a name="single_objects_ei_1"></a>
+**Single object 4 (extra illumination)** <a name="single_object_ei_1"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
@@ -90,7 +90,7 @@ Single Objects with Extra Illumination <a name="single_objects_ei"></a>
 | 9 | Lost object | Camera box - Position 2 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-ext-part01-video09.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-ext-part01-video09.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-ext-part01-video09.txt) |
 | 10 | Lost object | Camera box - Position 3 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-ext-part01-video10.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-ext-part01-video10.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-ext-part01-video10.txt) |
 
-<a name="single_objects_ei_2"></a>
+**Single object 5 (extra illumination)** <a name="single_object_ei_2"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
@@ -101,7 +101,7 @@ Single Objects with Extra Illumination <a name="single_objects_ei"></a>
 | 5 | Lost object | Brown box - Position 2 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-ext-part02-video04.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-ext-part02-video04.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-ext-part02-video04.txt) |
 | 6 | Lost object | Brown box - Position 3 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-ext-part02-video05.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-sing-ext-part02-video05.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-ext-part02-video05.txt) |
 
-<a name="single_objects_ei_3"></a>
+**Single object 6 (extra illumination)** <a name="single_object_ei_3"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
@@ -125,14 +125,14 @@ Single Objects with Extra Illumination <a name="single_objects_ei"></a>
 Multiple Objects <a name="multiple_objs"></a>
 ======
 
-<a name="multiple_objs_1"></a>
+**Multiple objects 1 (normal illumination)** <a name="multiple_objs_1"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
 | 1 | Reference | Reference | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-amb-part01-video01.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-amb-part01-video01.mp4) | - |
 | 2 | Lost object | Multiple objects - Video 1	 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-mult-amb-part01-video01.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-mult-amb-part01-video01.mp4) | Not avaliable |
 
-<a name="multiple_objs_2"></a>
+**Multiple objects 2 (normal illumination)** <a name="multiple_objs_2"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
@@ -143,14 +143,14 @@ Multiple Objects <a name="multiple_objs"></a>
 Multiple Objects with Extra Illumination <a name="multiple_objs_ei"></a>
 ======
 
-<a name="multiple_objs_ei_1"></a>
+**Multiple objects 3 (extra illumination)** <a name="multiple_objs_ei_1"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
 | 1 | Reference | Reference | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-ext-part01-video01.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/ref-mult-ext-part01-video01.mp4) | - |
 | 2 | Lost object | Multiple objects - Video 1 | [AVI](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-mult-ext-part01-video01.avi) [MP4](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/mp4/obj-mult-ext-part01-video01.mp4) | [annotation](http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-mult-ext-part01-video01.txt) |
 
-<a name="multiple_objs_ei_2"></a>
+**Multiple objects 4 (extra illumination)** <a name="multiple_objs_ei_2"></a>
 
 | # | Type |Description | Download | Annotation file |
 | :---: | :---: | :---: | :---: | :---: |
