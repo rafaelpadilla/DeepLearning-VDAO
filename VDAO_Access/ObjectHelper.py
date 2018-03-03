@@ -128,7 +128,7 @@ class ObjectDatabase:
         # Find bounding box where the object will be inserted
         auxBackground = np.zeros(background.shape, dtype=background.dtype)
         auxBackground[yIni:h+yIni,xIni:w+xIni,0:3] = cv2.merge((mask, mask, mask))
-        min_x, min_y, max_x, max_y = ALOIDatabase.getBoundingBoxMask(auxBackground)
+        min_x, min_y, max_x, max_y = ObjectDatabase.getBoundingBoxMask(auxBackground)
         return new_background, [min_x, min_y, max_x, max_y]
 
     @staticmethod
@@ -205,7 +205,7 @@ class ObjectDatabase:
         img_weight_backg = 1 - np.array(img_weight_foreg)
         img_blur_border = np.add(np.multiply(img_weight_foreg,img_mask_new),np.multiply(img_weight_backg,img_mask_new_backg))
          # Find bounding box where the object will be inserted
-        min_x, min_y, max_x, max_y = ALOIDatabase.getBoundingBoxMask(img_weight_foreg*255)
+        min_x, min_y, max_x, max_y = ObjectDatabase.getBoundingBoxMask(img_weight_foreg*255)
         return img_blur_border, [min_x, min_y, max_x, max_y]
 
     @staticmethod
