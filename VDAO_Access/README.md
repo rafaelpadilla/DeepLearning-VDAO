@@ -3,7 +3,7 @@
 With **VDAO_Acess Project** you have access to different tools to:
 
 * Play VDAO videos;
-* Play VDAO videos highlighting lost objects with bounding boxes **[To be implemented]**;
+* Play VDAO videos highlighting lost objects with bounding boxes;
 * Capture a specific frame within the videos;
 * Split a video into different frames, skipping a given number of frames;
 * Merge objects from [ALOI Database](http://aloi.science.uva.nl/) or **any database** with its corresponding mask;
@@ -138,16 +138,37 @@ You can set the last parameter to True if you want to show details of the frame,
 **Example 04: Play a VDAO video**
 
 You can use the method **playVideo(showFrame, showBoundingBoxes)** specifying in the boolean parameter **showFrame** if you want to show the frame counter in the video or not.  
-With the parameter **showBoundingBoxes**, if you passed to the constructor the annotation file with the objects locations, the video will be played and the bounding boxes will be inserted around the lost objects. [ **TO BE IMPLEMENTED** ] 
 
 The code below shows how to play a VDAO video with and without frame information:
 
 ```python
 # Play video showing information about the video
-myVideo.playVideo(True)
+myVideo.PlayVideo(True)
 # Play video showing information about the video
-myVideo.playVideo(False)
+myVideo.PlayVideo(False)
 ```
+With the parameter **showBoundingBoxes** set to ```True```, the video will be played and whenever there is a bounding box identified in the annotation file, the bounding box will be drawn in every frame. To use this feature, when creating the VDAOVideo object, it is necessary to pass the path for the annotation file using the parameter ```annotationFilePath```. See the example below:
+
+```python
+# Set the folder where the annotation file (.txt) and the video (.avi) are
+folder = '/media/rafael/Databases/databases/VDAO/VDAO/Table_1-Shoe_Position_1'
+# Set the paths for the video and its annotation file
+video = os.path.join(folder, 'obj-sing-amb-part01-video01.avi')
+annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
+# Create VDAOvideo object
+vdao = VDAOVideo(video, annotationFilePath=annotation)
+# Play the video setting the parameter showBoundingBoxes to True
+vdao.PlayVideo(True, True)
+```
+
+The image below shows one of the frames of the example above where an object has its bounding box shown.
+
+<!--- Showing examples of frames with and without information--->
+<div style="text-align:center">
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_withBBfromAnnotation.jpg" alt="AAAAAA" style="width: 30px;"/>
+<p align="center">Example of **PlayVideo** function showing a bounding box obtained from the annotationFile.</p>
+</div>
+
 
 **Example 05: Crop an object given its mask**
 
