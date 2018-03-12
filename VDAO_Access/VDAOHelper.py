@@ -315,8 +315,3 @@ class VDAOInfo:
         print('Number of frames: ' + str(self._numberOfFrames))
         print(' ')
         print('*************************************')
-
-class VDAOAnnotatedFile:
-     def __init__(self, annotated_file):
-         self.annotated_file = annotated_file
-         

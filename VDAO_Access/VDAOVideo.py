@@ -6,6 +6,7 @@ import numpy as np
 import utils
 # To get video information
 from VDAOHelper import VDAOInfo, VideoType
+from Annotation import Annotation
 
 class VDAOVideo:
     """
@@ -17,7 +18,7 @@ class VDAOVideo:
         Last modification: Dec 9th 2017
     """
     
-    def __init__(self, videoPath, videoType=None, annotationFile=None):
+    def __init__(self, videoPath, videoType=None, annotationFilePath=None):
         # Defines if the video is reference or with objects by the name of the file
         if videoType == None:
             _, fileName = utils.splitPathFile(videoPath)
@@ -31,12 +32,18 @@ class VDAOVideo:
         self.videoPath = videoPath
         self.videoInfo = VDAOInfo(self.videoPath)
 
-        if annotationFile != None:
-            self.annotationFile = annotationFile
+        self.annotationFilePath = annotationFilePath
+        self.annotation = None
     
     def PlayVideo(self, showFrame=True, showBoundingBoxes=False):
+        # Parse videos
+        annot = None
+        if showBoundingBoxes and self.annotation == None:
+            totalFrames = self.videoInfo.getNumberOfFrames()
+            annot = Annotation(self.annotationFilePath, totalFrames)
+
         cap = cv2.VideoCapture(self.videoPath)
-        fps = self.videoInfo.getFramesPerSecond() #or cap.get(cv2.CAP_PROP_FPS)
+        fps = self.videoInfo.getFrameRateFloat() #or cap.get(cv2.CAP_PROP_FPS)
         waitFraction = int(1000/fps)
         # Parameters to display video info
         width, height = self.videoInfo.getWidthHeight()
@@ -74,7 +81,6 @@ class VDAOVideo:
         frameCount = 1
         ret = True
         while(ret == True):
-            
             if showFrame:
                 # VDAO videos have 3 channels
                 framedImage = np.zeros((framedImageHeight, width, 3), np.uint8)
@@ -90,10 +96,11 @@ class VDAOVideo:
             else:
                 framedImage = frame
                 
-            # TODO: Falta implementar o parser do txt e marcar os frames com um retângulo
-            # Usar a classe VDAOAnnotatedFile
-            # if frameCount == 2902:
-            #     cv2.rectangle(framedImage,(0,430),(2,453),(0,255,0),3)
+            # if there is annotation to show
+            if annot != None and annot.listAnnotation[frameCount][1] != None:
+                box = annot.listAnnotation[frameCount][1]
+                label = annot.listAnnotation[frameCount][0]
+                framedImage = utils.add_bb_into_image(framedImage,box, (0,255,0), 3, label)
 
             # Show framedImage
             cv2.imshow('VDAO', framedImage)
