@@ -158,15 +158,15 @@ annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
 # Create VDAOvideo object
 vdao = VDAOVideo(video, annotationFilePath=annotation)
 # Play the video setting the parameter showBoundingBoxes to True
-vdao.PlayVideo(True, True)
+vdao.PlayVideo(True, showBoundingBoxes=True)
 ```
 
 The image below shows one of the frames of the example above where an object has its bounding box shown.
 
 <!--- Showing examples of frames with and without information--->
 <div style="text-align:center">
-<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_withBBfromAnnotation.jpg" alt="AAAAAA" style="width: 30px;"/>
-<p align="center">Example of **PlayVideo** function showing a bounding box obtained from the annotationFile.</p>
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/ex_withBBfromAnnotation.jpg" alt="AAAAAA" style="width: 30px;"/>
+<p align="center">Example of PlayVideo function showing a bounding box obtained from the annotationFile (showBoundingBoxes=True).</p>
 </div>
 
 
