@@ -8,12 +8,13 @@
 ############################################################################################
 
 import cv2
+import os
 from VDAOVideo import VDAOVideo 
 from VDAOHelper import VideoType
 from ObjectHelper import ObjectDatabase
 
 # Change here the path to your video. 
-videoPath = "/media/rafael/Databases/databases/VDAO/obj-mult-ext-part02-video01.avi"
+videoPath = "/media/rafael/Databases/databases/VDAO/VDAO/Table_1-Shoe_Position_1/obj-sing-amb-part01-video01.avi"
 
 # Create a VDAOVideo object informing if it its a reference or if it contains objects
 myVideo = VDAOVideo(videoPath)
@@ -24,7 +25,7 @@ myVideo = VDAOVideo(videoPath)
 
 # Get number of frames
 numberOfFrames = myVideo.videoInfo.getNumberOfFrames()
-print("Number of frames: "+ numberOfFrames)
+print("Number of frames: "+ str(numberOfFrames))
 
 # Get frame rate
 frameRate = myVideo.videoInfo.getFrameRate()
@@ -65,17 +66,15 @@ res, frame = myVideo.GetFrame(frameNumber, True) # Getting 180th frame
 ####################################################################### 
 # Example 05: Play a video adding bounding box
 ####################################################################### 
-# Given a VDAO video and its annotation file, play video showing
-# bouding boxes around the objects
-# folder = '/media/rafael/Databases/databases/VDAO/VDAO/Table_1-Shoe_Position_1'
-# get video and annotation file
-# video = os.path.join(folder, 'obj-sing-amb-part01-video01.avi')
-# annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
-# Create vdao video object
-# vdao = VDAOVideo(video, annotationFilePath=annotation)
-# Play video
-# vdao.PlayVideo(True, True)
-
+# Set the folder where the annotation file (.txt) and the video (.avi) are
+folder = '/media/rafael/Databases/databases/VDAO/VDAO/Table_1-Shoe_Position_1'
+# Set the paths for the video and its annotation file
+video = os.path.join(folder, 'obj-sing-amb-part01-video01.avi')
+annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
+# Create VDAOvideo object
+vdao = VDAOVideo(video, annotationFilePath=annotation)
+# Play the video setting the parameter showBoundingBoxes to True
+vdao.PlayVideo(True, True)
 
 ####################################################################### 
 # Example 06: Crop an object given its mask
