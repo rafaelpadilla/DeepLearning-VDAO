@@ -67,12 +67,14 @@ res, frame = myVideo.GetFrame(frameNumber, True) # Getting 180th frame
 ####################################################################### 
 # Given a VDAO video and its annotation file, play video showing
 # bouding boxes around the objects
-folder = '/media/rafael/Databases/databases/VDAO/VDAO/Table_1-Shoe_Position_1'
-video = os.path.join(folder, 'obj-sing-amb-part01-video01.avi')
-annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
-
-vdao = VDAOVideo(video, annotationFilePath=annotation)
-vdao.PlayVideo(True, True)
+# folder = '/media/rafael/Databases/databases/VDAO/VDAO/Table_1-Shoe_Position_1'
+# get video and annotation file
+# video = os.path.join(folder, 'obj-sing-amb-part01-video01.avi')
+# annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
+# Create vdao video object
+# vdao = VDAOVideo(video, annotationFilePath=annotation)
+# Play video
+# vdao.PlayVideo(True, True)
 
 
 ####################################################################### 
