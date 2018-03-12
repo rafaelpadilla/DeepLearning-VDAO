@@ -74,7 +74,7 @@ annotation = os.path.join(folder, 'obj-sing-amb-part01-video01.txt')
 # Create VDAOvideo object
 vdao = VDAOVideo(video, annotationFilePath=annotation)
 # Play the video setting the parameter showBoundingBoxes to True
-vdao.PlayVideo(True, True)
+vdao.PlayVideo(True, showBoundingBoxes=True)
 
 ####################################################################### 
 # Example 06: Crop an object given its mask
