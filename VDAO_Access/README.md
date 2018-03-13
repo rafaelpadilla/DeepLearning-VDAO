@@ -1,7 +1,8 @@
 # **VDAO Access Project** #
 
 1. [Intro](#intro_project)  
-2. [Examples](#examples)  
+2. [Environment Preparation & Dependencies](#env_preparation)  
+3. [Examples](#examples)  
    [- Example 00: Create the object VDAOVideo](#example00)  
    [- Example 01: Obtain different information of a video](#example01)    
    [- Example 02: Obtain all information of a video](#example02)    
@@ -9,7 +10,7 @@
    [- Example 04: Play a VDAO video](#example04)    
    [- Example 05: Crop an object given its mask](#example05)    
    [- Example 06: Merge an object with its mask](#example06)    
-3. [FAQ](#FAQ)
+4. [FAQ](#FAQ)
 
 ## Intro <a id="intro_project"></a>  
 
@@ -38,6 +39,61 @@ from ALOIHelper import ALOIDatabase
 
 All manipulations to the frames will be made through the VDAOVideo object. In order to create the object, you need to pass to the constructor the path to a video from the VDAO database. You can download the videos from [here](https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO.md).
 
+## Environment Preparation & Dependencies<a id="env_preparation"></a>
+
+The **VDAO Access** project was developed and tested using **Python version 3.6** in Linux environment.  
+
+You need **openCV version 3** to run the project. We recommend you to use an environment manager such as Conda or virtualenvwrapper.
+
+Use the commands below to create a **Conda environment** and install openCV (if do not have Conda, install it following the instructions [here](https://conda.io/docs/user-guide/install/index.html)):
+
+#### Creating environment **myenv**:  
+
+Type the command below in your prompt to create a new environment. Replace ```myenv``` with the environment name you want to create.  
+```
+conda create -n myenv python=3.6
+```
+
+The following packages will be installed:
+```
+    ca-certificates: 2017.08.26-h1d4fec5_0
+    certifi:         2018.1.18-py36_0     
+    libedit:         3.1-heed3624_0       
+    libffi:          3.2.1-hd88cf55_4     
+    libgcc-ng:       7.2.0-hdf63c60_3     
+    libstdcxx-ng:    7.2.0-hdf63c60_3     
+    ncurses:         6.0-h9df7e31_2       
+    openssl:         1.0.2n-hb7f436b_0    
+    pip:             9.0.1-py36_5         
+    python:          3.6.4-hc3d631a_1     
+    readline:        7.0-ha6073c6_4       
+    setuptools:      38.5.1-py36_0        
+    sqlite:          3.22.0-h1bed415_0    
+    tk:              8.6.7-hc745277_3     
+    wheel:           0.30.0-py36hfd4bba0_1
+    xz:              5.2.3-h55aa19d_2     
+    zlib:            1.2.11-ha838bed_2    
+```
+
+When asked if you want to proceed, confirm with **y**. 
+
+#### Activating environment **myenv**:
+
+Type the following command to activate your new environment:
+```
+source activate myenv
+```
+
+You will see ```(myenv)``` at the left side of the Unix prompt. It means your environment was created and is active.
+
+#### Installing openCV in your environment:
+
+Now you have your environment activated, type the command below to install openCV:
+```
+conda install -c menpo opencv3 
+```
+Now you need to clone or download the **VDAO Project** to start playing with VDAO. :)
+
 ## Example 00: Create the object VDAOVideo<a id="example00"></a>  
 ```python
 # Passing the path and the enum that identifies if the video is a reference (it contains no lost objects) or if it is a target video (it contains lost objects):
@@ -47,7 +103,7 @@ myVideo = VDAOVideo("/home/rafael/Thesis/ref-mult-ext-part02-video01.avi", Video
 myVideo = VDAOVideo("/home/rafael/Thesis/ref-mult-ext-part02-video01.avi")
 ```
 
-##Example 01: Obtain different information of a video <a id="example01"></a>  
+## Example 01: Obtain different information of a video <a id="example01"></a>  
 
 You can have access to different information of your videos. Use the **get functions** to get individual information of the videos.
 
