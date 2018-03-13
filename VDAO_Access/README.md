@@ -1,6 +1,19 @@
-# **VDAO_Access Project** #
+# **VDAO Access Project** #
 
-With **VDAO_Acess Project** you have access to different tools to:
+1. [Intro](#intro_project)  
+2. [Examples](#examples)  
+   [- Example 00: Create the object VDAOVideo](#example00)  
+   [- Example 01: Obtain different information of a video](#example01)    
+   [- Example 02: Obtain all information of a video](#example02)    
+   [- Example 03: Obtaining and saving specific frames within the video](#example03)    
+   [- Example 04: Play a VDAO video](#example04)    
+   [- Example 05: Crop an object given its mask](#example05)    
+   [- Example 06: Merge an object with its mask](#example06)    
+3. [FAQ](#FAQ)
+
+## Intro <a id="intro_project"></a>  
+
+With **VDAO Access Project** you have access to different tools to:
 
 * Play VDAO videos;
 * Play VDAO videos highlighting lost objects with bounding boxes;
@@ -25,7 +38,7 @@ from ALOIHelper import ALOIDatabase
 
 All manipulations to the frames will be made through the VDAOVideo object. In order to create the object, you need to pass to the constructor the path to a video from the VDAO database. You can download the videos from [here](https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO.md).
 
-**Example 00: Create the object VDAOVideo**
+## Example 00: Create the object VDAOVideo<a id="example00"></a>  
 ```python
 # Passing the path and the enum that identifies if the video is a reference (it contains no lost objects) or if it is a target video (it contains lost objects):
 myVideo = VDAOVideo("/home/rafael/Thesis/ref-mult-ext-part02-video01.avi", VideoType.Reference)
@@ -34,7 +47,7 @@ myVideo = VDAOVideo("/home/rafael/Thesis/ref-mult-ext-part02-video01.avi", Video
 myVideo = VDAOVideo("/home/rafael/Thesis/ref-mult-ext-part02-video01.avi")
 ```
 
-**Example 01: Obtain different information of a video**
+##Example 01: Obtain different information of a video <a id="example01"></a>  
 
 You can have access to different information of your videos. Use the **get functions** to get individual information of the videos.
 
@@ -81,7 +94,7 @@ All the get functions are listed below:
 | 20 | ```getBitRate()``` | Gets the number of bits used to represent each second of the video |
 | 21 | ```getNumberOfFrames()``` | Gets the number of frames of the whole video |
   
-**Example 02: Obtain all information of a video**
+## Example 02: Obtain all information of a video <a id="example02"></a>  
 
 Besides number of frames and frame rate, you can use the function **printAllInformation()** to have the full set of information in the output window. See the example below:
 
@@ -113,7 +126,7 @@ Duration ts: 29034
 Duration: 1209.750000 
 ```
 
-**Example 03: Obtaining and saving specific frames within the video**
+## Example 03: Obtaining and saving specific frames within the video <a id="example03"></a>  
 
 Use the function **getFrame(frameNumber, withInfo)** to obtain a specific frame within the video. You will just need to pass the frame number as the parameter. The parameter withInfo is a boolean where you should inform if you want your frame with or without informations.
 
@@ -131,11 +144,11 @@ You can set the last parameter to True if you want to show details of the frame,
 <!--- Showing examples of frames with and without information--->
 <div style="text-align:center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_withWithoutInfo.jpg" alt="AAAAAA" style="width: 30px;"/>
-<p align="center">Example of frames with info (showInfo=True) and without info (showInfo=False) respectively </p>
+<p align="center">Example of frames with info (showInfo=False) and without info (showInfo=True) respectively </p>
 </div>
 
 
-**Example 04: Play a VDAO video**
+## Example 04: Play a VDAO video <a id="example04"></a>  
 
 You can use the method **playVideo(showFrame, showBoundingBoxes)** specifying in the boolean parameter **showFrame** if you want to show the frame counter in the video or not.  
 
@@ -170,7 +183,7 @@ The image below shows one of the frames of the example above where an object has
 </div>
 
 
-**Example 05: Crop an object given its mask**
+## Example 05: Crop an object given its mask <a id="example05"></a>  
 
 If you want to obtain the exact bounding box of an object from your objects' database, you just have to call the static method **getBoundingBoxMask(mask)** of the class ObjectDatabase.  
 The parameter **mask** is the loaded image containing the mask.
@@ -186,7 +199,7 @@ cv2.imshow('ROI', mask)
 cv2.waitKey(100)
 ```
 
-**Example 06: Merge an object with its mask**
+## Example 06: Merge an object with its mask <a id="example06"></a>  
 
 Sometimes you will need to obtain random objects and crop them according to its mask. For that you have to instantiate the class ObjectDatabase and call its function **getRandomObject()**. See the example below.
 
@@ -207,3 +220,30 @@ The image below shows the application of the function ```getRandomObject```. The
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_mergedImages.jpg" alt="AAAAAA" style="width: 30px;"/>
 <p align="center">Random image from the ALOI database was chosen and merged with its mask using the getRandomObject function. It results in the 3rd image (the bounding box was added afterwards)</p>
 </div>
+
+## FAQ <a id="FAQ"></a>  
+
+**Q: How do I get a specific frame in jpg within a video?**
+
+**Q: How do I get a specific frame in png within a video?**
+
+**Q: How do I get a specific frame in raw format within a video?**
+
+**Q: How to know which compression method was used in a video?**
+
+**Q: How do I get the frame rate of a video?**
+
+**Q: How do I get the total number of frame in a video?**
+
+**Q: How to merge an image and its mask in a single image?**
+
+**Q: How to obtain a bounding box of a mask?**
+
+**Q: How do I obtain frames in a video skipping  every 15 frames?**
+
+**Q: How do I play a VDAO video?**
+
+**Q: How do I play a VDAO video showing the bounding boxes in the annotation file?**
+
+**Q: How do I add an object in an image making a smooth transition in the border regions?**
+
