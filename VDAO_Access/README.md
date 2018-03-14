@@ -82,7 +82,7 @@ Don't forget the headers! In order to run the examples or start using the VDAO P
 import os
 import cv2
 from VDAOVideo import VDAOVideo 
-from VDAOHelper import VideoType
+from VDAOHelper import VideoType, ImageExtension
 from ObjectHelper import ObjectDatabase
 ```
 <a id="examples"></a> 
