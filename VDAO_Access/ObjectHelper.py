@@ -60,10 +60,10 @@ class ObjectDatabase:
         allObjects = utils.getAllFilesRecursively(self.imagesPath, self.extenstionImages)
         idx = random.randint(0, len(allObjects))
         objPath = allObjects[idx-1]
-        print(objPath)
+        # print(objPath)
         # Try to get mask path based on the path of the object
         maskPath = objPath.replace(self.imagesPath,self.masksPath)
-        print(maskPath)
+        # print(maskPath)
         if os.path.isfile(maskPath) == False:
             raise IOError("Not able to get mask of the object %s", objPath)
         # Merge image and the mask
@@ -75,6 +75,10 @@ class ObjectDatabase:
 
     @staticmethod
     def blendImageAndMask(objPath, maskPath):
+        if os.path.isfile(objPath) == False:
+            raise IOError("Not able to load the image %s", objPath)
+        if os.path.isfile(maskPath) == False:
+            raise IOError("Not able to load the image %s", maskPath)
         # Load images
         img = cv2.imread(objPath)
         mask = cv2.imread(maskPath)
@@ -86,6 +90,14 @@ class ObjectDatabase:
     # Using my method
     @staticmethod
     def blendImageAndBackground(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=10, iteracao2=5):
+        # A paths were passed instead of loaded images
+        if isinstance(image, str) and os.path.isfile(image) == True:
+            image = cv2.imread(image)
+        if isinstance(mask, str) and os.path.isfile(mask) == True:
+            mask = cv2.imread(mask)
+        if isinstance(background, str) and os.path.isfile(background) == True:
+            background = cv2.imread(background)
+
         # Flip horizontally
         if flipHor==True:
             image = cv2.flip(image, 0)
@@ -134,6 +146,14 @@ class ObjectDatabase:
     @staticmethod
     # Blend images using Bruno's method
     def blendImageAndBackground_2(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=7, iteracao2=4):
+        # A paths were passed instead of loaded images
+        if isinstance(image, str) and os.path.isfile(image) == True:
+            image = cv2.imread(image)
+        if isinstance(mask, str) and os.path.isfile(mask) == True:
+            mask = cv2.imread(mask)
+        if isinstance(background, str) and os.path.isfile(background) == True:
+            background = cv2.imread(background)
+
         ###MACROS
         REF_IMG_HEIGHT, REF_IMG_WIDTH,_ = background.shape
         STREL_KERNEL = cv2.getStructuringElement(shape=1, ksize=(3,3))
@@ -210,7 +230,10 @@ class ObjectDatabase:
 
     @staticmethod
     def getBoundingBoxMask(mask):
-    
+        # A path was passed instead of a loaded image mask
+        if isinstance(mask, str) and os.path.isfile(mask) == True:
+            mask = cv2.imread(mask)
+
         h, w, _ = mask.shape
         min_x = w
         max_x = 0

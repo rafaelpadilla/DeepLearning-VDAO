@@ -14,6 +14,24 @@ class VideoType(Enum):
     Reference = 1
     WithObjects = 2
 
+from enum import Enum
+class ImageExtension(Enum):
+    """
+    Class representing the formats of images supported.
+    For more details about PPM, PGM and PBM check this page:
+    http://paulbourke.net/dataformats/ppm/
+
+        Developed by: Rafael Padilla
+        SMT - Signal Multimedia and Telecommunications Lab
+        COPPE - Universidade Federal do Rio de Janeiro
+        Last modification: Dec 9th 2017
+    """
+    JPG = 1
+    PNG = 2
+    PPM = 3
+    PGM = 4
+    PBM = 5
+
 import subprocess
 import shlex
 import json
@@ -254,13 +272,13 @@ class VDAOInfo:
             val = self._frameRate
         return val
 
-    def getFramesPerSecond(self): #WRONG!
-        return None # Make it useless
-        """Gets number of frames that are displayed per second ????? TO REVIEW!"""
-        val = None
-        if self._idxVideoInfo is not None:
-            val = self._framesPerSecond
-        return val
+    # def getFramesPerSecond(self): #WRONG!
+    #     return None # Make it useless
+    #     """Gets number of frames that are displayed per second ????? TO REVIEW!"""
+    #     val = None
+    #     if self._idxVideoInfo is not None:
+    #         val = self._framesPerSecond
+    #     return val
 
     def getDurationTs(self):
         """Gets the duration whole video in frames ?????"""
@@ -284,7 +302,7 @@ class VDAOInfo:
         return val
 
     def getNumberOfFrames(self):
-        """Gets the number of frames of the whole video ????"""
+        """Gets the number of frames of the whole video"""
         val = None
         if self._idxVideoInfo is not None:
             val = int(self._numberOfFrames)
@@ -310,7 +328,7 @@ class VDAOInfo:
         print('Frame rate: ' + str(self._frameRate))
         print('Duration ts: ' + str(self._durationTS))
         print('Duration: ' + str(self._duration))
-        # print('Real douration: ' + str(self._real))
+        # print('Real duration: ' + str(self._real))
         print('Bit rate: ' + str(self._bitRate))
         print('Number of frames: ' + str(self._numberOfFrames))
         print(' ')
