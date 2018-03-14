@@ -10,7 +10,7 @@
    [- Example 04: Play a VDAO video](#example04)    
    [- Example 05: Get the bounding box of a mask](#example05)    
    [- Example 06: Merge an object with its mask](#example06)    
-   [Example 07: Get random ALOI object and merge it with its mask)(#example07) 
+   [- Example 07: Get random ALOI object and merge it with its mask](#example07)
 4. [FAQ](#FAQ)
 
 <a id="intro_project"></a>  
@@ -310,8 +310,9 @@ The image below shows the application of the function ```getRandomObject()```. T
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Access/images/ex_mergedImages.jpg" alt="AAAAAA" style="width: 30px;"/>
 <p align="center">Random image from the ALOI database was chosen and merged with its mask using the getRandomObject function. It results in the 3rd image (the bounding box was added afterwards)</p>
 </div>
-
-## FAQ <a id="FAQ"></a>  
+  
+<a id="FAQ"></a>  
+## FAQ  
 
 **Q: How do I slice a video from frame 1 to 1001 skipping every 100 frames and save it in JPEG format?**
 ```python
