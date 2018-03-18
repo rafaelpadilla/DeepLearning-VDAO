@@ -133,7 +133,7 @@ class VDAOVideo:
 
             # Show framedImage
             cv2.imshow('VDAO', framedImage)
-            # cv2.waitKey(waitFraction)
+            cv2.waitKey(waitFraction)
 
             ret,frame = cap.read()        
             frameCount = frameCount+1
