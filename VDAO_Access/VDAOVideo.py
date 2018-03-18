@@ -4,6 +4,7 @@ import os
 import sys
 import numpy as np
 import utils
+import time
 # To get video information
 from VDAOHelper import VDAOInfo, VideoType, ImageExtension
 from Annotation import Annotation
@@ -32,15 +33,28 @@ class VDAOVideo:
         self.videoPath = videoPath
         self.videoInfo = VDAOInfo(self.videoPath)
 
-        self.annotationFilePath = annotationFilePath
-        self.annotation = None
+        # self._annotation = annotationFilePath
+        self._annotation = Annotation(annotationFilePath=annotationFilePath, totalFrames=self.videoInfo.getNumberOfFrames())
+
+    def ParseAnnotation(self):
+        return self._annotation._parseFile()
+
+    def GetAnnotations(self):
+        if self._annotation.parsed == False:
+            self.ParseAnnotation()
+        return self._annotation
+
+    def SetAnnotation(self, newAnnotation):
+        self._annotation = newAnnotation
+        self._annotation.parsed = True
+        self._annotation.error = False
+
     
     def PlayVideo(self, showInfo=True, showBoundingBoxes=False):
-        # Parse videos
-        annot = None
-        if showBoundingBoxes and self.annotation == None:
-            totalFrames = self.videoInfo.getNumberOfFrames()
-            annot = Annotation(self.annotationFilePath, totalFrames)
+        # Parse annotations
+        if showBoundingBoxes and self._annotation.parsed == False:
+            # if somehow there was an error while parsing, do not showBoundingBoxes
+            showBoundingBoxes = self.ParseAnnotation()
 
         cap = cv2.VideoCapture(self.videoPath)
         fps = self.videoInfo.getFrameRateFloat() #or cap.get(cv2.CAP_PROP_FPS)
@@ -80,7 +94,15 @@ class VDAOVideo:
         ret,frame = cap.read()
         frameCount = 1
         ret = True
+        start_time = time.time()
+        maxTime = 0
         while(ret == True):
+            deltaTime = time.time() - start_time
+            if deltaTime > maxTime and frameCount > 50:
+                maxTime = deltaTime
+                print('Frame: %d (%f)' % (frameCount, maxTime*10))
+            start_time = time.time()
+            
             if showInfo:
                 # VDAO videos have 3 channels
                 framedImage = np.zeros((framedImageHeight, width, 3), np.uint8)
@@ -95,16 +117,23 @@ class VDAOVideo:
 
             else:
                 framedImage = frame
-                
+            
             # if there is annotation to show
-            if annot != None and annot.listAnnotation[frameCount][1] != None:
-                box = annot.listAnnotation[frameCount][1]
-                label = annot.listAnnotation[frameCount][0]
-                framedImage = utils.add_bb_into_image(framedImage,box, (0,255,0), 3, label)
+            if showBoundingBoxes == True: 
+                # Annotation object's listAnnotation has frames+1 positions
+                # listAnnotation[0] is not taken into account by the VDAOVideo.PlayVideo() when needed to draw bb
+                # But the VDAOVideo.PlayVideo() plays the first frame :p
+                # listAnnotation's last element is the last frame of the video
+                fr = self._annotation.listAnnotation[frameCount]
+                for b in range(len(fr)):
+                    # label = fr[b][0]
+                    # box = fr[b][1]
+                    # framedImage = utils.add_bb_into_image(framedImage,box, (0,255,0), 3, label)
+                    framedImage = utils.add_bb_into_image(framedImage, fr[b][1], (0,255,0), 3, fr[b][0])
 
             # Show framedImage
             cv2.imshow('VDAO', framedImage)
-            cv2.waitKey(waitFraction)
+            # cv2.waitKey(waitFraction)
 
             ret,frame = cap.read()        
             frameCount = frameCount+1
@@ -128,14 +157,18 @@ class VDAOVideo:
 
         cap = cv2.VideoCapture(self.videoPath)
         fr = self.videoInfo.getFrameRateFloat() 
+        # we make frameNumber-1, because for this API, our frames go from 1 to max
         frameTime = 1000 * (frameNumber-1)/fr 
         cap.set(cv2.CAP_PROP_POS_MSEC, frameTime)
 
         ret,frame = cap.read()
         cap.release()
-        if ret & withInfo:
-            frame = self.AddInfoToFrame(frame, frameNumber)
-        return ret,frame
+        sizeImg = None
+        if ret:
+            sizeImg = frame.shape
+            if withInfo:
+                frame = self.AddInfoToFrame(frame, frameNumber)
+        return ret,frame, sizeImg
 
     def AddInfoToFrame(self, frame, frameNumber):
       # Parameters to display video info
@@ -234,7 +267,3 @@ class VDAOVideo:
                     print("Error saving file saved: %s" % folderAndFile)
             else:
                 print("Error opening the frame %d" % i)
-
-
-
-    # def CropROI(self, outputPath):
