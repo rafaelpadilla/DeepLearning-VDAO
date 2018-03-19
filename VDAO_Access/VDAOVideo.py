@@ -7,6 +7,7 @@ import utils
 import time
 # To get video information
 from VDAOHelper import VDAOInfo, VideoType, ImageExtension
+from YoloTrainingHelper import YOLOHelper
 from Annotation import Annotation
 
 class VDAOVideo:
@@ -49,7 +50,26 @@ class VDAOVideo:
         self._annotation.parsed = True
         self._annotation.error = False
 
-    
+    @staticmethod
+    def PlayFrameToFrame(listImages, dirImages, showBoundingBoxes=False):
+        i=0
+        while i < len(listImages):
+            if showBoundingBoxes:
+                imagem = YOLOHelper.get_image_with_bb(listImages[i], dirImages)
+                cv2.putText(imagem, listImages[i], org=(30,30), fontFace=cv2.FONT_HERSHEY_SIMPLEX, color=(255,255,255), thickness=1, fontScale=0.7)  
+            else:
+                imagem = cv2.imread(os.path.join(dirImages,listImages[i]))
+            cv2.imshow('Frame', imagem)
+            wkey = cv2.waitKey(0)
+            key = chr(wkey%256)
+            if key == 'a':
+                i = i - 1
+            elif key == 's':
+                i = i + 1
+            elif key == 'q':
+                cv2.destroyAllWindows()
+                return
+
     def PlayVideo(self, showInfo=True, showBoundingBoxes=False):
         # Parse annotations
         if showBoundingBoxes and self._annotation.parsed == False:
