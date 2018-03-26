@@ -248,7 +248,7 @@ class VDAOVideo:
 
         for i in range(startingFrame,endingFrame+1,framesToSkip):
             # Get the ith frame
-            res,frame = self.GetFrame(i, showInfo)
+            res,frame,_ = self.GetFrame(i, showInfo)
             # Check if frame was successfully retrieved and save it
             if res: 
                 # Save image based on the extension

@@ -102,3 +102,20 @@ def add_bb_into_image(image, boundingBox, color, thickness, label=None):
         cv2.putText(image,label, (xin_bb, yin_bb), font, fontScale, (0,0,0), fontThickness, cv2.LINE_AA)
     return image
 
+# Source: https://www.pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
+def blur_measurement(image):
+    if type(image) is str:
+        if os.path.isfile(image):
+            image = cv2.imread(image)
+        else:
+            raise IOError('It was not possible to load image %s' % image)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    channelR = image[:,:,2]
+    channelG = image[:,:,1]
+    channelB = image[:,:,0]
+    
+    grayVar = cv2.Laplacian(gray, cv2.CV_64F).var()
+    RVar = cv2.Laplacian(channelR, cv2.CV_64F).var()
+    GVar = cv2.Laplacian(channelG, cv2.CV_64F).var()
+    BVar = cv2.Laplacian(channelB, cv2.CV_64F).var()
+    return [RVar, GVar, BVar, grayVar]
