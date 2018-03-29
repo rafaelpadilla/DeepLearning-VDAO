@@ -15,6 +15,21 @@ class VideoType(Enum):
     WithObjects = 2
 
 from enum import Enum
+class BlendingMethod(Enum):
+    """
+    Class representing different blending methods between
+    an image and a background
+
+        Developed by: Rafael Padilla
+        SMT - Signal Multimedia and Telecommunications Lab
+        COPPE - Universidade Federal do Rio de Janeiro
+        Last modification: Dec 9th 2017
+    """
+    RafaelsMethod = 1
+    BrunosMethod = 2
+    KeepBlurLevel = 3
+
+from enum import Enum
 class ImageExtension(Enum):
     """
     Class representing the formats of images supported.

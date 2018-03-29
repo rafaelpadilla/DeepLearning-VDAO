@@ -1,7 +1,10 @@
 import os
 import fnmatch
 import cv2
+import numpy as np
 import itertools
+import random
+import math
 
 # Ex: 
 # in: '/home/rafael/thesis/simulations/data1/test_data/000001.jpg'
@@ -27,7 +30,6 @@ def splitPaths(path):
         if item != '':
             folders.append(item)
     return folders
-
 
 def getAllFilesRecursively(filePath, extension="*"):
     files = [os.path.join(dirpath, f)
@@ -55,9 +57,8 @@ def getArea(box):
 def getNonOverlappedBoxes(boxes):
     if len(boxes) == 1 or boxes == []:
         return boxes, [0]
-
     nonOverlappedBoxes = []
-    idxes = []
+    nonOverlappedIdx = []
     # Get combination among all boxes
     combinations = list(itertools.combinations(boxes,2))
     # Loop through the pairs
@@ -66,12 +67,78 @@ def getNonOverlappedBoxes(boxes):
         if boxesIntersect(combination[0], combination[1]) == False:
             if combination[0] not in nonOverlappedBoxes:
                 nonOverlappedBoxes.append(combination[0])
-                idxes.append(boxes.index(combination[0]))
+                nonOverlappedIdx.append(boxes.index(combination[0]))
             if combination[1] not in nonOverlappedBoxes:
                 nonOverlappedBoxes.append(combination[1])
-                idxes.append(boxes.index(combination[1]))
-    return nonOverlappedBoxes, idxes
-    
+                nonOverlappedIdx.append(boxes.index(combination[1]))
+    return nonOverlappedBoxes, nonOverlappedIdx
+
+def getOverlappedBoxes(boxes):
+    if len(boxes) == 1 or boxes == []:
+        return [], []
+    overlappedBoxes = []
+    overlappedIdx = []
+    # Get combination among all boxes
+    combinations = list(itertools.combinations(boxes,2))
+    # Loop through the pairs
+    for combination in combinations:
+        # If boxes do not intersect
+        if boxesIntersect(combination[0], combination[1]) == True:
+            if combination[0] not in overlappedBoxes:
+                overlappedBoxes.append(combination[0])
+                overlappedIdx.append(boxes.index(combination[0]))
+            if combination[1] not in overlappedBoxes:
+                overlappedBoxes.append(combination[1])
+                overlappedIdx.append(boxes.index(combination[1]))
+    return overlappedBoxes, overlappedIdx
+
+def removeIdxList(myList, indexesToRemove):
+    newList = []
+    for idx in range(len(myList)):
+        # index should not be removed
+        if idx not in indexesToRemove:
+            newList.append(myList[idx])
+    return newList
+
+# bgShape = (height, width)
+# boxSize = (height, width)
+# scaleFator = (minFactor, maxFactor)
+# rotationFator = (minAngle, maxAngle)
+def getUniqueBoundingBoxes(bgShape, amountBoxes, boxSize, scaleFator=(100,100)):
+    # Get background dimension
+    bgHeight = bgShape[0]
+    bgWidth = bgShape[1]
+    # Get box original dimension
+    boxHeight = boxSize[0]
+    boxWidth = boxSize[1]
+
+    boxes = []
+    scales = []
+    # for i in range(amountBoxes):
+    while len(boxes) < amountBoxes:
+        # Random scale
+        scale = float(random.randint(scaleFator[0], scaleFator[1]))/100
+        scales.append(scale)
+        # Apply random scale
+        boxHeight = boxSize[0]*scale
+        boxWidth = boxSize[1]*scale
+        # Apply random Xint Yint
+        xPos = random.randint(0,bgWidth-boxWidth)  
+        yPos = random.randint(0,bgHeight-boxHeight)
+        # Define transformation matrix (rotation and scale)
+        # transfMatriz = cv2.getRotationMatrix2D(, angle, 1.0)
+        boxes.append([xPos, yPos, int(xPos+boxWidth), int(yPos+boxHeight)])
+        combinations, overlappedIdx = getOverlappedBoxes(boxes)
+        # remove overlapped
+        boxes = removeIdxList(boxes, overlappedIdx)
+        scales = removeIdxList(scales, overlappedIdx)
+    ## Just display results graphically ##
+    # img = np.zeros((bgHeight, bgWidth, 3), np.uint8)
+    # for box in boxes:
+    #     img = add_bb_into_image(img, box, (255,0,0), 1)
+    # cv2.imshow('a',img)
+    # cv2.waitKey(0)
+    return boxes, scales
 
 def add_bb_into_image(image, boundingBox, color, thickness, label=None):
     r = int(color[0])
@@ -103,6 +170,7 @@ def add_bb_into_image(image, boundingBox, color, thickness, label=None):
     return image
 
 # Source: https://www.pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
+# The lower the value, the more blurier the image is
 def blur_measurement(image):
     if type(image) is str:
         if os.path.isfile(image):
@@ -113,9 +181,33 @@ def blur_measurement(image):
     channelR = image[:,:,2]
     channelG = image[:,:,1]
     channelB = image[:,:,0]
-    
-    grayVar = cv2.Laplacian(gray, cv2.CV_64F).var()
-    RVar = cv2.Laplacian(channelR, cv2.CV_64F).var()
-    GVar = cv2.Laplacian(channelG, cv2.CV_64F).var()
-    BVar = cv2.Laplacian(channelB, cv2.CV_64F).var()
+    try:
+        grayVar =  cv2.Laplacian(gray, cv2.CV_64F)
+        grayVar = grayVar.var()
+        RVar = cv2.Laplacian(channelR, cv2.CV_64F).var()
+        GVar = cv2.Laplacian(channelG, cv2.CV_64F).var()
+        BVar = cv2.Laplacian(channelB, cv2.CV_64F).var()
+    except IOError as e:
+        print("I/O error({0}): {1}".format(e.errno, e.strerror))
+
     return [RVar, GVar, BVar, grayVar]
+
+def enlargeMask(mask, iterations):
+    inv_mask = 255 - mask
+    se = cv2.getStructuringElement(shape=cv2.MORPH_RECT,ksize=(3,3))
+    enlargedMask = cv2.erode(src=inv_mask, kernel=se, iterations=iterations)
+    enlargedMask_bin = enlargedMask/255
+    diffMask = np.add(enlargedMask, mask)
+    diffMask_bin = diffMask/255
+    return enlargedMask, enlargedMask_bin.astype(np.uint8), diffMask, diffMask_bin.astype(np.uint8)
+    
+def euclideanDistance(list1, list2):
+    # dist = 0
+    # for i in range(len(vect1)):
+    #     dist = dist + pow(vect1[i]-vect2[i],2)
+    # return math.sqrt(dist)
+    # OR
+    return np.linalg.norm(np.asarray(list1)-np.asarray(list2))
+    
+
+

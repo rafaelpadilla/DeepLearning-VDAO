@@ -255,6 +255,10 @@ class YOLOHelper:
     #                  added
     @staticmethod
     def create_files_bb_yolo(dir_images, file_bb_info, out_dir_labels):
+        if not out_dir_labels.endswith('/'):
+            out_dir_labels = out_dir_labels+'/'
+        if not dir_images.endswith('/'):
+            dir_images = dir_images+'/'
         classId = 0
         # Read file with information
         fh1 = open(file_bb_info,"r")
@@ -431,7 +435,7 @@ class YOLOHelper:
             raise ValueError('Image file %s does not exist.' % path_image)
         path, img_name = utils.splitPathFile(path_image)
         if os.path.isdir(dir_boundingBox):
-            path_bb = dir_boundingBox+'/'+img_name.replace('.jpg',suffix+'.txt')
+            path_bb = dir_boundingBox+'/'+img_name.replace('.jpg',suffix+'.txt').replace('.png','.txt')
         elif os.path.isfile(dir_boundingBox):
             path_bb = dir_boundingBox
         # Validate

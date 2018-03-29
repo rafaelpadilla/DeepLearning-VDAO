@@ -5,6 +5,9 @@ import os
 import warnings
 import random
 import utils
+import shutil
+from VDAOHelper import BlendingMethod
+
 # To get video information
 class ObjectDatabase:
     """
@@ -74,22 +77,192 @@ class ObjectDatabase:
         return [mergedImage, (min_x, min_y, max_x, max_y)]
 
     @staticmethod
-    def blendImageAndMask(objPath, maskPath):
-        if os.path.isfile(objPath) == False:
-            raise IOError("Not able to load the image %s", objPath)
-        if os.path.isfile(maskPath) == False:
-            raise IOError("Not able to load the image %s", maskPath)
-        # Load images
-        img = cv2.imread(objPath)
-        mask = cv2.imread(maskPath)
+    def blendImageAndMask(img, mask):
+         # A paths were passed instead of loaded images
+        if isinstance(img, str) and os.path.isfile(img) == True:
+            img = cv2.imread(img)
+        if isinstance(mask, str) and os.path.isfile(mask) == True:
+            mask = cv2.imread(mask)
+        if mask.ndim == 1:
+            mask = cv2.merge((mask, mask, mask))
         # Multiply mask by image so we have the object only
         mergedImage = np.multiply(img,mask/255)
         mergedImage = mergedImage.astype(np.uint8)
         return mergedImage
 
-    # Using my method
     @staticmethod
-    def blendImageAndBackground(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=10, iteracao2=5):
+    def blendImageAndBackground(image, mask, background, method=BlendingMethod.BrunosMethod, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=10, iteracao2=5, saveIntermediateImages=False, folderSaveIntermImages=''):
+        if method == BlendingMethod.BrunosMethod:
+            return ObjectDatabase.blendImageAndBackground_BrunosMethod(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor, iteracao1, iteracao2)
+        elif method == BlendingMethod.RafaelsMethod:
+            return ObjectDatabase.blendImageAndBackground_RafaelsMethod(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor, iteracao1, iteracao2)
+        elif method == BlendingMethod.KeepBlurLevel:
+            return ObjectDatabase.blendImageAndBackground_KeepBlurLevel(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor, saveIntermediateImages, folderSaveIntermImages)
+
+    @staticmethod
+    def blendImageAndBackground_KeepBlurLevel(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, saveIntermediateImages=False, folderSaveIntermImages=''):
+        # A paths were passed instead of loaded images
+        if isinstance(image, str) and os.path.isfile(image) == True:
+            imagePath = image
+            image = cv2.imread(image)
+        if isinstance(mask, str) and os.path.isfile(mask) == True:
+            maskPath = mask
+            mask = cv2.imread(mask)
+        if isinstance(background, str) and os.path.isfile(background) == True:
+            backgroundPath = background
+            background = cv2.imread(background)
+        if saveIntermediateImages:
+            _, fil = utils.splitPathFile(imagePath)
+            fol = folderSaveIntermImages+'/'+fil.replace('.png','').replace('.jpg','')
+            # if folder exists, delete it
+            if os.path.isdir(fol):
+                shutil.rmtree(fol, ignore_errors=True)
+            os.makedirs(fol)
+        # Flip horizontally
+        if flipHor==True:
+            image = cv2.flip(image, 0)
+            mask = cv2.flip(mask, 0)
+        # Rotate counter-clockwise by the angle (in degrees)
+        w, h, channels = image.shape
+        rotMatrix = cv2.getRotationMatrix2D((w/2,h/2), rotAngle, 1)
+        image = cv2.warpAffine(image,rotMatrix,(w,h))
+        mask = cv2.warpAffine(mask,rotMatrix,(w,h))
+        # Rescale image and mask
+        image = cv2.resize(image, None, fx=scaleFactor, fy=scaleFactor,  interpolation=cv2.INTER_CUBIC)
+        mask = cv2.resize(mask, None, fx=scaleFactor, fy=scaleFactor,  interpolation=cv2.INTER_CUBIC)
+        # Before rotating the mask, the values are either 0 or 255. After rotation, some of these values
+        # are changed. Therefore, we need to threshold
+        _,mask = cv2.threshold(mask,127,255,cv2.THRESH_BINARY)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/mask.png', mask, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        mask_inv_bin = (255-mask)/255
+        mask_inv_bin = mask_inv_bin.astype(np.uint8)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/mask_inv.png', mask_inv_bin*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        # Get binary mask
+        mask_bin  = mask/255
+        mask_bin = mask_bin.astype(np.uint8)
+        # Blend shoe with mask
+        imgMaskBlended = ObjectDatabase.blendImageAndMask(image, mask)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/imgMaskBlended.png', imgMaskBlended, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        # Obtain 2 layers:
+        # layer_1 => layer between mask_bin and enlarged by 5 iterations
+        # layer_2 => layer between enlarged by 7 iterations and 3 iterations
+        _, mask_larger_2, _, _ = utils.enlargeMask(mask, 3)
+        _, mask_larger_1_bin, _, layer_1 = utils.enlargeMask(mask, 5)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/mask_larger_1.png', mask_larger_1_bin*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        layer_1 = 1-layer_1
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/layer_1.png', layer_1*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        _, mask_larger_3, _, _ = utils.enlargeMask(mask, 7)
+        layer_2_bin = np.subtract(mask_larger_2, mask_larger_3)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/layer_2.png', layer_2_bin*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        layer_2_bin_inv = 1-layer_2_bin
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/layer_2_bin_inv.png',layer_2_bin_inv*255 , [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        # It's necessary to get width and height once the image was rescaled
+        rsz_rows, rsz_cols, rsz_channels = image.shape
+        # Get blur level of the region of the background:
+        min_x = xIni
+        min_y = yIni
+        max_x = xIni+rsz_cols
+        max_y = yIni+rsz_rows
+        # print('min_x: %s' % str(min_x))
+        # print('min_y: %s' % str(min_y))
+        # print('max_x: %s' % str(max_x))
+        # print('max_y: %s' % str(max_y))
+        # print('scaleFactor: %s' % str(scaleFactor))
+        # print('image.shape: %s' % str(image.shape))
+        # print('mask.shape: %s' % str(mask.shape))
+        # print('background: %s' % str(background.shape))
+        # define region background without shoe
+        roiBackground = background[min_y:max_y,min_x:max_x,:]
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/roiBackground.png', roiBackground, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        # print('roiBackground: %s' % str(roiBackground.shape))
+        blurLevelReference = utils.blur_measurement(roiBackground)
+        # print('blurLevelReference: %s' % str(blurLevelReference))
+        # backgroundWithShoeNoTreatment is used as reference only
+        backgroundWithShoeNoTreatment = np.multiply(roiBackground, mask_inv_bin)
+        backgroundWithShoeNoTreatment = backgroundWithShoeNoTreatment+imgMaskBlended
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/backgroundWithShoeNoTreatment.png', backgroundWithShoeNoTreatment, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        blurImageNoTreatment = utils.blur_measurement(backgroundWithShoeNoTreatment)
+        # print("blur without treatment: %s" % str(blurImageNoTreatment))
+        dist = utils.euclideanDistance(blurImageNoTreatment,blurLevelReference)
+        # print('dist: %f' % dist)
+        rsz_rows, rsz_cols, rsz_channels = imgMaskBlended.shape
+        layer_1_with_background = np.multiply(layer_1, roiBackground)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/layer_1_with_background.png', layer_1_with_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        layer_2_with_background = np.multiply(layer_2_bin, roiBackground)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/layer_2_with_background.png', layer_2_with_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        shoes_background = np.add(imgMaskBlended,layer_1_with_background)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/shoes_background.png', shoes_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        backgroundWithLarge1ShoeMask = np.multiply(roiBackground, mask_larger_1_bin)
+        # cv2.imwrite('/media/rafael/Databases/databases/VDAO/backgroundWithLarge1ShoeMask.png', backgroundWithLarge1ShoeMask, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+
+        if saveIntermediateImages:
+            fh = open(os.path.join(fol,'log.txt'), "a")
+            fh.write("\nBlur vector of image without treatment (backgroundWithShoeNoTreatment.png): %s" % str(blurImageNoTreatment))
+            fh.write('\nBlur vector of reference (roiBackground.png): %s' % str(blurLevelReference))
+            fh.write('\nDistance blur (backgroundWithShoeNoTreatment and roiBackground): %f' % utils.euclideanDistance(blurImageNoTreatment,blurLevelReference))
+            cv2.imwrite(os.path.join(fol,'mask.png'), mask, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'mask_inv.png'), mask_inv_bin*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'imgMaskBlended.png'), imgMaskBlended, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'mask_larger_1.png'), mask_larger_1_bin*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'layer_1.png'), layer_1*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'layer_2.png'), layer_2_bin*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'layer_2_bin_inv.png'),layer_2_bin_inv*255 , [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'roiBackground.png'), roiBackground, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'backgroundWithShoeNoTreatment.png'), backgroundWithShoeNoTreatment, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'layer_1_with_background.png'), layer_1_with_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'layer_2_with_background.png'), layer_2_with_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'shoes_background.png'), shoes_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            cv2.imwrite(os.path.join(fol,'backgroundWithLarge1ShoeMask.png'), backgroundWithLarge1ShoeMask, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            
+        iteration = 0
+        returnImage = roiBackground
+        while True:
+            # print('iteration: %d' % iteration)
+            blurred_R = cv2.GaussianBlur(shoes_background[:,:,2],(3,3),0)
+            blurred_G = cv2.GaussianBlur(shoes_background[:,:,1],(3,3),0)
+            blurred_B = cv2.GaussianBlur(shoes_background[:,:,0],(3,3),0)
+            blurredShoeBackground = cv2.merge((blurred_B,blurred_G,blurred_R))
+            # cv2.imwrite('/media/rafael/Databases/databases/VDAO/blurredShoeBackground.png', blurredShoeBackground, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            ghostyBackgroundWithShoe = np.add(backgroundWithLarge1ShoeMask, blurredShoeBackground)
+            # cv2.imwrite('/media/rafael/Databases/databases/VDAO/ghostyBackgroundWithShoe.png', ghostyBackgroundWithShoe, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            prebackgroundWithShoe = np.multiply(ghostyBackgroundWithShoe, layer_2_bin_inv)
+            # cv2.imwrite('/media/rafael/Databases/databases/VDAO/prebackgroundWithShoe.png', prebackgroundWithShoe, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            finalImage = layer_2_with_background+prebackgroundWithShoe
+            # cv2.imwrite('/media/rafael/Databases/databases/VDAO/finalImage.png', finalImage, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            blurLevel = utils.blur_measurement(finalImage)
+            # print('blurLevel: %s' % str(blurLevel))
+            distLoop = utils.euclideanDistance(blurLevel, blurLevelReference)
+            # print('dist: %f' % distLoop)
+            # cv2.imwrite('/media/rafael/Databases/databases/VDAO/teste.png', shoes_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            # Distance was increased or did not change, break loop
+            if distLoop >= dist:
+                if saveIntermediateImages:
+                    fh.write("\nStopping... Distance increased to %f" % distLoop)
+                break
+            else: #continue loop
+                dist = distLoop
+                shoes_background = np.multiply(finalImage, 1-mask_larger_1_bin)
+                iteration = iteration+1
+
+            if saveIntermediateImages:
+                fh.write("\nBlur vector of image loop %d (%d_finalImage.png): %s" % (iteration, iteration, str(blurLevel)))
+                fh.write('\nDistance blur (%d_finalImage and roiBackground): %f' % (iteration, distLoop))
+                cv2.imwrite(os.path.join(fol,'%d_shoes_background.png' % iteration), shoes_background, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+                cv2.imwrite(os.path.join(fol,'%d_blurredShoeBackground.png' % iteration), blurredShoeBackground, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+                cv2.imwrite(os.path.join(fol,'%d_ghostyBackgroundWithShoe.png' % iteration), ghostyBackgroundWithShoe, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+                cv2.imwrite(os.path.join(fol,'%d_prebackgroundWithShoe.png' % iteration), prebackgroundWithShoe, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+                cv2.imwrite(os.path.join(fol,'%d_finalImage.png' % iteration), finalImage, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            
+            returnImage = finalImage
+
+        if saveIntermediateImages:
+            fh.close()
+        return returnImage, [min_x, min_y, max_x, max_y]
+
+
+    # Using my method
+    @staticmethod    
+    def blendImageAndBackground_RafaelsMethod(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=10, iteracao2=5):
         # A paths were passed instead of loaded images
         if isinstance(image, str) and os.path.isfile(image) == True:
             image = cv2.imread(image)
@@ -141,11 +314,11 @@ class ObjectDatabase:
         auxBackground = np.zeros(background.shape, dtype=background.dtype)
         auxBackground[yIni:h+yIni,xIni:w+xIni,0:3] = cv2.merge((mask, mask, mask))
         min_x, min_y, max_x, max_y = ObjectDatabase.getBoundingBoxMask(auxBackground)
-        return new_background, [min_x, min_y, max_x, max_y]
+        return new_background.astype(np.uint8), [min_x, min_y, max_x, max_y]
 
     @staticmethod
     # Blend images using Bruno's method
-    def blendImageAndBackground_2(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=7, iteracao2=4):
+    def blendImageAndBackground_BrunosMethod(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, iteracao1=7, iteracao2=4):
         # A paths were passed instead of loaded images
         if isinstance(image, str) and os.path.isfile(image) == True:
             image = cv2.imread(image)
@@ -226,7 +399,7 @@ class ObjectDatabase:
         img_blur_border = np.add(np.multiply(img_weight_foreg,img_mask_new),np.multiply(img_weight_backg,img_mask_new_backg))
          # Find bounding box where the object will be inserted
         min_x, min_y, max_x, max_y = ObjectDatabase.getBoundingBoxMask(img_weight_foreg*255)
-        return img_blur_border, [min_x, min_y, max_x, max_y]
+        return img_blur_border.astype(np.uint8), [min_x, min_y, max_x, max_y]
 
     @staticmethod
     def getBoundingBoxMask(mask):
