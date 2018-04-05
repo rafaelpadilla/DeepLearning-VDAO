@@ -98,6 +98,49 @@ class ObjectDatabase:
             return ObjectDatabase.blendImageAndBackground_RafaelsMethod(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor, iteracao1, iteracao2)
         elif method == BlendingMethod.KeepBlurLevel:
             return ObjectDatabase.blendImageAndBackground_KeepBlurLevel(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor, saveIntermediateImages, folderSaveIntermImages)
+        elif method == BlendingMethod.OnlyBlend:
+            return ObjectDatabase.blendImageAndBackground_OnlyBlend(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor)
+
+    @staticmethod
+    def blendImageAndBackground_OnlyBlend(image, mask, background, xIni, yIni, scaleFactor, rotAngle, flipHor):
+        # A paths were passed instead of loaded images
+        if isinstance(image, str) and os.path.isfile(image) == True:
+            imagePath = image
+            image = cv2.imread(image)
+        if isinstance(mask, str) and os.path.isfile(mask) == True:
+            maskPath = mask
+            mask = cv2.imread(mask)
+        if isinstance(background, str) and os.path.isfile(background) == True:
+            backgroundPath = background
+            background = cv2.imread(background)
+        # Flip horizontally
+        if flipHor==True:
+            image = cv2.flip(image, 0)
+            mask = cv2.flip(mask, 0)
+        # Rotate counter-clockwise by the angle (in degrees)
+        w, h, channels = image.shape
+        rotMatrix = cv2.getRotationMatrix2D((w/2,h/2), rotAngle, 1)
+        image = cv2.warpAffine(image,rotMatrix,(w,h))
+        mask = cv2.warpAffine(mask,rotMatrix,(w,h))
+        # Rescale image and mask
+        image = cv2.resize(image, None, fx=scaleFactor, fy=scaleFactor,  interpolation=cv2.INTER_CUBIC)
+        mask = cv2.resize(mask, None, fx=scaleFactor, fy=scaleFactor,  interpolation=cv2.INTER_CUBIC)
+        # Before rotating the mask, the values are either 0 or 255. After rotation, some of these values
+        # are changed. Therefore, we need to threshold
+        _,mask = cv2.threshold(mask,127,255,cv2.THRESH_BINARY)
+        mask_inv_bin = (255-mask)/255
+        mask_inv_bin = mask_inv_bin.astype(np.uint8)
+        imgMaskBlended = ObjectDatabase.blendImageAndMask(image, mask)
+        rsz_rows, rsz_cols, rsz_channels = image.shape
+        # Get region of background
+        max_x = xIni+rsz_cols
+        max_y = yIni+rsz_rows
+        roiBackground = background[yIni:max_y,xIni:max_x,:]
+        # Merge background with mask
+        bgMask = np.multiply(roiBackground,mask_inv_bin)
+        # Apply maskblended to the background
+        roiBackground = bgMask+imgMaskBlended
+        return roiBackground, [xIni, yIni, max_x, max_y]
 
     @staticmethod
     def blendImageAndBackground_KeepBlurLevel(image, mask, background, xIni=0, yIni=0, scaleFactor=1, rotAngle=0, flipHor=False, saveIntermediateImages=False, folderSaveIntermImages=''):
@@ -398,8 +441,11 @@ class ObjectDatabase:
         img_weight_backg = 1 - np.array(img_weight_foreg)
         img_blur_border = np.add(np.multiply(img_weight_foreg,img_mask_new),np.multiply(img_weight_backg,img_mask_new_backg))
          # Find bounding box where the object will be inserted
-        min_x, min_y, max_x, max_y = ObjectDatabase.getBoundingBoxMask(img_weight_foreg*255)
-        return img_blur_border.astype(np.uint8), [min_x, min_y, max_x, max_y]
+        # min_x, min_y, max_x, max_y = ObjectDatabase.getBoundingBoxMask(img_weight_foreg*255)
+        img_blur_border = img_blur_border[yIni:rsz_rows+yIni,xIni:rsz_cols+xIni,:]
+        # img_blur_border = img_blur_border[min_y:max_y,min_x:max_x,:]
+        # return img_blur_border.astype(np.uint8), [min_x, min_y, max_x, max_y]
+        return img_blur_border.astype(np.uint8), [xIni, yIni, rsz_cols+xIni, rsz_rows+yIni]
 
     @staticmethod
     def getBoundingBoxMask(mask):
@@ -438,3 +484,68 @@ class ObjectDatabase:
             if pos_y != 0 and pos_y < min_y: # checking if pixel of channel 0 is 255
                 min_y = pos_y
         return min_x, min_y, max_x, max_y
+
+
+    # Given a image_details.txt file, generate training images blending image and background following
+    # a blending method.
+    # image_details file contains: file_name	xInt	yInt	xEnd	yEnd	image	background	scale	angle	flip
+    @staticmethod
+    def generateImages(imageDetailsFile, imagesFolder, maskFolder, backgroundFolder, outputDir, maskPrefix='', blendingMethod = BlendingMethod.OnlyBlend):
+        skipArray = []
+        fh = open(imageDetailsFile, "r")
+        newfilename = ''
+        count = 0
+        for line in fh:
+            filename = line.split('\t')[0]
+            if filename == 'file_name':
+                continue
+            if newfilename == '':
+                newfilename = filename
+            if newfilename != filename:
+                newfilename = filename
+                skipArray.append(count)
+                count = 0
+            count += 1
+        fh.close()
+        count = 0
+        fh = open(imageDetailsFile, "r")
+        for line in fh:
+            params = line.split('\t')
+            filename = params[0]
+            if filename == 'file_name':
+                skip = skipArray.pop(0)
+                continue
+            elif filename == '\n':
+                continue
+            count = count + 1
+            xInt = int(params[1])
+            yInt = int(params[2])
+            xEnd = int(params[3])
+            yEnd = int(params[4])
+            imageObj = params[5]
+            background = params[6]
+            scale = float(params[7])
+            angle = float(params[8])
+            flip = True
+            if params[9].replace('\n','') == 'False':
+                flip = False
+            objPath = os.path.join(imagesFolder, imageObj)
+            maskPath = "cropped_"+imageObj
+            maskPath = os.path.join(maskFolder,maskPath)
+            # Read background
+            if count == 1:
+                imgBackground = cv2.imread(os.path.join(backgroundFolder,background))
+            imgBlurred, [min_x, min_y, max_x, max_y] = ObjectDatabase.blendImageAndBackground(objPath, maskPath, imgBackground, 
+                                    blendingMethod, xIni=xInt, yIni=yInt, scaleFactor=scale, \
+                                    rotAngle=angle, flipHor=flip, saveIntermediateImages=False, \
+                                    folderSaveIntermImages='')
+            imgBackground[min_y:max_y,min_x:max_x,:] = imgBlurred
+            
+            if skip == count:
+                pathToSave = os.path.join(outputDir,filename)
+                cv2.imwrite(pathToSave, imgBackground,[cv2.IMWRITE_PNG_COMPRESSION, 0])
+                print('File successfully saved: %s' % pathToSave) 
+                count = 0
+                if len(skipArray) > 0:
+                    skip = skipArray.pop(0)
+        fh.close()

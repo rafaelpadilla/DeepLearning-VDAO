@@ -28,6 +28,7 @@ class BlendingMethod(Enum):
     RafaelsMethod = 1
     BrunosMethod = 2
     KeepBlurLevel = 3
+    OnlyBlend = 4
 
 from enum import Enum
 class ImageExtension(Enum):

@@ -266,6 +266,8 @@ class YOLOHelper:
         for line in fh1:
             splitLine = line.split("\t")
             fileName = splitLine[0]
+            if fileName == '\n':
+                continue
             xIni = splitLine[1]
             yIni = splitLine[2]
             xEnd = splitLine[3]
@@ -294,6 +296,9 @@ class YOLOHelper:
             fh2 = open(file2write,"a")
             lastOpenedFile = file2write
             fh2.write("%s %s %s %s %s\n" % (str(classId), x, y, w, h))
+            fh2.close()
+        fh1.close()
+
 
 
 

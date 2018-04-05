@@ -208,6 +208,3 @@ def euclideanDistance(list1, list2):
     # return math.sqrt(dist)
     # OR
     return np.linalg.norm(np.asarray(list1)-np.asarray(list2))
-    
-
-
