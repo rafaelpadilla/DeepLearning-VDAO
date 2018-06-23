@@ -7,17 +7,18 @@ def convertIntToStr(number):
         numStr = '0%s' % numStr
     return numStr
 
+def contentExists(url):
+    r = requests.head(url)
+    return r.status_code == requests.codes.ok
+
 def downloadContent(url, saveDir):
-    fileName = url.rsplit('/', 1)[1]
-    if not os.path.isfile(os.path.join(saveDir,fileName)):
-        os.chdir(saveDir)
-        os.system('wget %s' % url) 
-    
-    # r = requests.get(url, allow_redirects=True)
-    # if url.find('/'):
-    #     fileName = url.rsplit('/', 1)[1]
-    #     fileDir = os.path.join(saveDir,fileName)
-    #     open(fileDir, 'wb').write(r.content)
+    if contentExists(url):
+        fileName = url.rsplit('/', 1)[1]
+        if not os.path.isfile(os.path.join(saveDir,fileName)):
+            os.chdir(saveDir)
+            # os.system('wget %s' % url) 
+    else:
+        print("Url does not exist: %s" % url)
 
 # Create folder
 # base_dir = '/local/home/common/datasets/VDAO/single_objs/'
@@ -26,14 +27,26 @@ tables = [1,2,3,4,5,6,7,8,9,10]
 numTables = len(tables)
 objVideosPerTable = [10,5,17,9,5,14,1,2,1,2]
 refVideosPerTable = [2,1,1,1,1,1,1,1,1,1]
+# Ex: Urls
+# Table 1:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part01-video01.avi
+# Table 2:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part02-video01.avi
+# Table 3:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part03-video01.avi
+# Table 4:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-ext-part01-video01.avi
+# Table 5:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-ext-part02-video01.avi
+# Table 6:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-ext-part03-video01.avi
+# Table 7:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-amb-part01-video01.avi
+# Table 8:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-amb-part02-video01.avi
+# Table 9:  http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-ext-part01-video01.avi
+# Table 10: http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-mult-ext-part02-video01.avi
 objVideosIllumination = ['amb','amb','amb','ext','ext','ext','amb','amb','ext','ext']
 objVideosSingleMulti = ['sing','sing','sing','sing','sing','sing','mult','mult','mult','mult']
+videoParts = ['part01','part02','part03','part01','part02','part03','part01','part02','part01','part02']
 
 _tableDirectory = 'table_#NUMTABLE'
 _directory = 'Table_#NUMTABLE-Object_#NUMOBJECT'
-_videoReferencePath = 'http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-#SINGLEMULTI-#ILLUMINATION-part#NUMTABLE-video#NUMVIDEO.avi'
-_videoObjectPath = 'http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-#SINGLEMULTI-#ILLUMINATION-part#NUMTABLE-video#NUMVIDEO.avi'
-_annotationObjectPath = 'http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-#SINGLEMULTI-#ILLUMINATION-part#NUMTABLE-video#NUMVIDEO.txt'
+_videoReferencePath = 'http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-#SINGLEMULTI-#ILLUMINATION-#VIDEOPARTS-video#NUMVIDEO.avi'
+_videoObjectPath = 'http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-#SINGLEMULTI-#ILLUMINATION-#VIDEOPARTS-video#NUMVIDEO.avi'
+_annotationObjectPath = 'http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-#SINGLEMULTI-#ILLUMINATION-#VIDEOPARTS-video#NUMVIDEO.txt'
 
 for idTable in range(numTables):
     tableInt = tables[idTable]
@@ -41,6 +54,10 @@ for idTable in range(numTables):
     qteObjVideosPerTable = objVideosPerTable[idTable]
     illu = objVideosIllumination[idTable]
     singleMulti = objVideosSingleMulti[idTable]
+    videoPart = videoParts[idTable]
+    print('#####################################################################################')
+    print('%s' % tableStr)
+    print('#####################################################################################')
     # Create vector with paths (['ref']: reference videos paths; ['obj']: object videos paths)
     qteRef = refVideosPerTable[idTable]
     # Create table directory if it does not exist
@@ -56,7 +73,7 @@ for idTable in range(numTables):
         saveFileDir = os.path.join(directory,'Table_%s-Reference_%s' % (tableStr,refStr))
         if not os.path.exists(saveFileDir): #create file if it does not exist
             os.makedirs(saveFileDir)
-        urlToDownload = _videoReferencePath.replace('#NUMTABLE',tableStr).replace('#NUMVIDEO',refStr).replace('#ILLUMINATION',illu).replace('#SINGLEMULTI', singleMulti)
+        urlToDownload = _videoReferencePath.replace('#VIDEOPARTS',videoPart).replace('#NUMVIDEO',refStr).replace('#ILLUMINATION',illu).replace('#SINGLEMULTI', singleMulti)
         downloadContent(urlToDownload,os.path.join(directory,saveFileDir))
         
     # Object videos and annotations
@@ -66,10 +83,10 @@ for idTable in range(numTables):
         saveFileDir = os.path.join(directory,'Table_%s-Object_%s' % (tableStr,qteObjStr))
         if not os.path.exists(saveFileDir): #create file if it does not exist
             os.makedirs(saveFileDir)
-        urlToDownload = _videoObjectPath.replace('#NUMTABLE',tableStr).replace('#NUMVIDEO',qteObjStr).replace('#ILLUMINATION',illu).replace('#SINGLEMULTI', singleMulti)
+        urlToDownload = _videoObjectPath.replace('#VIDEOPARTS',videoPart).replace('#NUMVIDEO',qteObjStr).replace('#ILLUMINATION',illu).replace('#SINGLEMULTI', singleMulti)
         downloadContent(urlToDownload,os.path.join(directory,saveFileDir))
         # annotation file
-        urlToDownload = _annotationObjectPath.replace('#NUMTABLE',tableStr).replace('#NUMVIDEO',qteObjStr).replace('#ILLUMINATION',illu).replace('#SINGLEMULTI', singleMulti)
+        urlToDownload = _annotationObjectPath.replace('#VIDEOPARTS',videoPart).replace('#NUMVIDEO',qteObjStr).replace('#ILLUMINATION',illu).replace('#SINGLEMULTI', singleMulti)
         downloadContent(urlToDownload,os.path.join(directory,saveFileDir))
 
 
