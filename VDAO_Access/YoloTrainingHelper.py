@@ -125,7 +125,57 @@ class Detections:
         return newDetections
 
     @staticmethod
-    def evaluateDetections(gtDetection, evalDetection):
+    def Teste(gtDetection, evalDetection, minIoUTruePos=0.5):
+        classes = []
+        # Get classes
+        for detGT in gtDetection.detections:
+            if detGT.classId not in classes:
+                classes.append(detGT.classId)
+        for detEval in evalDetection.detections:
+            if detEval.classId not in classes:
+                classes.append(detEval.classId)
+
+        # # Show images
+        # for c in classes:
+        #     # Show blank image with the bounding boxes for each class
+        #     img = np.zeros((detGT.height_img,detGT.width_img,3), np.uint8)
+        #     for detGT in gtDetection.detections:
+        #         if c == detGT.classId:
+        #             bb = detGT.getAbsoluteBoundingBox()
+        #             img = cv2.rectangle(img, (bb[0],bb[1]), (bb[2],bb[3]), (0,255,0), 4)
+        #     for detEval in evalDetection.detections:
+        #         if c == detEval.classId:
+        #             bb = detEval.getAbsoluteBoundingBox()
+        #             img = cv2.rectangle(img, (bb[0],bb[1]), (bb[2],bb[3]), (0,0,255), 4)
+        # cv2.imshow("Detections",img)
+        # cv2.waitKey(0)
+        # cv2.destroyWindow("Detections")
+ 
+    @staticmethod
+    def SeparateClasses(gtDetection, evalDetection):
+        classes = []
+        # Get classes
+        for detGT in gtDetection.detections:
+            if detGT.classId not in classes:
+                classes.append(detGT.classId)
+        for detEval in evalDetection.detections:
+            if detEval.classId not in classes:
+                classes.append(detEval.classId)
+        ret = [] #class, list_gt, list_dets
+        for c in classes:
+            gts = []
+            for detGT in gtDetection.detections:
+                if detGT.classId == c:
+                    gts.append(detGT)
+            evals = []
+            for detEval in evalDetection.detections:
+                if detEval.classId == c:
+                    evals.append(detEval)
+            ret.append([c,gts,evals])
+        return ret
+
+    @staticmethod
+    def evaluateDetections(gtDetection, evalDetection, minIoUTruePos=0.0):
         #####################################################################
         # Evaluate Intersection over Union (IoU):
         #
@@ -159,34 +209,47 @@ class Detections:
         # Initiate True Positives and False Positive counts
         TP = 0
         FP = 0
-        # for each evalDetection, find the best (lowest IOU) gtDetection
-        # note: the eval detection must be the same class
-        while evalDetection.count() > 0:
-            for detEval in evalDetection.detections:
-                bb = detEval.getAbsoluteBoundingBox()
-                bestIoU = 0
-                bestGT = None
-                # find the bb with lowest IOU
-                for detGT in gtDetection.detections:
-                    
-                    # detection must be the same class as the groundtruth
-                    if detGT.classId == detEval.classId:
+        FN = 0
+        # Detections.Teste(gtDetection, evalDetection)
+        dets = Detections.SeparateClasses(gtDetection, evalDetection)
+
+
+# Multiple detections of the same object in an image are considered
+# false detections e.g. 5 detections of a single object is counted as 1 correct detec-
+# tion and 4 false detections – it is the responsibility of the participant’s system
+# to filter multiple detections from its output
+
+        # For each class, get its GTs and detections
+        for d in dets:
+            gtDetections = d[1]
+            evalDetections = d[2]
+
+            # for each evalDetection, find the best (lowest IOU) gtDetection
+            # note: the eval detection must be the same class
+            while len(gtDetections) > 0:
+                for detEval in evalDetections:
+                    bb = detEval.getAbsoluteBoundingBox()
+                    bestIoU = 0
+                    bestGT = None
+                    # find the bb with lowest IOU
+                    for detGT in gtDetections:
                         iou = YOLOHelper.iou(bb, detGT.getAbsoluteBoundingBox())
 
-                        # # Show blank image with the bounding boxes
-                        # img = np.zeros((detGT.height_img,detGT.width_img,3), np.uint8)
-                        # aa = detEval.getAbsoluteBoundingBox()
-                        # img = cv2.rectangle(img, (aa[0],aa[1]), (aa[2],aa[3]), (0,0,255), 4)
-                        # for de in evalDetection.detections:
-                        #     aaa = de.getAbsoluteBoundingBox()
-                        #     img = cv2.rectangle(img, (aaa[0],aaa[1]), (aaa[2],aaa[3]), (0,0,255), 2)
-                        # bbb = detGT.getAbsoluteBoundingBox()
-                        # img = cv2.rectangle(img, (bbb[0],bbb[1]), (bbb[2],bbb[3]), (0,255,0), 4)
-                        # for gt in gtDetection.detections:
-                        #     bbb = gt.getAbsoluteBoundingBox()
-                        #     img = cv2.rectangle(img, (bbb[0],bbb[1]), (bbb[2],bbb[3]), (0,255,0), 2)
-                        # cv2.imshow("IoU",img)
-                        # cv2.waitKey(0)
+                        # Show blank image with the bounding boxes
+                        img = np.zeros((detGT.height_img,detGT.width_img,3), np.uint8)
+                        aa = detEval.getAbsoluteBoundingBox()
+                        img = cv2.rectangle(img, (aa[0],aa[1]), (aa[2],aa[3]), (0,0,255), 6)
+                        for de in evalDetection.detections:
+                            aaa = de.getAbsoluteBoundingBox()
+                            img = cv2.rectangle(img, (aaa[0],aaa[1]), (aaa[2],aaa[3]), (0,0,255), 2)
+                        bbb = detGT.getAbsoluteBoundingBox()
+                        img = cv2.rectangle(img, (bbb[0],bbb[1]), (bbb[2],bbb[3]), (0,255,0), 6)
+                        for gt in gtDetection.detections:
+                            bbb = gt.getAbsoluteBoundingBox()
+                            img = cv2.rectangle(img, (bbb[0],bbb[1]), (bbb[2],bbb[3]), (0,255,0), 2)
+                        cv2.imshow("IoU %.2f" % iou,img)
+                        cv2.waitKey(0)
+                        cv2.destroyWindow("IoU %.2f" % iou)
 
                         if iou > 1 or iou < 0:
                             raise ValueError('IOU value out of limits: %f' % iou)
@@ -194,31 +257,23 @@ class Detections:
                         if iou > bestIoU:
                             bestGT = detGT
                             bestIoU = iou
-                    
-                IoUs.append(bestIoU)
-                # Increment False Positives or True Positives
-                if bestIoU > 0: 
-                    TP = TP + 1
-                else:
-                    FP = FP + 1
+                        
+                    IoUs.append(bestIoU)
+                    # Increment False Positives or True Positives
+                    if bestIoU == 0: # Detection makes no overlap with any object: it is a false positive
+                        FP = FP + 1
+                    elif (bestIoU >= minIoUTruePos): 
+                        TP = TP + 1
+                    else: #bestIoU < minIoUTruePos : The overlapped IOU is below the threshold
+                        FP = FP + 1 # Detection is a false positive
 
-                # print("bestIoU: %f" % bestIoU)
-                
-                # it is also necessary to remove this best detection (match) from further
-                # analysis, otherwise, it'd be "unfair"
-                evalDetection.detections.remove(detEval)
-                # also remove the groundtruth bounding box
-                if bestGT != None:
-                    gtDetection.detections.remove(bestGT)
-                if evalDetection.count() > 0:
-                    break #continue while loop
-        # averageIoU = np.sum(IoUs) / (TP+FP) = averageIoU = np.average(IoUs)
-        if IoUs != []:
-            averageIoU = np.average(IoUs) 
-        else:
-            averageIoU = 0        
+                    # Now remove this detected BB and go to the next                
+                    evalDetection.detections.remove(detEval)
+                    continue
+            
+                FN = FN + len(gtDetection.detections)
         # Return average IoU among all detected bounding boxes, True Positives and False Positives
-        return averageIoU, TP, FP
+        return FN, TP, FP
 
     # @staticmethod
     # def evaluate_IoU(resultsPath, groundtruthPath):
@@ -446,6 +501,10 @@ class YOLOHelper:
         # Validate
         if os.path.isfile(path_bb) == False:
             raise ValueError('Cannot find txt file %s in the folder %s' %(img_name.replace('.jpg',suffix+'.txt'), path))
+        # Default: no object was detected
+        detecCoords = []
+        objDetected = False
+
         imagem = cv2.imread(path_image)
         imWidth = imagem.shape[1]
         imHeight = imagem.shape[0]
@@ -486,10 +545,12 @@ class YOLOHelper:
             
             (xIn, yIn, xEnd, yEnd) = YOLOHelper.deconvert((imWidth, imHeight), (x1, y1, x2, y2))
             imagem = utils.add_bb_into_image(imagem, (xIn, yIn, xEnd, yEnd), (r,g,b), thickness, objectName)
+            objDetected = True
+            detecCoords.append((xIn, yIn, xEnd, yEnd))
             # Show image
             # cv2.imshow('objects', imagem)
             # # cv2.waitKey(5000)
-        return imagem
+        return imagem, detecCoords, objDetected
 
 
     # When generating training files, it is necessary to create one file per image 
@@ -639,15 +700,16 @@ class YOLOHelper:
 # Also need to inform the ground truth path with the .txt file that contains 
 # the ground truth bounding boxes.
 #############################################################################
-
-#resultsPath = '/home/rafael.padilla/thesis/simulations/simulation6/results/res_test_final' #pasta com os _dets.txt
-#groundtruthPath = '/home/rafael.padilla/thesis/simulations/data2/test_data' #pasta com os groundtruths .txt
-##Percorro os arquivos .txt em resultsPath para comparo com os mesmos em groundtruthsPath
-#results = glob.glob(resultsPath+"/*.txt")
-#IoUs = []
-#print("Starting calculating IoU between images:")
-#count = 0
-#for res in results:
+# resultsPath = '/home/rafael/thesis/simulations/simulation14/simu_onlyblend/test_results/Table_1-Shoe_Position_3/t_01'
+# groundtruthPath = '/home/rafael/thesis/simulations/data5/test/Table_1-Shoe_Position_3'
+# # resultsPath = '/home/rafael.padilla/thesis/simulations/simulation6/results/res_test_final' #pasta com os _dets.txt
+# # groundtruthPath = '/home/rafael.padilla/thesis/simulations/data2/test_data' #pasta com os groundtruths .txt
+# #Percorro os arquivos .txt em resultsPath para comparo com os mesmos em groundtruthsPath
+# results = glob.glob(resultsPath+"/*.txt")
+# IoUs = []
+# print("Starting calculating IoU between images:")
+# count = 0
+# for res in results:
 #    _, detTxt = utils.splitPathFile(res)
 #    if detTxt == 'log.txt' or detTxt == 'IOU_evaluation.txt':
 #        continue
@@ -671,10 +733,9 @@ class YOLOHelper:
 #    print("%f" % iou)
 #    count = count + 1
 #    IoUs.append(iou)
-#
-#print("Pairs evaluated: %d" % count)
-#print("Total iOU: %f" % np.sum(IoUs))
-#print("Average iOU: %f" % np.average(IoUs))
+# print("Pairs evaluated: %d" % count)
+# print("Total iOU: %f" % np.sum(IoUs))
+# print("Average iOU: %f" % np.average(IoUs))
 
 #########################################################################
 # Example: given a jpg and its corresponding txt containing the bb info 

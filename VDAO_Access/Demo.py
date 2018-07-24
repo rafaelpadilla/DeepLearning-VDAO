@@ -125,7 +125,7 @@ extension=ImageExtension.PNG, compressionLevel=1)
 # Create myVideo object
 myVideo = VDAOVideo("/home/user/VDAO/ref-mult-ext-part02-video01.avi")
 # Get frame number 530
-ret, frame = myVideo.GetFrame(530)
+ret, frame, _ = myVideo.GetFrame(530)
 # Check if frame was successfully retrieved 
 if ret:
     # Show frame

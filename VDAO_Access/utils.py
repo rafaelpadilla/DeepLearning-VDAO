@@ -208,3 +208,12 @@ def euclideanDistance(list1, list2):
     # return math.sqrt(dist)
     # OR
     return np.linalg.norm(np.asarray(list1)-np.asarray(list2))
+
+def secsToMinSecMs(seconds):
+    frac,whole = math.modf(round(seconds/60,9))
+    _min = str(whole).replace('.0','') #minutes
+    frac,whole = math.modf(frac*60)
+    _sec = str(whole).replace('.0','') #seconds
+    _ms = str(round(frac*1000,2)) #milliseconds
+    return '%s min %s sec %s ms' % (_min, _sec, _ms)
+

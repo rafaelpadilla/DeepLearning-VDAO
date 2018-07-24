@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
+import utils
+
 class VideoType(Enum):
     """
 	Class representing enums that identify a VDAO video:
@@ -307,7 +309,8 @@ class VDAOInfo:
         """Gets the full duration of the video in seconds"""
         val = None
         if self._idxVideoInfo is not None:
-            val = self._durationReal
+            # val = self._duration
+            val = utils.secsToMinSecMs(float(self._duration))
         return val
 
     def getBitRate(self):

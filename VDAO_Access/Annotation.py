@@ -1,5 +1,6 @@
 import os 
 import utils
+import sys
 
 class Annotation:
     """
@@ -38,15 +39,23 @@ class Annotation:
         for line in f:
             params = line.split(' ')
             readFrame = int(params[1])+1 #(*)
-            # Sometimes VDAO annotation file has annotated more frames than the video has. Threfore we need to use this if
+            # Sometimes VDAO annotation file has annotated more frames than the video has.
             # Ex: annotation file 'obj-mult-ext-part02-video01.avi' has line: 'greenBox0 29039 0 0 0 0 3', but this file contains only 29034 frames
             if readFrame < items:
+                # class, (x,y,r,b), subObj, 'class (subobj)', frame
                 self.listAnnotation[readFrame].append((params[0], (int(params[2]),int(params[3]),int(params[4]),int(params[5])), int(params[6]), ('%s (%s)' % (params[0], params[6].replace('\n',''))), int(params[1])))
         f.close()
         self.parsed = True
         self.error = False
         return True
-    
+        
+    # Return True if Annotation file is valid, otherwise return False
+    def IsValid(self):
+        if self.parsed == False:
+            return self._parseFile()
+        else:
+            return self.error
+
     def GetClassesObjects(self):
         if self.parsed == False:
             self._parseFile()
@@ -62,6 +71,23 @@ class Annotation:
             self._parseFile()
         return  list(filter(lambda annot: annot != [], (annot for annot in self.listAnnotation)))
     
+    def GetNumberOfAnnotatedFrames(self):
+        if self.parsed == False:
+            self._parseFile()
+        nonEmptyFrames = self.GetNonEmptyFrames()
+        minObj = (sys.maxsize,-1,-1,-1,-1,-1) # (area,frame,x,y,r,b)
+        maxObj = (-1,-1,-1,-1,-1,-1) # (area,frame,x,y,r,b)
+        counted=[]
+        for nef in nonEmptyFrames:
+            for f in nef:
+                counted.append(f[4])
+                area = (f[1][0]-f[1][2])*(f[1][1]-f[1][3]) #(x2-x1)*(y2-y1)
+                if area < minObj[0]:
+                    minObj = (area,f[4],f[1])
+                if area > maxObj[0]:
+                    maxObj = (area,f[4],f[1])
+        return [len(set(counted)), min(counted), max(counted), minObj, maxObj]
+
     @staticmethod
     def FilterOnlySpecificObjects(refAnnotation, labels):
         if refAnnotation.parsed == False:

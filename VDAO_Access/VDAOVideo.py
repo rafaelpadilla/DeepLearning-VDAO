@@ -25,9 +25,9 @@ class VDAOVideo:
         if videoType == None:
             _, fileName = utils.splitPathFile(videoPath)
             if fileName.startswith('ref-'):
-                videoType = VideoType.Reference
+                self.videoType = VideoType.Reference
             elif fileName.startswith('obj-'):
-                videoType = VideoType.WithObjects
+                self.videoType = VideoType.WithObjects
         else:
             self.videoType = VideoType
     
@@ -50,6 +50,9 @@ class VDAOVideo:
         self._annotation.parsed = True
         self._annotation.error = False
 
+    def GetVideoType(self):
+        return self.videoType
+
     @staticmethod
     def PlayFrameToFrame(listImages, dirImages, showBoundingBoxes=False):
         i=0
@@ -70,7 +73,7 @@ class VDAOVideo:
                 cv2.destroyAllWindows()
                 return
 
-    def PlayVideo(self, showInfo=True, showBoundingBoxes=False):
+    def PlayVideo(self, showInfo=True, showBoundingBoxes=False, frameCallback=None):
         # Parse annotations
         if showBoundingBoxes and self._annotation.parsed == False:
             # if somehow there was an error while parsing, do not showBoundingBoxes
@@ -78,7 +81,8 @@ class VDAOVideo:
 
         cap = cv2.VideoCapture(self.videoPath)
         fps = self.videoInfo.getFrameRateFloat() #or cap.get(cv2.CAP_PROP_FPS)
-        waitFraction = int(1000/fps)
+        waitFraction = int(770/fps) #Ajusta-se o fator 770 para tentar fazer o vídeo tocar no fps original
+        # waitFraction = int(1000/fps) #Ajusta-se o fator 770 para tentar fazer o vídeo tocar no fps original
         # Parameters to display video info
         width, height = self.videoInfo.getWidthHeight()
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -114,14 +118,16 @@ class VDAOVideo:
         ret,frame = cap.read()
         frameCount = 1
         ret = True
-        start_time = time.time()
+        # start_time = time.time()
         maxTime = 0
+
         while(ret == True):
-            deltaTime = time.time() - start_time
-            if deltaTime > maxTime and frameCount > 50:
-                maxTime = deltaTime
-                print('Frame: %d (%f)' % (frameCount, maxTime*10))
             start_time = time.time()
+            # deltaTime = time.time() - start_time
+            # if deltaTime > maxTime and frameCount > 50:
+            #     maxTime = deltaTime
+            #     print('Frame: %d (%f)' % (frameCount, maxTime*10))
+            # start_time = time.time()
             
             if showInfo:
                 # VDAO videos have 3 channels
@@ -134,7 +140,6 @@ class VDAOVideo:
                 cv2.putText(framedImage, secondLine, org=originText2, fontFace=font, color=colorText, thickness=thicknessFont, fontScale=scaleText)
                 cv2.putText(framedImage, thirdLine, org=originText3, fontFace=font, color=colorText, thickness=thicknessFont, fontScale=scaleText)
                 cv2.putText(framedImage, fourthLine%frameCount, org=originText4, fontFace=font, color=colorText, thickness=thicknessFont, fontScale=scaleText)
-
             else:
                 framedImage = frame
             
@@ -151,10 +156,17 @@ class VDAOVideo:
                     # framedImage = utils.add_bb_into_image(framedImage,box, (0,255,0), 3, label)
                     framedImage = utils.add_bb_into_image(framedImage, fr[b][1], (0,255,0), 3, fr[b][0])
 
-            # Show framedImage
-            cv2.imshow('VDAO', framedImage)
-            cv2.waitKey(waitFraction)
-
+            deltaTime = (time.time() - start_time)*1000 # secs to ms
+            waitMs = waitFraction - deltaTime
+            # If there is a callback, return the frame
+            if frameCallback != None:
+                frameCallback(framedImage, waitMs)
+            else:
+                # Show framedImage
+                cv2.imshow('VDAO', framedImage)
+                cv2.waitKey(int(waitMs)) #in miliseconds
+                
+            # Read next frame
             ret,frame = cap.read()        
             frameCount = frameCount+1
 
@@ -176,11 +188,18 @@ class VDAOVideo:
             raise IOError('Frame number must be between 1 and '+str(self.videoInfo.getNumberOfFrames()))
 
         cap = cv2.VideoCapture(self.videoPath)
-        fr = self.videoInfo.getFrameRateFloat() 
-        # we make frameNumber-1, because for this API, our frames go from 1 to max
-        frameTime = 1000 * (frameNumber-1)/fr 
-        cap.set(cv2.CAP_PROP_POS_MSEC, frameTime)
-
+        
+        # We make frameNumber-1, because for this API, our frames go from 1 to max;
+        # openCV frame count is 0-based
+        # Reference: https://docs.opencv.org/3.0-beta/modules/videoio/doc/reading_and_writing_video.html
+        
+        # Approach #1: Slower
+        # fr = self.videoInfo.getFrameRateFloat() 
+        # frameTime = 1000 * (frameNumber-1)/fr 
+        # cap.set(cv2.CAP_PROP_POS_MSEC, frameTime)
+        # Approach #2: Faster -> We immediately get to the frame we want
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frameNumber-1)
+        
         ret,frame = cap.read()
         cap.release()
         sizeImg = None
