@@ -1,0 +1,139 @@
+{
+"table_01":
+{
+    "references":[
+        {
+	    "name": "reference video 1",
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part01-video01.avi"
+        },
+        {
+	    "name": "Reference Video 2",
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part01-video02.avi"
+        }
+    ]
+    ,
+    "objects":[
+        {
+	    "name": "object 01",
+            "object_type": "shoe",
+            "position": 1,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video01.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video01.txt"
+        },
+        {
+	    "name": "object 02",
+            "object_type": "shoe",
+            "position": 2,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video02.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video02.txt"
+        },
+        {
+	    "name": "object 03",
+            "object_type": "shoe",
+            "position": 3,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video03.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video03.txt"
+        },
+        {
+	    "name": "object 04",
+            "object_type": "dark-blue box",
+            "position": 1,
+            "part": 1,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video04.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video04.txt"
+        },
+        {
+	    "name": "object 05",
+            "object_type": "dark-blue box",
+            "position": 1,
+            "part": 2,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video05.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video05.txt"
+        },
+        {
+	    "name": "object 06",
+            "object_type": "dark-blue box",
+            "position": 2,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video06.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video06.txt"
+        },
+        {
+	    "name": "object 07",
+            "object_type": "dark-blue box",
+            "position": 3,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video07.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video07.txt"
+        },
+        {
+	    "name": "object 08",
+            "object_type": "camera box",
+            "position": 1,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video08.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video08.txt"
+        },
+        {
+	    "name": "object 09",
+            "object_type": "camera box",
+            "position": 2,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video09.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video09.txt"
+        },
+        {
+	    "name": "object 10",
+            "object_type": "camera box",
+            "position": 3,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part01-video10.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part01-video10.txt"
+        }
+    ]
+    
+},
+"table_02":
+{
+    "references":[
+        {
+	    "name": "reference video 1",
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part02-video01.avi"
+        }
+    ]
+    ,
+    "objects":[
+        {
+	    "name": "object 01",
+            "object_type": "white jar",
+            "position": 1,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video01.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video01.txt"
+        },
+        {
+	    "name": "object 02",
+            "object_type": "white jar",
+            "position": 2,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video02.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video02.txt"
+        },
+        {
+	    "name": "object 03",
+            "object_type": "white jar",
+            "position": 3,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video03.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video03.txt"
+        },
+        {
+	    "name": "object 04",
+            "object_type": "brown box",
+            "position": 2,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video04.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video04.txt"
+        },
+        {
+	    "name": "object 05",
+            "object_type": "brown box",
+            "position": 3,
+            "url": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part02-video05.avi",
+	    "url_annotation": "http://www02.smt.ufrj.br/~tvdigital/database/objects/data/ann/obj-sing-amb-part02-video05.txt"
+        }
+    ]
+
+
+}
