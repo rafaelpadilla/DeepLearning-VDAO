@@ -1,6 +1,3 @@
-# FALTA COLOCAR INFORMACOES DO ANNOTATION FILE
-# https://www.flaticon.com/search?word=remove&color=2
-
 import json
 from Table import *
 import sys
@@ -23,6 +20,7 @@ from PanelDetails import PanelDetails
 from VDAOVideo import VDAOVideo
 from Annotation import Annotation
 import _init_paths
+import utils
 
 class Main:
     def CommandSearchBtn(self):
@@ -121,10 +119,17 @@ class Main:
                 details.append('Area: %s / Frame: %s'%(maxObj[0],maxObj[1])) #max obj (area,frame,x,y,r,b)
         return details
 
+    def on_closing(self):
+        self.playerWindow.destroy()
+        self.playerWindow = None
+
     def callback_AddVideoPlayer(self, videoPath, annotationPath):
         # If there the player wasnt created yet, let's create one
         if self.playerWindow == None:
             self.playerWindow = tk.Toplevel(self.root)
+            # Event to close
+            self.playerWindow.protocol("WM_DELETE_WINDOW", self.on_closing)
+            # Create window with video 1
             self.player = Player(self.playerWindow)
         # Get video path and annotation path to create the video
         if annotationPath != []:
@@ -138,29 +143,28 @@ class Main:
         # No video created or both videos were created
         if self.player.lastVideoCreated == 0 or self.player.lastVideoCreated == 2:
             # Let's create video 1
-            self.player.AddVideo1(videoPath, annotationPath, currentFrameNbr=1)
+            self.player.AddVideo1(videoPath, annotationPath, currentFrameNbr=0)
             self.player.lastVideoCreated = 1
         # The created video was the video 1
         else:
             # Let's create video 2
-            self.player.AddVideo2(videoPath, annotationPath, currentFrameNbr=1)
+            self.player.AddVideo2(videoPath, annotationPath, currentFrameNbr=0)
             self.player.lastVideoCreated = 2
         
-
-        
     def callback_RemoveVideoPlayer(self, videoPath, annotationPath):
-        aqui = 123
+        raise IOError('Needs implementation')
 
-    def __init__(self, master):
-        self.root = master
-        self.frame = tk.Frame(self.root)
-        self.directory = '/media/rafael/Databases/databases/VDAO/references'
-        file_path = '/home/rafael/thesis/DeepLearning-VDAO/VDAO_Access/VDAO_files/vdao_videos.json'
-        with open(file_path) as f:
+    def __init__(self, jsonFilePath, directoryVideos):
+        if not os.path.exists(jsonPath):
+            raise IOError('JSON file %s does not exist' % jsonFilePath)
+        self.directory = directoryVideos
+        self.root = tk.Tk()
+        self.root.title("VDAO")
+        self.frame = tk.Frame()
+        _, jsonFile = utils.splitPathFile(jsonFilePath)
+        with open(jsonFilePath) as f:
             jsonData = json.load(f)
-
         currentPath = os.path.dirname(os.path.realpath(__file__))
-
         [sourcePackage, _tables, _videos] = SourcePackage.CreateSourcePackage(jsonData)
         self.filters = Filters(sourcePackage, _tables, _videos)
         # Get information for the filters
@@ -182,8 +186,6 @@ class Main:
         ###########################################################################
         # Adding UI
         ###########################################################################
-        # root = tk.Tk()
-        # root.title("VDAO - Videos visualization")
         pnlMain = tk.PanedWindow(self.root, orient=tk.VERTICAL) # Main panel
         pnlMain.pack(fill=tk.BOTH, expand=True)
         ### Filters
@@ -264,8 +266,6 @@ class Main:
         pnlFoot.add(pnlLeft)
         pnlRight = tk.PanedWindow(pnlFoot, orient=tk.VERTICAL)
         pnlFoot.add(pnlRight)
-        # rows,columns = root.grid_size() # add panel into the last row
-        # pnlFoot.grid(row=rows,column=0)
         lblLogo = tk.Label(self.root, image=self.logoImage)
         lblDescription = tk.Label(pnlRight, 
                     justify=tk.CENTER,
@@ -278,10 +278,9 @@ class Main:
         pnlRight.add(lblReference)
         # Create a player window
         self.playerWindow = None
+        self.root.mainloop()
         
-
-root = tk.Tk()
-main = Main(root)
-root.title("VDAO")
-root.mainloop()
+directoryVideos = '/media/rafael/Databases/databases/VDAO/references'
+jsonPath = '/home/rafael/thesis/DeepLearning-VDAO/VDAO_Access/VDAO_files/vdao_videos.json'
+main = Main(jsonPath, directoryVideos)
 

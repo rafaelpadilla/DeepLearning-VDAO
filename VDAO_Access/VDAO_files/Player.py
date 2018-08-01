@@ -7,6 +7,7 @@ import numpy as np
 from VDAOVideo import VDAOVideo
 from VDAOHelper import VideoType
 from VideoPlayer import VideoPlayer
+from InputWindow import InputWindow
 from MyEnums import StatusPlayer
 from PIL import Image, ImageTk
 import time
@@ -23,11 +24,17 @@ else:
 class Player:
         
     def btnPlayPause_Clicked(self):
+        # Make sure it is showing the correct frame
+        self.videoPlayer1.updatedFrames = self.videoPlayer2.updatedFrames
+
         # Define thread to play
         if not hasattr(self, 'threadPlayOn'):
             self.eventPause = threading.Event()
             self.threadPlayOn = threading.Thread(target=self.PlayOn, args=[]) # Play video from current frame on
             self.eventPause.set()
+            # Frames could have changed before first play together
+            self.videoPlayer1.cvVideo.set(cv2.CAP_PROP_POS_FRAMES, self.videoPlayer1.currentFrameNbr)
+            self.videoPlayer2.cvVideo.set(cv2.CAP_PROP_POS_FRAMES, self.videoPlayer2.currentFrameNbr)
             self.threadPlayOn.start()
         if self.statusPlayer == StatusPlayer.NOT_STARTED: # it hasnt started yet
             self.ChangeNavButtonsStatus(False) # disable navigation buttons
@@ -43,11 +50,6 @@ class Player:
             self.videoPlayer2.btnPlayPause.config(state="disabled")
             self.videoPlayer1.btnPlayPause.config(image=self.imgPause)
             self.videoPlayer2.btnPlayPause.config(image=self.imgPause)
-            # Define starting frames
-            self.videoPlayer1.currentFrameNbr = 1
-            self.videoPlayer2.currentFrameNbr = 1
-            self.videoPlayer1.cvVideo.set(cv2.CAP_PROP_POS_FRAMES, self.videoPlayer1.currentFrameNbr-1)
-            self.videoPlayer2.cvVideo.set(cv2.CAP_PROP_POS_FRAMES, self.videoPlayer2.currentFrameNbr-1)
             self.videoPlayer1.lblFrameNumber.configure(text="Frame: %d/%d" % (self.videoPlayer1.currentFrameNbr,self.videoPlayer1.totalFrames))
             self.videoPlayer2.lblFrameNumber.configure(text="Frame: %d/%d" % (self.videoPlayer2.currentFrameNbr,self.videoPlayer2.totalFrames))
             # Define thread to play
@@ -84,12 +86,14 @@ class Player:
             self.eventPause.set() # set event again to release it
     
     def callback_PlayPause(self, enableButtons, newStatus):
-        self.statusPlayer = newStatus
-        self.ChangeNavButtonsStatus(enableButtons)
-        if enableButtons:
-            self.btnPlayPause.config(state="normal")
-        else:
-            self.btnPlayPause.config(state="disabled")
+        # if (self.loadedFrame1 == True and self.loadedFrame2 == True):
+        if self.videoPlayer1.updatedFrames == True and self.videoPlayer2.updatedFrames == True:
+            self.statusPlayer = newStatus
+            self.ChangeNavButtonsStatus(enableButtons)
+            if enableButtons:
+                self.btnPlayPause.config(state="normal")
+            else:
+                self.btnPlayPause.config(state="disabled")
 
     def ChangeNavButtonsStatus(self, enable):
         if enable:
@@ -101,6 +105,7 @@ class Player:
             self.btnForward1.config(state="normal")
             self.btnForward5.config(state="normal")
             self.btnForward10.config(state="normal")
+            self.btnSelectFrame.config(state="normal")
         else:
             self.btnBackwardsBeg.config(state="disabled")
             self.btnBackwards1.config(state="disabled")
@@ -110,6 +115,7 @@ class Player:
             self.btnForward1.config(state="disabled")
             self.btnForward5.config(state="disabled")
             self.btnForward10.config(state="disabled")
+            self.btnSelectFrame.config(state="disabled")
 
     def PlayOn(self):
         # Plays until both videos have frames to play
@@ -119,7 +125,6 @@ class Player:
                 self.eventPause.clear() # Set it to False, so we can wait (if it is not cleared, it is True, and it wont be able to wait)
                 self.eventPause.wait() # wait unitl it is set again
                 self.eventPause.clear()
-
             ret1,frame1 = self.videoPlayer1.cvVideo.read()
             ret2,frame2 = self.videoPlayer2.cvVideo.read()
             if ret1 and ret2:
@@ -159,61 +164,57 @@ class Player:
         self.videoPlayer2.btnForward10_Clicked()
     
     def btnForwardEnd_Clicked(self):
-        self.videoPlayer1.btnForward1_Clicked()
-        self.videoPlayer2.btnForward1_Clicked()
+        self.videoPlayer1.btnForwardEnd_Clicked()
+        self.videoPlayer2.btnForwardEnd_Clicked()
+
+    def event_SetFrame(self, frameNumber):
+        if frameNumber != None:
+            self.videoPlayer1.GoToFrame(frameNumber)
+            self.videoPlayer2.GoToFrame(frameNumber)
+
+    def btnSelectFrame_Clicked(self):
+        self.inputWindow = tk.Toplevel(self.root)
+        inputWindow = InputWindow(parent=self.inputWindow, eventClose=self.event_SetFrame, title="", minValue=1, maxValue=np.min([self.videoPlayer1.totalFrames, self.videoPlayer2.totalFrames]))
+        inputWindow.Center(self.inputWindow)
 
     def PlayDiff(self, skippingFrame):
-        if self.loadedFrame2 == self.loadedFrame1 or skippingFrame:
+        if self.videoPlayer1.updatedFrames == self.videoPlayer2.updatedFrames or skippingFrame:
             grayA = cv2.cvtColor(self.frame1, cv2.COLOR_BGR2GRAY)
             grayB = cv2.cvtColor(self.frame2, cv2.COLOR_BGR2GRAY)
             diff = cv2.subtract(grayA, grayB)
             self.videoPlayerDifference.RenderFrame(diff,skippingFrame=False)
 
+    def callBack_EquateFrames(self):
+        self.videoPlayer1.updatedFrames = self.videoPlayer2.updatedFrames = True
+
     def callback_PlayFrame1(self, cvImage, frameNumber, skippingFrame):
         self.frame1 = cvImage
-        self.frame1Nbr = frameNumber
-        self.loadedFrame1 = not self.loadedFrame1
-        if self.videoPlayer1.totalFrames != 0 and self.videoPlayer2.totalFrames != 0:
+        self.videoPlayer1.updatedFrames = not self.videoPlayer1.updatedFrames
+        if self.videoPlayer1.currentFrameNbr != 0 and self.videoPlayer2.currentFrameNbr != 0:
             self.PlayDiff(skippingFrame)
 
     def callback_PlayFrame2(self, cvImage, frameNumber, skippingFrame):
         self.frame2 = cvImage
-        self.frame2Nbr = frameNumber
-        self.loadedFrame2 = not self.loadedFrame2
-        if self.videoPlayer1.totalFrames != 0 and self.videoPlayer2.totalFrames != 0:
+        self.videoPlayer2.updatedFrames = not self.videoPlayer2.updatedFrames
+        if self.videoPlayer1.currentFrameNbr != 0 and self.videoPlayer2.currentFrameNbr != 0:
             self.PlayDiff(skippingFrame)
 
     def AddVideo1(self, videoFilePath, annotationFilePath, currentFrameNbr):
         _,fileName = utils.splitPathFile(videoFilePath)
         self.videoPlayer1.UpdateVideoDetails(fileName, videoFilePath, annotationFilePath, currentFrameNbr)
-        self.loadedFrame1 = True
 
     def AddVideo2(self, videoFilePath, annotationFilePath, currentFrameNbr):
         _,fileName = utils.splitPathFile(videoFilePath)
         self.videoPlayer2.UpdateVideoDetails(fileName, videoFilePath, annotationFilePath, currentFrameNbr)
         # Depois de adicionar o segundo vídeo, habilita botão para tocar os dois vídeos
         self.btnPlayPause.config(state="normal")
+        self.ChangeNavButtonsStatus(True)
         # Seta o status como NOT_STARTED para que o vídeo seja tocado
-        self.statusPlayer == StatusPlayer.NOT_STARTED
-        self.loadedFrame1 = self.loadedFrame2 = True
+        self.statusPlayer = StatusPlayer.NOT_STARTED
+        self.videoPlayer2.loadedFrames = True
 
-# # Video Difference
-# self.videoPlayerDifference = VideoPlayer(pnlMain, 'Video Difference', "", "", None, 1, None, None, videoIsProcessed=True)
-# # Video 2
-
-# # Se tiver não frames para tocar em ambos vídeos
-# if self.videoPlayer1.totalFrames == 0 or self.videoPlayer2.totalFrames == 0: # Se vídeo não tem frames para tocar
-#     self.statusPlayer = StatusPlayer.FAILED
-#     self.btnPlayPause.config(state="disabled")
-# else:
-#     self.statusPlayer = StatusPlayer.NOT_STARTED
-#     self.loadedFrame1 = self.loadedFrame2 = True
-#     self.frame1Nbr = self.frame2Nbr = 0
-
-
-
-    def __init__(self, master):
-        self.root = master
+    def __init__(self, parent, video1FilePath=None, annotation1FilePath=None, video2FilePath=None, annotation2FilePath=None):
+        self.root = parent
         # Set status of the player
         self.statusPlayer = StatusPlayer.NOT_STARTED
         self.eventPause = threading.Event()
@@ -222,7 +223,13 @@ class Player:
         self.root.title("VDAO - Videos visualization")
         self.pnlMain = tk.PanedWindow(self.root, orient=tk.VERTICAL)
         self.pnlMain.pack(fill=tk.BOTH, expand=True)
-        # Buttons
+        # Define video player 1 
+        self.videoPlayer1 = VideoPlayer(parent=self.pnlMain, titleVideo='Video #1', fileName='', videoFilePath='', annotationFilePath='', currentFrameNbr=0, callback_FrameUpdated=self.callback_PlayFrame1, callBack_PlayPauseBtn_Clicked=self.callback_PlayPause, callBack_EquateFrames=self.callBack_EquateFrames)
+        # Define video Difference
+        self.videoPlayerDifference = VideoPlayer(self.pnlMain, 'Video Difference', "", "", None, 1, None, None, videoIsProcessed=True)
+        # Define video player 2        
+        self.videoPlayer2 = VideoPlayer(parent=self.pnlMain, titleVideo='Video #2', fileName='', videoFilePath='', annotationFilePath='', currentFrameNbr=0, callback_FrameUpdated=self.callback_PlayFrame2, callBack_PlayPauseBtn_Clicked=self.callback_PlayPause, callBack_EquateFrames=self.callBack_EquateFrames)
+       # Buttons
         pnlButtons = tk.PanedWindow(self.root)
         pnlButtons.pack()
         # Load images
@@ -236,6 +243,7 @@ class Player:
         self.imgForward1 = tk.PhotoImage(file=os.path.join(currentPath,'aux_images','forward_1.png'))
         self.imgForward5 = tk.PhotoImage(file=os.path.join(currentPath,'aux_images','forward_5.png'))
         self.imgForward10 = tk.PhotoImage(file=os.path.join(currentPath,'aux_images','forward_10.png'))
+        self.imgSelectFrame = tk.PhotoImage(file=os.path.join(currentPath,'aux_images','select_frame.png'))
         # Create and add buttons
         self.btnBackwardsBeg = tk.Button(pnlButtons, width=24, height=24, image=self.imgBackwardsBeg, state=tk.NORMAL, command=self.btnBackwardsBeg_Clicked)
         self.btnBackwardsBeg.pack(side=tk.LEFT, padx=2, pady=2)
@@ -255,24 +263,21 @@ class Player:
         self.btnForward10.pack(side=tk.LEFT, padx=2, pady=2)
         self.btnForwardEnd = tk.Button(pnlButtons, width=24, height=24, image=self.imgForwardEnd, state=tk.NORMAL, command=self.btnForwardEnd_Clicked)
         self.btnForwardEnd.pack(side=tk.LEFT, padx=2, pady=2)
+        self.btnSelectFrame = tk.Button(pnlButtons, width=24, height=24, image=self.imgSelectFrame, state=tk.NORMAL, command=self.btnSelectFrame_Clicked)
+        self.btnSelectFrame.pack(side=tk.LEFT, padx=2, pady=2)
         # Desabilita botoes
         self.ChangeNavButtonsStatus(False)
-        # Define video player 1 
-        self.videoPlayer1 = VideoPlayer(parent=self.pnlMain, titleVideo='Video #1', fileName='', videoFilePath='', annotationFilePath='', currentFrameNbr=0, callback_FrameUpdated=self.callback_PlayFrame1, callBack_PlayPauseBtn_Clicked=self.callback_PlayPause)
-        # Define video Difference
-        self.videoPlayerDifference = VideoPlayer(self.pnlMain, 'Video Difference', "", "", None, 1, None, None, videoIsProcessed=True)
-        # Define video player 2        
-        self.videoPlayer2 = VideoPlayer(parent=self.pnlMain, titleVideo='Video #2', fileName='', videoFilePath='', annotationFilePath='', currentFrameNbr=0, callback_FrameUpdated=self.callback_PlayFrame2, callBack_PlayPauseBtn_Clicked=self.callback_PlayPause)
         # Se tiver não frames para tocar em ambos vídeos
         if self.videoPlayer1.totalFrames == 0 or self.videoPlayer2.totalFrames == 0: # Se vídeo não tem frames para tocar
             self.statusPlayer = StatusPlayer.FAILED
-            self.loadedFrame1 = self.loadedFrame2 = False
+            # self.loadedFrame1 = self.loadedFrame2 = False
+            self.videoPlayer1.loadedFrames = self.videoPlayer2.loadedFrames = False
             # Desabilita botão geral para tocar vídeos
             self.btnPlayPause.config(state="disabled")
         else: # Tem frames para tocar em ambos videos
             self.statusPlayer = StatusPlayer.NOT_STARTED 
-            self.loadedFrame1 = self.loadedFrame2 = True
-            self.frame1Nbr = self.frame2Nbr = 0
+            # self.loadedFrame1 = self.loadedFrame2 = True
+            self.videoPlayer1.loadedFrames = self.videoPlayer2.loadedFrames = True
             # Habilita botão geral para tocar vídeos
             self.btnPlayPause.config(state="normal")
         # Desabilita botões de navegação entre para os 2 vídeos
@@ -292,6 +297,6 @@ class Player:
         self.lastVideoCreated = 0
         # Creates empty frames
         self.frame1 = self.frame2 = None
-# root = tk.Tk()
-# player = Player(root)
-# root.mainloop()
+
+# video1FilePath = 
+# player = Player()
