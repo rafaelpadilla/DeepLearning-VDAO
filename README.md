@@ -6,7 +6,7 @@ In this repository you can find my experiments using Deep Learning on VDAO datab
 
 VDAO is a video database containing annotated videos in a cluttered industrial environment. The videos were captured using a camera on a moving platform.
 
-The complete database comprises a total 6 multi-object, 56 single-object and 4 no-object (for reference purposes) footages, acquired with two different cameras and two different light conditions, yielding an approximate total of 8.2 hours of video.
+The complete database comprises a total 6 multi-object, 56 single-object and 4 no-object (for reference purposes) footages, acquired with two different cameras and two different light conditions, yielding an approximate total of 8.2 hours of video. A total of 77 videos form the VDAO base. Those videos are grouped into tables according to configurations such as number of lost objects and illuminations.
 
 See [here](http://www02.smt.ufrj.br/~tvdigital/database/objects/docs/an_annotated_video_database_for_abandoned_object_detection_in_a_cluttered_environment.pdf) the paper presenting the database. You can download the database videos and related annotation files from the **[official VDAO database webpage](http://www02.smt.ufrj.br/~tvdigital/database/objects/page_01.html)**.
 
@@ -26,6 +26,12 @@ The images below show examples of **reference frames** (no object) and **target 
 <img src="https://github.com/rafaelpadilla/Detecting-lost-objects-with-Deep-Learning/blob/master/images/ex_frames_target.jpg" style="width: 30px;"/>
 <p align="center">Examples of the VDAO dataset target frames (objects manually annotated with bounding boxes)</p>
 </div>
+
+### VDAO Alignment ###
+
+As mentioned before, VDAO database has 77 videos divided into 10 tables. Each table (except the table 01) has one reference video and multiple videos containing lost objects. Some applications it is necessary to make temporal alignment between the target videos (with objects) and the reference videos.
+
+Part of this project focused on performing temporal alignment of the target videos to their corresponding reference ones. The frames correspondences can be found [here](https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/VDAO_Alignment.md).
 
 ## YOLO ##
 
