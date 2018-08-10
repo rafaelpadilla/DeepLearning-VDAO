@@ -19,43 +19,43 @@
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table01_video_alignment.png" align="center"/></p>
 
-## Table 02 ##
 <a name="table_02"></a>
+## Table 02 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table02_video_alignment.png" align="center"/></p>
 
-## Table 03 ##
 <a name="table_03"></a>
+## Table 03 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table03_video_alignment.png" align="center"/></p>
 
-## Table 04 ##
 <a name="table_04"></a>
+## Table 04 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table04_video_alignment.png" align="center"/></p>
 
-## Table 05 ##
 <a name="table_05"></a>
+## Table 05 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table05_video_alignment.png" align="center"/></p>
 
-## Table 06 ##
 <a name="table_06"></a>
+## Table 06 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table06_video_alignment.png" align="center"/></p>
 
-## Table 07 ##
 <a name="table_07"></a>
+## Table 07 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table07_video_alignment.png" align="center"/></p>
 
-## Table 08 ##
 <a name="table_08"></a>
+## Table 08 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table08_video_alignment.png" align="center"/></p>
 
-## Table 09 ##
 <a name="table_09"></a>
+## Table 09 ##
 
-## Table 10 ##
 <a name="table_10"></a>
+## Table 10 ##
