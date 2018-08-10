@@ -23,13 +23,15 @@
 ## Table 02 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table02_video_alignment.png" align="center"/></p>
-**Observations:**   
+
+**Observations:**  
 * Object 1 is already present in the initial frame of the Path 1 (going).
 
 <a name="table_03"></a>
 ## Table 03 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table03_video_alignment.png" align="center"/></p>
+
 **Observations:**  
 * Object 9 is already present in the initial frame of the Path 1 (going).  
 * Object 12 is already present in the initial frame of the Path 1 (going).  
@@ -39,6 +41,7 @@
 ## Table 04 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table04_video_alignment.png" align="center"/></p>
+
 **Observations:**  
 * Object 4 is already present in the initial frame of the Path 1 (going).
 
@@ -51,14 +54,15 @@
 ## Table 06 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table06_video_alignment.png" align="center"/></p>
+
 **Observations:**  
 * Object 11 is already present in the initial frame of the Path 1 (going).
-
 
 <a name="table_07"></a>
 ## Table 07 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table07_video_alignment.png" align="center"/></p>
+
 **Observations:**  
 * Reference video already contains one more path (going), but it is not complete. Therefore it was discarded.  
 * Object 1 is already present in the initial frame of the Path 1 (going) and Path Path 3 (going).  
@@ -68,6 +72,7 @@
 ## Table 08 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table08_video_alignment.png" align="center"/></p>
+
 **Observations:**  
 * Object 1 is already present in the initial frame of the Path 1 (going) and Path Path 3 (going).  
 * Object 2 is already present in the initial frame of the Path 1 (going) and Path Path 3 (going).  
