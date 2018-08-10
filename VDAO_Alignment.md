@@ -51,6 +51,8 @@
 
 ## Table 08 ##
 <a name="table_08"></a>
+<p align="center">
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table08_video_alignment.png" align="center"/></p>
 
 ## Table 09 ##
 <a name="table_09"></a>
