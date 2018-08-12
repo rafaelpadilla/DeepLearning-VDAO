@@ -189,6 +189,7 @@ class VDAOVideo:
                 raise IOError('Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),frameNumber))
             else:
                 print('Error: Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),frameNumber))
+                return None, None, None
 
         cap = cv2.VideoCapture(self.videoPath)
         
