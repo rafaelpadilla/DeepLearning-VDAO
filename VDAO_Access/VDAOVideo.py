@@ -176,7 +176,7 @@ class VDAOVideo:
         cap.release()
         cv2.destroyAllWindows()
 
-    def GetFrame(self, frameNumber, withInfo=False):
+    def GetFrame(self, frameNumber, withInfo=False, raiseException=True):
         """Frame count starts from 1 to max frames -> self.infoVideo.getNumberOfFrames()"""
 
         maxNumberFrames = self.videoInfo.getNumberOfFrames()
@@ -185,7 +185,10 @@ class VDAOVideo:
             
         # Check if frame exist within the video
         if frameNumber < 1 or frameNumber > int(maxNumberFrames):
-            raise IOError('Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),frameNumber))
+            if raiseException == True:
+                raise IOError('Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),frameNumber))
+            else:
+                print('Error: Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),frameNumber))
 
         cap = cv2.VideoCapture(self.videoPath)
         
