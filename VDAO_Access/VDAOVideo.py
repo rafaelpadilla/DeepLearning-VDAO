@@ -185,7 +185,7 @@ class VDAOVideo:
             
         # Check if frame exist within the video
         if frameNumber < 1 or frameNumber > int(maxNumberFrames):
-            raise IOError('Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames())),frameNumber)
+            raise IOError('Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),frameNumber))
 
         cap = cv2.VideoCapture(self.videoPath)
         
