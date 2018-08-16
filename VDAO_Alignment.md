@@ -80,6 +80,10 @@
 
 <a name="table_09"></a>
 ## Table 09 ##
+<p align="center">
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table09_video_alignment.png" align="center"/></p>
 
 <a name="table_10"></a>
 ## Table 10 ##
+<p align="center">
+<img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table10_video_alignment.png" align="center"/></p>
