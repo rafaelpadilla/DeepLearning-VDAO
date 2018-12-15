@@ -1,11 +1,21 @@
-import json
-from Table import *
-import sys
 import glob
+import json
 import os
-from PIL import ImageTk, Image
+import sys
+
+from PIL import Image, ImageTk
+
+import _init_paths
+import utils
+from Annotation import Annotation
+from CheckBar import CheckBar
 from ListBox import MyListBox
-if sys.version_info[0] < 2: # add tkinker depending on the 
+from PanelDetails import PanelDetails
+from Player import Player
+from Table import *
+from VDAOVideo import VDAOVideo
+
+if sys.version_info[0] < 2: # add tkinker depending on the
     import Tkinter as tk
     import ttk
     import tkFont
@@ -14,13 +24,6 @@ else:
     import tkinter.ttk as ttk
     import tkinter.font as tkFont
 
-from Player import Player
-from CheckBar import CheckBar
-from PanelDetails import PanelDetails
-from VDAOVideo import VDAOVideo
-from Annotation import Annotation
-import _init_paths
-import utils
 
 class Main:
     def CommandSearchBtn(self):
@@ -150,7 +153,7 @@ class Main:
             # Let's create video 2
             self.player.AddVideo2(videoPath, annotationPath, currentFrameNbr=0)
             self.player.lastVideoCreated = 2
-        
+
     def callback_RemoveVideoPlayer(self, videoPath, annotationPath):
         raise IOError('Needs implementation')
 
@@ -175,7 +178,7 @@ class Main:
         if 'multiple objects' in objectsClasses: # put 'multiple objects' in the end of the list
             objectsClasses.remove('multiple objects')
             objectsClasses = ['multiple objects'] + objectsClasses
-        tableTypes = self.filters.GetAllTypes() # tables with "single object" or "multiple objects" 
+        tableTypes = self.filters.GetAllTypes() # tables with "single object" or "multiple objects"
         tableTypes.sort()
         illuminationTypes = self.filters.GetIlluminationTypes()
         illuminationTypes.sort()
@@ -218,7 +221,7 @@ class Main:
         btnSearch = tk.Button(pnlButton, text="Search", command=self.CommandSearchBtn)
         pnlButton.add(btnSearch)
         ### Listbox Panel
-        pnlListBox = tk.PanedWindow(pnlMain, orient=tk.HORIZONTAL) 
+        pnlListBox = tk.PanedWindow(pnlMain, orient=tk.HORIZONTAL)
         pnlMain.add(pnlListBox)
         ## ListBox
         listBoxHeaders = ['Table', #Table name
@@ -234,7 +237,7 @@ class Main:
                     ]
         self.mc_listbox = MyListBox(pnlListBox, listBoxHeaders, self.SelectItemFromListCallBack)
         ### Details of selected items of the List Box
-        pnlDetailsLB = tk.PanedWindow(pnlMain, orient=tk.VERTICAL) 
+        pnlDetailsLB = tk.PanedWindow(pnlMain, orient=tk.VERTICAL)
         pnlMain.add(pnlDetailsLB)
         # Count Items
         pnlCount = tk.PanedWindow(pnlDetailsLB, orient=tk.HORIZONTAL)
@@ -267,9 +270,9 @@ class Main:
         pnlRight = tk.PanedWindow(pnlFoot, orient=tk.VERTICAL)
         pnlFoot.add(pnlRight)
         lblLogo = tk.Label(self.root, image=self.logoImage)
-        lblDescription = tk.Label(pnlRight, 
+        lblDescription = tk.Label(pnlRight,
                     justify=tk.CENTER,
-                    padx = 10, 
+                    padx = 10,
                     font = ("Helvetica", 16, "bold"),
                     text="Video Database of Abandoned Objects")
         lblReference = tk.Label(pnlRight, justify = tk.CENTER, padx = 0, font = ("Helvetica",10), text = "https://github.com/rafaelpadilla/DeepLearning-VDAO")
@@ -279,8 +282,7 @@ class Main:
         # Create a player window
         self.playerWindow = None
         self.root.mainloop()
-        
-directoryVideos = '/media/rafael/Databases/databases/VDAO/references'
-jsonPath = '/home/rafael/thesis/DeepLearning-VDAO/VDAO_Access/VDAO_files/vdao_videos.json'
-main = Main(jsonPath, directoryVideos)
 
+directoryVideos = 'C:\\vdao_teste\\'
+jsonPath = 'C:\\Users\\Rafael\\thesis\\DeepLearning-VDAO\\VDAO_Access\\VDAO_files\\vdao_videos.json'
+main = Main(jsonPath, directoryVideos)

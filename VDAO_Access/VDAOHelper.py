@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
+import json
+import os
+import pprint
+import shlex
+import subprocess
 from enum import Enum
+
 import utils
+
 
 class VideoType(Enum):
     """
@@ -9,14 +16,17 @@ class VideoType(Enum):
     * WithObjects for videos that contain lost objects
 
         Developed by: Rafael Padilla
+
         SMT - Signal Multimedia and Telecommunications Lab
+
+
         COPPE - Universidade Federal do Rio de Janeiro
         Last modification: Dec 9th 2017
     """
     Reference = 1
     WithObjects = 2
 
-from enum import Enum
+
 class BlendingMethod(Enum):
     """
     Class representing different blending methods between
@@ -26,13 +36,14 @@ class BlendingMethod(Enum):
         SMT - Signal Multimedia and Telecommunications Lab
         COPPE - Universidade Federal do Rio de Janeiro
         Last modification: Dec 9th 2017
+
     """
-    RafaelsMethod = 1
+
     BrunosMethod = 2
     KeepBlurLevel = 3
     OnlyBlend = 4
 
-from enum import Enum
+
 class ImageExtension(Enum):
     """
     Class representing the formats of images supported.
@@ -45,16 +56,12 @@ class ImageExtension(Enum):
         Last modification: Dec 9th 2017
     """
     JPG = 1
+
     PNG = 2
     PPM = 3
     PGM = 4
     PBM = 5
 
-import subprocess
-import shlex
-import json
-import pprint
-import os
 
 class VDAOInfo:
     """
@@ -65,39 +72,40 @@ class VDAOInfo:
         Universidade Federal do Rio de Janeiro
         Last modification: Dec 9th 2017
     """
+
     def __init__(self, video_file):
-        self._filePath=video_file
+        self._filePath = video_file
         # Inicializa variáveis
-        self._idxVideoInfo=None
-        self._idxAudioInfo=None
-        self._idxSubtitleInfo=None
-        self._fileName=None
-        self._format=None
-        self._formatLong=None
-        self._size=None #in bytes
-        self._codec=None
-        self._codecLong=None
-        self._width=None
-        self._height=None
-        self._widthHeight=None
-        self._sampleAspectRatio=None
-        self._displayAspectRatio=None
-        self._pixelFormat=None
-        self._frameRate=None
-        self._framesPerSecond=None
-        self._durationTS=None
-        self._duration=None
-        self._durationReal=None
-        self._bitRate=None
-        self._numberOfFrames=None
-        self._createdOn=None
-        self._enconder=None
+        self._idxVideoInfo = None
+        self._idxAudioInfo = None
+        self._idxSubtitleInfo = None
+        self._fileName = None
+        self._format = None
+        self._formatLong = None
+        self._size = None  #in bytes
+        self._codec = None
+        self._codecLong = None
+        self._width = None
+        self._height = None
+        self._widthHeight = None
+        self._sampleAspectRatio = None
+        self._displayAspectRatio = None
+        self._pixelFormat = None
+        self._frameRate = None
+        self._framesPerSecond = None
+        self._durationTS = None
+        self._duration = None
+        self._durationReal = None
+        self._bitRate = None
+        self._numberOfFrames = None
+        self._createdOn = None
+        self._enconder = None
         # self.streams=[]
         # self.video=[]
         # self.audio=[]
         try:
             with open(os.devnull, 'w') as tempf:
-                subprocess.check_call(["ffprobe","-h"],stdout=tempf,stderr=tempf)
+                subprocess.check_call(["ffprobe", "-h"], stdout=tempf, stderr=tempf)
         except:
             raise IOError('ffprobe not found.')
         if os.path.isfile(video_file):
@@ -117,32 +125,34 @@ class VDAOInfo:
                     self._idxSubtitleInfo = i
             # Set properties related to the file itself
             self._fileName = ffoutput['format']['filename']
-            self._fileName = self._fileName[self._fileName.rfind('/')+1:]
+            self._fileName = self._fileName[self._fileName.rfind('/') + 1:]
             self._format = ffoutput['format']['format_name']
             self._formatLong = ffoutput['format']['format_long_name']
-            self._size = ffoutput['format']['size'] 
+            self._size = ffoutput['format']['size']
             if 'creation_time' in ffoutput['format']['tags']:
                 self._createdOn = ffoutput['format']['tags']['creation_time']
             self._encoder = ffoutput['format']['tags']['encoder']
             # Set properties related to the video
             if self.isVideo():
-                self._codec = ffoutput['streams'][self._idxVideoInfo]['codec_name'] 
-                self._codecLong = ffoutput['streams'][self._idxVideoInfo]['codec_long_name'] 
-                self._width = ffoutput['streams'][self._idxVideoInfo]['width'] 
-                self._height = ffoutput['streams'][self._idxVideoInfo]['height'] 
-                self._widthHeight = [self._width,self._height]
-                self._sampleAspectRatio = ffoutput['streams'][self._idxVideoInfo]['sample_aspect_ratio'] 
-                self._displayAspectRatio = ffoutput['streams'][self._idxVideoInfo]['display_aspect_ratio'] 
-                self._pixelFormat = ffoutput['streams'][self._idxVideoInfo]['pix_fmt'] 
-                self._frameRate = ffoutput['streams'][self._idxVideoInfo]['r_frame_rate'] 
+                self._codec = ffoutput['streams'][self._idxVideoInfo]['codec_name']
+                self._codecLong = ffoutput['streams'][self._idxVideoInfo]['codec_long_name']
+                self._width = ffoutput['streams'][self._idxVideoInfo]['width']
+                self._height = ffoutput['streams'][self._idxVideoInfo]['height']
+                self._widthHeight = [self._width, self._height]
+                self._sampleAspectRatio = ffoutput['streams'][self.
+                                                              _idxVideoInfo]['sample_aspect_ratio']
+                self._displayAspectRatio = ffoutput['streams'][
+                    self._idxVideoInfo]['display_aspect_ratio']
+                self._pixelFormat = ffoutput['streams'][self._idxVideoInfo]['pix_fmt']
+                self._frameRate = ffoutput['streams'][self._idxVideoInfo]['r_frame_rate']
                 self._framesPerSecond = int(self._frameRate[:self._frameRate.index('/')])
-                self._durationTS = ffoutput['streams'][self._idxVideoInfo]['duration_ts'] 
-                self._duration = ffoutput['streams'][self._idxVideoInfo]['duration'] 
-                # self._durationReal = ffoutput['streams'][self._idxVideoInfo]['duration'] 
-                self._bitRate = ffoutput['streams'][self._idxVideoInfo]['bit_rate'] 
-                self._numberOfFrames = ffoutput['streams'][self._idxVideoInfo]['nb_frames']       
+                self._durationTS = ffoutput['streams'][self._idxVideoInfo]['duration_ts']
+                self._duration = ffoutput['streams'][self._idxVideoInfo]['duration']
+                # self._durationReal = ffoutput['streams'][self._idxVideoInfo]['duration']
+                self._bitRate = ffoutput['streams'][self._idxVideoInfo]['bit_rate']
+                self._numberOfFrames = ffoutput['streams'][self._idxVideoInfo]['nb_frames']
         else:
-            raise IOError('This is not a valid media file '+video_file)
+            raise IOError('This is not a valid media file ' + video_file)
 
     def isVideo(self):
         """Returns true if the file is a valid video extension"""
@@ -279,8 +289,8 @@ class VDAOInfo:
             if idx == -1:
                 return None
             num = float(val[:idx])
-            den = float(val[idx+1:])            
-            return num/den
+            den = float(val[idx + 1:])
+            return num / den
         return val
 
     def getFrameRate(self):
@@ -333,11 +343,11 @@ class VDAOInfo:
         print(' ')
         print('File path: ' + str(self._filePath))
         print('File name: ' + str(self._fileName))
-        print('File extension: ' + str(self._format) + ' (' +str(self._formatLong)+')')
+        print('File extension: ' + str(self._format) + ' (' + str(self._formatLong) + ')')
         print('Created on: ' + str(self._createdOn))
         print('Encoder: ' + str(self._encoder))
         print('File size: ' + str(self._size))
-        print('Codec: ' + str(self._codec) + ' (' +str(self._codecLong)+')')
+        print('Codec: ' + str(self._codec) + ' (' + str(self._codecLong) + ')')
         print('Width: ' + str(self._width))
         print('Height: ' + str(self._height))
         print('Width x Height: ' + str(self._widthHeight))
