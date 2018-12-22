@@ -209,6 +209,12 @@ mkdir Table_35 &&
 wget http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/ref-video35.avi -P Table_35/ && 
 wget http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video35.avi -P Table_35/ && 
 ############
+# TABLE 36 #
+############
+mkdir Table_36 && 
+wget http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/ref-video36.avi -P Table_36/ && 
+wget http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video36.avi -P Table_36/ && 
+############
 # TABLE 37 #
 ############
 mkdir Table_37 && 
