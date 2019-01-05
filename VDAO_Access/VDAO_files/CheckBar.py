@@ -1,12 +1,19 @@
 import sys
-if sys.version_info[0] < 2: # add tkinker depending on the 
+
+if sys.version_info[0] < 2:  # add tkinker depending on the
     import Tkinter as tk
 else:
     import tkinter as tk
 
+
 class CheckBar:
-    
-    def __init__(self, parent=None, picks=[], maxCol=5, commands=None, root=None, initialState='normal'):
+    def __init__(self,
+                 parent=None,
+                 picks=[],
+                 maxCol=5,
+                 commands=None,
+                 root=None,
+                 initialState='normal'):
         self.DescriptionElementAll = None
         self.CommandElementAll = None
         self.vars = []
@@ -33,17 +40,24 @@ class CheckBar:
             self.commands = self.commands + commands
         self.maxWidth = len(CheckBar.getMaxWord(self.allPicks))
         self.AddElements()
-    
+
     def AddElements(self):
         r = c = 0
         var = tk.IntVar()
         for idx in range(len(self.allPicks)):
             var = tk.IntVar()
-            chk = tk.Checkbutton(self.parent, text=' %s'%self.allPicks[idx], variable=var, onvalue=1, 
-                                offvalue=0, pady=2, width=self.maxWidth+2, anchor=tk.W,
-                                command=self.commands[idx])
+            chk = tk.Checkbutton(
+                self.parent,
+                text=' %s' % self.allPicks[idx],
+                variable=var,
+                onvalue=1,
+                offvalue=0,
+                pady=2,
+                width=self.maxWidth + 2,
+                anchor=tk.W,
+                command=self.commands[idx])
             self.checkbuttons.append(chk)
-            chk.grid(row=r,column=c)
+            chk.grid(row=r, column=c)
             c = c + 1
             if c >= self.maxCol:
                 c = 0
@@ -51,17 +65,17 @@ class CheckBar:
             self.vars.append(var)
 
     def AddElementAll(self, description, command=None):
-        self.RemoveAllElements(removeCommands=False) # dont remove all commands. they'll be used
+        self.RemoveAllElements(removeCommands=False)  # dont remove all commands. they'll be used
         self.DescriptionElementAll = description
         self.CommandElementAll = command
         self.commands = [self.AllIsSelected] + [c for c in self.commands]
-        self.allPicks = [description]+ self.allPicks
+        self.allPicks = [description] + self.allPicks
         self.maxWidth = len(CheckBar.getMaxWord(self.allPicks))
         self.AddElements()
-        if self.initialState == 'disable': #Apply initial state
+        if self.initialState == 'disable':  #Apply initial state
             self.DisableAllElements()
 
-    def RemoveAllElements(self, removeCommands = False):
+    def RemoveAllElements(self, removeCommands=False):
         for widget in self.parent.winfo_children():
             widget.destroy()
         self.vars = []
@@ -73,7 +87,7 @@ class CheckBar:
     def DisableAllElements(self):
         for widget in self.parent.winfo_children():
             widget.configure(state='disable')
-    
+
     def EnableAllElements(self):
         for widget in self.parent.winfo_children():
             widget.configure(state='normal')
@@ -115,9 +129,11 @@ class CheckBar:
                 chkButton.deselect()
         if self.CommandElementAll != None:
             self.CommandElementAll()
-    
+
     @staticmethod
     def getMaxWord(words):
+        if len(words) == 0:
+            return []
         maxWord = words[0]
         for w in words:
             if len(w) > len(maxWord):

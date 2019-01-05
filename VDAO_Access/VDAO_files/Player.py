@@ -462,14 +462,14 @@ class Player:
 # video2FilePath = os.path.join(videosFolder,'Table_01-Object_03','_2_obj-sing-amb-part01-video03.avi')
 # v = VDAOVideo(video2FilePath)
 
-video1FilePath = 'C:\\vdao_teste\\ref-sing-amb-part03-video01.avi'
-video2FilePath = 'C:\\vdao_teste\\obj-sing-amb-part03-video01.avi'
-video2FilePath = 'C:\\vdao_teste\\obj-mult-ext-part02-video02.avi'
-annotFile = 'C:\\vdao_teste\\obj-mult-ext-part02-video02.txt'
-root = tk.Tk()
-player = Player(root, video1FilePath, None, video2FilePath, None)
-player.AddVideo1(video1FilePath, None, currentFrameNbr=0)
-# player.AddVideo2(video2FilePath, None, currentFrameNbr=0)
-player.AddVideo2(video2FilePath, annotFile, currentFrameNbr=0)
-player.callback_PlayFrame1
-root.mainloop()
+# video1FilePath = 'C:\\vdao_teste\\ref-sing-amb-part03-video01.avi'
+# video2FilePath = 'C:\\vdao_teste\\obj-sing-amb-part03-video01.avi'
+# video2FilePath = 'C:\\vdao_teste\\obj-mult-ext-part02-video02.avi'
+# annotFile = 'C:\\vdao_teste\\obj-mult-ext-part02-video02.txt'
+# root = tk.Tk()
+# player = Player(root, video1FilePath, None, video2FilePath, None)
+# player.AddVideo1(video1FilePath, None, currentFrameNbr=0)
+# # player.AddVideo2(video2FilePath, None, currentFrameNbr=0)
+# player.AddVideo2(video2FilePath, annotFile, currentFrameNbr=0)
+# player.callback_PlayFrame1
+# root.mainloop()
