@@ -2,10 +2,10 @@
 "source": "http://www02.smt.ufrj.br/~tvdigital/database/research/page_01.html",
 "description": "The following tables contain links to entire parts of the VDAO database used for training.",
 "tables": {
-
 "table_01": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 01",
@@ -19,10 +19,11 @@
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video01.avi"
         }
     ]
-},
+	},
 "table_02": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 02",
@@ -40,6 +41,7 @@
 "table_03": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 03",
@@ -57,6 +59,7 @@
 "table_04": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 04",
@@ -74,6 +77,8 @@
 "table_05": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
+
     "references":[	
         {
 	    "name": "reference video 05",
@@ -88,10 +93,12 @@
         }
     ]
 },
-"table_06: {
+"table_06": {
     "description": "Video ",
     "type": "single object",
-    "references":[	
+	"illumination": "not specified",
+
+	"references":[	
         {
 	    "name": "reference video 06",
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/ref-video06.avi"
@@ -108,7 +115,9 @@
 "table_07": {
     "description": "Video ",
     "type": "single object",
-    "references":[	
+	"illumination": "not specified",
+
+	"references":[	
         {
 	    "name": "reference video 07",
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/ref-video07.avi"
@@ -125,6 +134,7 @@
 "table_08": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 08",
@@ -142,6 +152,7 @@
 "table_09": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 09",
@@ -156,9 +167,10 @@
         }
     ]
 },
-"table_10: {
+"table_10": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 10",
@@ -176,6 +188,7 @@
 "table_11": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 11",
@@ -193,6 +206,7 @@
 "table_12": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 12",
@@ -210,6 +224,7 @@
 "table_13": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 13",
@@ -227,6 +242,7 @@
 "table_14": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 14",
@@ -244,6 +260,7 @@
 "table_15": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 15",
@@ -258,9 +275,10 @@
         }
     ]
 },
-"table_16: {
+"table_16": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 16",
@@ -278,6 +296,7 @@
 "table_17": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 17",
@@ -295,6 +314,7 @@
 "table_18": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 18",
@@ -312,6 +332,7 @@
 "table_19": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 19",
@@ -326,9 +347,10 @@
         }
     ]
 },
-"table_20: {
+"table_20": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 20",
@@ -346,6 +368,7 @@
 "table_21": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 21",
@@ -363,6 +386,7 @@
 "table_22": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 22",
@@ -380,6 +404,7 @@
 "table_23": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 23",
@@ -397,6 +422,7 @@
 "table_24": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 24",
@@ -414,6 +440,7 @@
 "table_25": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 25",
@@ -428,9 +455,10 @@
         }
     ]
 },
-"table_26: {
+"table_26": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 26",
@@ -448,6 +476,7 @@
 "table_27": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 27",
@@ -465,6 +494,7 @@
 "table_28": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 28",
@@ -482,6 +512,7 @@
 "table_29": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 29",
@@ -496,9 +527,10 @@
         }
     ]
 },
-"table_30 {
+"table_30": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 30",
@@ -516,6 +548,7 @@
 "table_31": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 31",
@@ -530,10 +563,10 @@
         }
     ]
 },
-
 "table_32": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 32",
@@ -551,6 +584,7 @@
 "table_33": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 33",
@@ -568,6 +602,7 @@
 "table_34": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 34",
@@ -585,6 +620,7 @@
 "table_35": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 35",
@@ -599,9 +635,10 @@
         }
     ]
 },
-"table_36: {
+"table_36": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 36",
@@ -619,6 +656,7 @@
 "table_37": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 37",
@@ -636,6 +674,7 @@
 "table_38": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 38",
@@ -653,6 +692,7 @@
 "table_39": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 39",
@@ -667,9 +707,10 @@
         }
     ]
 },
-"table_40: {
+"table_40": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 40",
@@ -684,10 +725,10 @@
         }
     ]
 },
-
 "table_41": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 41",
@@ -705,6 +746,7 @@
 "table_42": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 42",
@@ -722,6 +764,7 @@
 "table_43": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 43",
@@ -739,6 +782,7 @@
 "table_44": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 44",
@@ -756,6 +800,7 @@
 "table_45": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 45",
@@ -770,9 +815,10 @@
         }
     ]
 },
-"table_46: {
+"table_46": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 46",
@@ -790,6 +836,7 @@
 "table_47": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 47",
@@ -807,6 +854,7 @@
 "table_48": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 48",
@@ -824,6 +872,7 @@
 "table_49": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 49",
@@ -838,9 +887,10 @@
         }
     ]
 },
-"table_50: {
+"table_50": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 50",
@@ -858,6 +908,7 @@
 "table_51": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 51",
@@ -872,10 +923,10 @@
         }
     ]
 },
-
 "table_52": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 52",
@@ -893,6 +944,7 @@
 "table_53": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 53",
@@ -910,6 +962,7 @@
 "table_54": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 54",
@@ -927,6 +980,7 @@
 "table_55": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 55",
@@ -941,9 +995,10 @@
         }
     ]
 },
-"table_56: {
+"table_56": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 56",
@@ -961,6 +1016,7 @@
 "table_57": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 57",
@@ -978,6 +1034,7 @@
 "table_58": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 58",
@@ -995,6 +1052,7 @@
 "table_59": {
     "description": "Video ",
     "type": "single object",
+	"illumination": "not specified",
     "references":[	
         {
 	    "name": "reference video 59",
@@ -1008,4 +1066,6 @@
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video59.avi"
         }
     ]
-},
+}
+}
+}

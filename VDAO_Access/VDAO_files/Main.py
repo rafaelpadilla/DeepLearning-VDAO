@@ -283,6 +283,6 @@ class Main:
         self.playerWindow = None
         self.root.mainloop()
 
-directoryVideos = 'C:\\vdao_teste\\'
+directoryVideos = 'F:\\VDAO\\vdao_object'
 jsonPath = 'C:\\Users\\Rafael\\thesis\\DeepLearning-VDAO\\VDAO_Access\\VDAO_files\\vdao_videos.json'
 main = Main(jsonPath, directoryVideos)
