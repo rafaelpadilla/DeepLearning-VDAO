@@ -1,0 +1,36 @@
+Lucas Pinheiro Cinelli <lpcinelli@poli.ufrj.br>
+Anexos
+27 de nov de 2018 13:24
+para eu, Rafael
+
+Segue em anexo o zip com o código do Bruno.
+O arquivo que te interessa é esse train_HDF5_generator_VDAO.py
+
+
+Lucas CINELLI
+
+
+---------- Forwarded message ---------
+From: Bruno Machado Afonso <bruno.ma@poli.ufrj.br>
+Date: jeu. 29 mars 2018 à 08:22
+Subject: Códigos do treinamento ICIP
+To: Lucas Pinheiro Cinelli <lpcinelli@poli.ufrj.br>
+
+
+Bom dia Lucas,
+
+Ontem a noite organizei da melhor maneira que pude os códigos para que você possa dar continuidade ao trabalho. Se te passasse tudo sem as devidas orientações, muito provavelmente você ficaria perdido. Acredito que dessa forma vai facilitar seu trabalho.
+
+Segue em anexo o zip com os códigos que precisa do treinamento do ICIP.
+
+O train_FC_59_vids_DIS.py treina a FC para os blocos dos 59 videos.
+O train_HDF5_generator_VDAO.py gera o HDF5 com os frames da VDAO, caso você precise gerar um novo HDF5
+O imagenet_utils.py é usado para tirar o nivel DC das imagens durante o proceso para salvar
+
+Os diretórios aonde estão localizados os frames de treinamento/teste e os arquivos HDF5 estão
+escritos no arquivo diretorios.txt. Os HDF5 de treinamento (ALOI e VDAO) e os HDF5 de teste (os que representam os frames dos 59 videos) já tenho salvo e estão localizados no diretório escrito no arquivo de texto.
+
+Qualquer dúvida estou a disposição.
+
+Att.,
+Bruno Afonso

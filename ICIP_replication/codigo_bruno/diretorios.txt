@@ -1,0 +1,14 @@
+### LOCAL DOS FRAMES VDAO:	/home/bruno.afonso/datasets/Reference_Object_frames_skip_17_full_aligned
+
+### LOCAL DOS FRAMES DOS 59 VIDEOS TESTE:	/home/bruno.afonso/datasets/TEST_FRAMES_59V
+
+### LOCAL DOS HDF5:	/home/bruno.afonso/datasets/article_HDF5
+
+### Nomes dos Datasets: (IGNORAR COLCHETES -- X/y = X ou y, X para os mapas de features, y para as labels)
+
+	59_videos_test_batch.h5 - 'video[X]_[NOME DA CAMADA]_X/y_TEST_SET' 
+	train_batch_VDAO.h5 - '[TIPO ILUMINACAO]_[NOME DO OBJETO]_[NUMERO DA POSICAO]_[NOME DA CAMADA]_X/y_TRAIN_SET'
+	train_batch_ALOI.h5 - '[NOME DA CAMADA]_X/y_TRAIN_SET'
+
+
+	
