@@ -1,0 +1,11 @@
+import os 
+from enum import Enum
+
+
+DIR = '/media/rafael/HD_2T/VDAO/vdao_research/'
+FOLDER = os.path.join(DIR,'vdao_research')
+TOTAL_TABLES = 59
+
+tables_dir = [os.path.join(FOLDER,str(i)) for i in range(1,59+1)]
+
+objects = Enum('Object', 'STRING_ROLL BAG WHITE_BOX LAMP_BULB_BOX SPOTLIGHT_BOX MUG BLUE_COAT WRENCH BOTTLE BLUE_BOX BACKPACK PINK_BACKPACK BOTTLE_CAP UMBRELLA GREEN_BOX SHOE DARK_BLUE_BOX CAMERA_BOX PINK_BOTTLE BLACK_BACKPACK WHITE_JAR BROWN_BOX TOWEL BLACK_COAT')
