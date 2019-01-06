@@ -16,6 +16,7 @@
         {
 	    "name": "object 01",
 		"object_class": "dark blue box",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video01.avi"
         }
     ]
@@ -34,6 +35,7 @@
         {
 	    "name": "object 02",
 		"object_class": "dark blue box",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video02avi"
         }
     ]
@@ -52,6 +54,7 @@
         {
 	    "name": "object 03",
 		"object_class": "shoe",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video03.avi"
         }
     ]
@@ -70,6 +73,7 @@
         {
 	    "name": "object 04",
 		"object_class": "camera box",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video04.avi"
         }
     ]
@@ -89,6 +93,7 @@
         {
 	    "name": "object 05",
 		"object_class": "towel",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video05.avi"
         }
     ]
@@ -108,6 +113,7 @@
         {
 	    "name": "object 06",
 		"object_class": "white jar",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video06.avi"
         }
     ]
@@ -127,6 +133,7 @@
         {
 	    "name": "object 07",
 		"object_class": "pink bottle",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video07.avi"
         }
     ]
@@ -145,6 +152,7 @@
         {
 	    "name": "object 08",
 		"object_class": "shoe",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video08.avi"
         }
     ]
@@ -163,6 +171,7 @@
         {
 	    "name": "object 09",
 		"object_class": "shoe",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video09.avi"
         }
     ]
@@ -181,6 +190,7 @@
         {
 	    "name": "object 10",
 		"object_class": "dark blue box",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video10.avi"
         }
     ]
@@ -199,6 +209,7 @@
         {
 	    "name": "object 11",
 		"object_class": "dark blue box",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video11.avi"
         }
     ]
@@ -217,6 +228,7 @@
         {
 	    "name": "object 12",
 		"object_class": "camera box",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video12.avi"
         }
     ]
@@ -235,6 +247,7 @@
         {
 	    "name": "object 13",
 		"object_class": "camera box",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video13.avi"
         }
     ]
@@ -253,6 +266,7 @@
         {
 	    "name": "object 14",
 		"object_class": "white jar",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video14.avi"
         }
     ]
@@ -271,6 +285,7 @@
         {
 	    "name": "object 15",
 		"object_class": "white jar",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video15.avi"
         }
     ]
@@ -289,6 +304,7 @@
         {
 	    "name": "object 16",
 		"object_class": "white jar",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video16.avi"
         }
     ]
@@ -307,6 +323,7 @@
         {
 	    "name": "object 17",
 		"object_class": "brown box",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video17.avi"
         }
     ]
@@ -325,6 +342,7 @@
         {
 	    "name": "object 18",
 		"object_class": "brown box",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video18.avi"
         }
     ]
@@ -343,6 +361,7 @@
         {
 	    "name": "object 19",
 		"object_class": "brown box",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video19.avi"
         }
     ]
@@ -361,6 +380,7 @@
         {
 	    "name": "object 20",
 		"object_class": "pink bottle",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video20.avi"
         }
     ]
@@ -379,6 +399,7 @@
         {
 	    "name": "object 21",
 		"object_class": "pink bottle",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video21.avi"
         }
     ]
@@ -397,6 +418,7 @@
         {
 	    "name": "object 22",
 		"object_class": "pink bottle",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video22.avi"
         }
     ]
@@ -415,6 +437,7 @@
         {
 	    "name": "object 23",
 		"object_class": "towel",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video23.avi"
         }
     ]
@@ -433,6 +456,7 @@
         {
 	    "name": "object 24",
 		"object_class": "towel",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video24.avi"
         }
     ]
@@ -451,6 +475,7 @@
         {
 	    "name": "object 25",
 		"object_class": "black coat",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video25.avi"
         }
     ]
@@ -469,6 +494,7 @@
         {
 	    "name": "object 26",
 		"object_class": "black coat",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video26.avi"
         }
     ]
@@ -487,6 +513,7 @@
         {
 	    "name": "object 27",
 		"object_class": "black coat",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video27.avi"
         }
     ]
@@ -505,7 +532,8 @@
         {
 	    "name": "object 28",
 		"object_class": "black backpack",
-		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video28.avi"
+        "position": 1,
+        "url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video28.avi"
         }
     ]
 },
@@ -523,6 +551,7 @@
         {
 	    "name": "object 29",
 		"object_class": "black backpack",
+        "position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video29.avi"
         }
     ]
@@ -541,6 +570,7 @@
         {
 	    "name": "object 30",
 		"object_class": "black backpack",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video30.avi"
         }
     ]
@@ -559,6 +589,7 @@
         {
 	    "name": "object 31",
 		"object_class": "black backpack",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video31.avi"
         }
     ]
@@ -577,6 +608,7 @@
         {
 	    "name": "object 32",
 		"object_class": "black backpack",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video32.avi"
         }
     ]
@@ -595,6 +627,7 @@
         {
 	    "name": "object 33",
 		"object_class": "black backpack",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video33.avi"
         }
     ]
@@ -613,6 +646,7 @@
         {
 	    "name": "object 34",
 		"object_class": "shoe",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video34.avi"
         }
     ]
@@ -631,6 +665,7 @@
         {
 	    "name": "object 35",
 		"object_class": "shoe",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video35.avi"
         }
     ]
@@ -649,6 +684,7 @@
         {
 	    "name": "object 36",
 		"object_class": "shoe",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video36.avi"
         }
     ]
@@ -667,6 +703,7 @@
         {
 	    "name": "object 37",
 		"object_class": "dark blue box",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video37.avi"
         }
     ]
@@ -685,6 +722,7 @@
         {
 	    "name": "object 38",
 		"object_class": "dark blue box",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video38.avi"
         }
     ]
@@ -703,6 +741,7 @@
         {
 	    "name": "object 39",
 		"object_class": "camera box",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video39.avi"
         }
     ]
@@ -721,6 +760,7 @@
         {
 	    "name": "object 40",
 		"object_class": "camera box",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video40.avi"
         }
     ]
@@ -739,6 +779,7 @@
         {
 	    "name": "object 41",
 		"object_class": "camera box",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video41.avi"
         }
     ]
@@ -757,6 +798,7 @@
         {
 	    "name": "object 42",
 		"object_class": "white jar",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video01.avi"
         }
     ]
@@ -775,6 +817,7 @@
         {
 	    "name": "object 43",
 		"object_class": "white jar",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video43.avi"
         }
     ]
@@ -793,6 +836,7 @@
         {
 	    "name": "object 44",
 		"object_class": "brown box",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video44.avi"
         }
     ]
@@ -811,6 +855,7 @@
         {
 	    "name": "object 45",
 		"object_class": "brown box (alinhamento péssimo)",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video45.avi"
         }
     ]
@@ -829,6 +874,7 @@
         {
 	    "name": "object 46",
 		"object_class": "brown box",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video46.avi"
         }
     ]
@@ -847,6 +893,7 @@
         {
 	    "name": "object 47",
 		"object_class": "pink bottle",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video47.avi"
         }
     ]
@@ -865,6 +912,7 @@
         {
 	    "name": "object 48",
 		"object_class": "pink bottle",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video48.avi"
         }
     ]
@@ -883,6 +931,7 @@
         {
 	    "name": "object 49",
 		"object_class": "pink bottle",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video49.avi"
         }
     ]
@@ -901,6 +950,7 @@
         {
 	    "name": "object 50",
 		"object_class": "towel",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video50.avi"
         }
     ]
@@ -919,6 +969,7 @@
         {
 	    "name": "object 51",
 		"object_class": "towel",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video51.avi"
         }
     ]
@@ -937,6 +988,7 @@
         {
 	    "name": "object 52",
 		"object_class": "towel",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video52.avi"
         }
     ]
@@ -955,6 +1007,7 @@
         {
 	    "name": "object 53",
 		"object_class": "black coat",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video53.avi"
         }
     ]
@@ -973,6 +1026,7 @@
         {
 	    "name": "object 54",
 		"object_class": "black coat",
+        "position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video54.avi"
         }
     ]
@@ -991,6 +1045,7 @@
         {
 	    "name": "object 55",
 		"object_class": "black coat",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video55.avi"
         }
     ]
@@ -1009,6 +1064,7 @@
         {
 	    "name": "object 56",
 		"object_class": "black backpack",
+		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video56.avi"
         }
     ]
@@ -1027,6 +1083,7 @@
         {
 	    "name": "object 57",
 		"object_class": "black backpack",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video57.avi"
         }
     ]
@@ -1045,6 +1102,7 @@
         {
 	    "name": "object 58",
 		"object_class": "black backpack",
+		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video58.avi"
         }
     ]
@@ -1063,6 +1121,7 @@
         {
 	    "name": "object 59",
 		"object_class": "black backpack",
+		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video59.avi"
         }
     ]
