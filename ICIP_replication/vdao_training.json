@@ -28,7 +28,7 @@
     "references":[	
         {
 	    "name": "reference video 02",
-		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/ref-video02avi"
+		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/ref-video02.avi"
         }
     ],
     "objects":[
@@ -36,7 +36,7 @@
 	    "name": "object 02",
 		"object_class": "dark blue box",
 		"position": 1,
-		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video02avi"
+		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video02.avi"
         }
     ]
 },
