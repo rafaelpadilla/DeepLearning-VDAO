@@ -139,10 +139,9 @@ class VDAOInfo:
                 self._width = ffoutput['streams'][self._idxVideoInfo]['width']
                 self._height = ffoutput['streams'][self._idxVideoInfo]['height']
                 self._widthHeight = [self._width, self._height]
-                self._sampleAspectRatio = ffoutput['streams'][self.
-                                                              _idxVideoInfo]['sample_aspect_ratio']
-                self._displayAspectRatio = ffoutput['streams'][
-                    self._idxVideoInfo]['display_aspect_ratio']
+                if 'display_aspect_ratio' in ffoutput['streams'][self._idxVideoInfo]:
+                    self._displayAspectRatio = ffoutput['streams'][
+                        self._idxVideoInfo]['display_aspect_ratio']
                 self._pixelFormat = ffoutput['streams'][self._idxVideoInfo]['pix_fmt']
                 self._frameRate = ffoutput['streams'][self._idxVideoInfo]['r_frame_rate']
                 self._framesPerSecond = int(self._frameRate[:self._frameRate.index('/')])
