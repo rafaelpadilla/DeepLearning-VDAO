@@ -209,6 +209,14 @@ def euclideanDistance(list1, list2):
     # OR
     return np.linalg.norm(np.asarray(list1)-np.asarray(list2))
 
+
+def psnr(x, y):
+    mse = np.mean((x - y) ** 2)
+    if mse == 0:
+        return 100
+    PIXEL_MAX = 255.0
+    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
+
 def secsToMinSecMs(seconds):
     frac,whole = math.modf(round(seconds/60,9))
     _min = str(whole).replace('.0','') #minutes
