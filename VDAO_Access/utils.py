@@ -207,7 +207,7 @@ def euclideanDistance(list1, list2):
     #     dist = dist + pow(vect1[i]-vect2[i],2)
     # return math.sqrt(dist)
     # OR
-    return np.linalg.norm(np.asarray(list1)-np.asarray(list2))
+    return np.linalg.norm(np.asarray(list1).astype(float)-np.asarray(list2).astype(float))
 
 
 def psnr(x, y):
