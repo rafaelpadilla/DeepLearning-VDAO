@@ -72,7 +72,7 @@ class Annotation:
     def GetNonEmptyFrames(self):
         if self.parsed == False:
             self._parseFile()
-initPath        return  list(filter(lambda annot: annot != [], (annot for annot in self.listAnnotation)))
+        return  list(filter(lambda annot: annot != [], (annot for annot in self.listAnnotation)))
     
     def GetNumberOfAnnotatedFrames(self):
         if self.parsed == False:
