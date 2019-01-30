@@ -72,7 +72,7 @@ class Annotation:
     def GetNonEmptyFrames(self):
         if self.parsed == False:
             self._parseFile()
-        return  list(filter(lambda annot: annot != [], (annot for annot in self.listAnnotation)))
+initPath        return  list(filter(lambda annot: annot != [], (annot for annot in self.listAnnotation)))
     
     def GetNumberOfAnnotatedFrames(self):
         if self.parsed == False:
@@ -147,8 +147,6 @@ class Annotation:
             filteredItems=[]
             for f in refAnnotation.listAnnotation[frameId]:
                 area = abs(f[1][0]-f[1][2])*abs(f[1][1]-f[1][3]) #(x2-x1)*(y2-y1)
-                if area == 0:
-                    aqui = 123
                 if area >= minArea and area <= maxArea:
                     filteredItems.append(f)
             annot.listAnnotation[frameId] = filteredItems
