@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import utils
 import time
+import imageio
 # To get video information
 from VDAOHelper import VDAOInfo, VideoType, ImageExtension
 from YoloTrainingHelper import YOLOHelper
@@ -72,6 +73,16 @@ class VDAOVideo:
             elif key == 'q':
                 cv2.destroyAllWindows()
                 return
+    
+    @staticmethod
+    def GenerateVideosFromImages(listImages, outputFilePath, quality=6, fps=24):
+        # Using imageio to generate output video
+        writer = imageio.get_writer(outputFilePath, fps=fps, quality=quality, codec='libx264')
+        for i in listImages:
+            image = cv2.imread(i)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            writer.append_data(image)
+        writer.close()
 
     def PlayVideo(self, showInfo=True, showBoundingBoxes=False, frameCallback=None):
         # Parse annotations

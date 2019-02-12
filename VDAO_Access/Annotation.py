@@ -23,7 +23,9 @@ class Annotation:
     # Returns True if parse was successfully done, otherwise returns False
     def _parseFile(self):
         if self.annotationFilePath == None or os.path.exists(self.annotationFilePath) == False:
-            return False
+            self.parsed = False
+            self.error = True
+            return self.parsed
 
         # (*) Annotation objects (not the file) will always start counting from 1
         # it means that if there are 8632 frames, listAnnotation will have
@@ -32,7 +34,8 @@ class Annotation:
 
         # create array from 0 to totalFrames+1
         items = self.totalFrames+1
-        self.listAnnotation.clear()
+        # self.listAnnotation.clear()
+        self.listAnnotation = []
         [self.listAnnotation.append([]) for i in range(items)]
 
         f = open(self.annotationFilePath,"r")
@@ -43,25 +46,25 @@ class Annotation:
             # Ex: annotation file 'obj-mult-ext-part02-video01.avi' has line: 'greenBox0 29039 0 0 0 0 3', but this file contains only 29034 frames
             if readFrame < items:
                 # class, (x,y,r,b), subObj, 'class (subobj)', frame
-                self.listAnnotation[readFrame].append((params[0], (int(params[2]),int(params[3]),int(params[4]),int(params[5])), int(params[6]), ('%s (%s)' % (params[0], params[6].replace('\n',''))), int(params[1])))
+                self.listAnnotation[readFrame].append([params[0], (int(params[2]),int(params[3]),int(params[4]),int(params[5])), int(params[6]), ('%s (%s)' % (params[0], params[6].replace('\n',''))), int(params[1])])
         f.close()
         self.parsed = True
         self.error = False
-        return True
+        return self.parsed
         
     # Return True if Annotation file is valid, otherwise return False
     def IsValid(self):
         if self.parsed == False:
             return self._parseFile()
         else:
-            return self.error
+            return not self.error
 
     def GetClassesObjects(self):
         if self.parsed == False:
             self._parseFile()
         listObjects = []
         [[listObjects.append(bb[0][0:len(bb[0])-1]) for bb in annotation] for annotation in self.listAnnotation]
-        return set(listObjects)
+        return list(set(listObjects))
     
     # Ex: [0] = ('shoe0', (a,b,c,d), ..., 1) -> Frame 1 has 'shoe0' in bb (a,b,c,d)
     #     [1] = ('backpack1', (e,f,g,h), ...,3) -> Frame 3 has 'backpack1' in bb (e,f,g,h)
@@ -130,5 +133,28 @@ class Annotation:
             for b in range(len(nonOverlappedBoxes)):
                 annot.listAnnotation[frameId].append(refAnnotation.listAnnotation[frameId][idx[b]])
         return annot
+
+    @staticmethod
+    def FilterByObjectsArea(refAnnotation, minArea=-1, maxArea=sys.float_info.max):
+        if refAnnotation.parsed == False:
+            refAnnotation._parseFile()
+        # Create a new annotation object the with the same annotations as the reference one
+        annot = Annotation()
+        items = len(refAnnotation.listAnnotation)
+        [annot.listAnnotation.append([]) for i in range(items)]
+        # Get all annotations that have the specific bounding boxes
+        for frameId in range(len(refAnnotation.listAnnotation)):
+            filteredItems=[]
+            for f in refAnnotation.listAnnotation[frameId]:
+                area = abs(f[1][0]-f[1][2])*abs(f[1][1]-f[1][3]) #(x2-x1)*(y2-y1)
+                if area >= minArea and area <= maxArea:
+                    filteredItems.append(f)
+            annot.listAnnotation[frameId] = filteredItems
+        annot.error = False
+        annot.parsed = True
+        annot.annotationFilePath = refAnnotation.annotationFilePath
+        annot.totalFrames = len(annot.listAnnotation)
+        return annot
+
 
             
