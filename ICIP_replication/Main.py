@@ -68,7 +68,7 @@ def get_file_filters(fold, types=['obj'], include_table_folder=False):
     return search_terms
 
 
-search_terms = get_file_filters('fold_1',['ref','tar'])
+# search_terms = get_file_filters('fold_1',['tar'])
 
 
 import torch
@@ -163,6 +163,43 @@ dir_read, dir_save = define_folders()
 dir_read = os.path.join(dir_read,'shortest_distance_results','frames')
 dir_save = os.path.join(dir_save,'shortest_distance_results','features')
 
+
+############### TRANSFORMAR TODAS IMAGENS EM FEATURES ##################### 
+# #  Loop through layers to extract features
+# for layer_name in layers_to_extract:
+#     print('#'*80)
+#     print('Extracting features from layer: %s' % layer_name)
+#     # Use the model object to select the desired layer
+#     layer = layers_and_extractors[layer_name]
+#     size_output_layer = layers_and_sizes[layer_name]
+
+#     # Define directory to save features
+#     dir_to_save_features = os.path.join(dir_save, layer_name)
+#     if not os.path.isdir(dir_to_save_features):
+#         os.makedirs(dir_to_save_features)
+    
+#     # Loop through each image
+#     for subdir, dirs, files in os.walk(dir_read):
+#         for file_name in files:
+#             image_file_path = os.path.join(subdir, file_name)
+#             if not image_file_path.endswith('.png'):
+#                 print('-> Error: not a recognized image file: %s' % file_name)
+#                 continue
+#             # Get feature map
+#             feature_map = get_feature_vector(image_file_path, size_output_layer)
+#             # Save it
+#             path_to_save = 'f_%s_%s' % (layer_name,file_name.replace('.png','.npy'))
+#             np.save(os.path.join(dir_to_save_features,path_to_save),feature_map)
+#             print('Feature %s sucessfully saved.' % path_to_save)
+# print('Done!')
+
+
+
+
+layers_to_extract = ['residual16']
+search_terms = 't01_obj1'
+
+
 #  Loop through layers to extract features
 for layer_name in layers_to_extract:
     print('#'*80)
@@ -176,17 +213,18 @@ for layer_name in layers_to_extract:
     if not os.path.isdir(dir_to_save_features):
         os.makedirs(dir_to_save_features)
     
-    # Loop through each image
-    for subdir, dirs, files in os.walk(dir_read):
-        for file_name in files:
-            image_file_path = os.path.join(subdir, file_name)
+    # Loop through search term
+    for st in search_terms:
+        st = os.path.join(dir_read, st)
+        files = glob.glob(st)
+        for image_file_path in files:
             if not image_file_path.endswith('.png'):
                 print('-> Error: not a recognized image file: %s' % file_name)
                 continue
-            # Get feature map
-            feature_map = get_feature_vector(image_file_path, size_output_layer)
-            # Save it
-            path_to_save = 'f_%s_%s' % (layer_name,file_name.replace('.png','.npy'))
-            np.save(os.path.join(dir_to_save_features,path_to_save),feature_map)
-            print('Feature %s sucessfully saved.' % path_to_save)
+        # # Get feature map
+        # feature_map = get_feature_vector(image_file_path, size_output_layer)
+        # # Save it
+        # path_to_save = 'f_%s_%s' % (layer_name,file_name.replace('.png','.npy'))
+        # np.save(os.path.join(dir_to_save_features,path_to_save),feature_map)
+        # print('Feature %s sucessfully saved.' % path_to_save)
 print('Done!')
