@@ -103,6 +103,7 @@ def get_corresponding_reference(target_path):
     return file_ref, classe, num_frame
 
 def get_frame_number(frame_path):
+    frame_path = frame_path.replace('_ann','')
     return int(frame_path[frame_path.rfind('_')+1:].replace('.png',''))
     
 def is_frame_multiple_of(frame_path, value):
@@ -253,7 +254,8 @@ dir_read, dir_save = define_folders()
 dir_read = os.path.join(dir_read,'shortest_distance_results','frames','*')
 dir_save = os.path.join(dir_save,'shortest_distance_results','features')
 
-for fold_name in folds_number:
+folds_to_generate = ['fold_1']
+for fold_name in folds_to_generate:
     print('#'*80)
     print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
     # Get reference 
