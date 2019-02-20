@@ -26,6 +26,9 @@ def define_folders():
     elif hostname.startswith("node") or hostname.startswith("head"): #nodes do cluster smt
         dirVideos = "/nfs/proc/rafael.padilla/" 
         outputDir = "/nfs/proc/rafael.padilla/"
+    elif hostname.startswith('taiwan'): # maquina com GPU taiwan
+         dirVideos = "/nfs/proc/rafael.padilla/" 
+         outputDir = "/nfs/proc/rafael.padilla/"
     else:  # Path not defined
         raise Exception('Error: Folder with videos is not defined!')
     return dirVideos, outputDir
@@ -83,6 +86,9 @@ def get_feature_vector(image_path, layer_name, layers_and_sizes):
     # 8. Return the feature vector
     return feature_map
 
+# Lambda to insert "0" in 1-digit numbers (eg: 4->"04")
+l_double_digit = lambda x : '0'+str(x) if len(str(x)) == 1 else str(x)
+
 def get_corresponding_reference(target_path):
     ' Given a target frame file, obtain its corresponding reference.'
     folder, file = os.path.split(target_path)
@@ -90,21 +96,46 @@ def get_corresponding_reference(target_path):
     if '_ann' in file:
         classe = 'pos'
     file = file.replace('_ann','')
-    table_prefix = file[:file.find('_')]
-    path = file[file.find('path'):]
-    path = path[:path.find('_')]
+    # Get table number given the file name
+    table_number = get_table_number(file)
+    table_number_str = l_double_digit(table_number)
+    # Get object number given the file name
+    object_number = get_object_number(file)
+    object_number_str = l_double_digit(object_number)
+    # Get path (0 or 1)
+    path_number = get_path_number(file)
     # Get frame number given the file name
     num_frame = get_frame_number(file)
-    file_ref = '%s_%s_ref*_%d.png' % (table_prefix,path,num_frame)
+    file_ref = 't%s_path%d_ref*_%d.png' % (table_number_str,path_number,num_frame)
     file_ref = os.path.join(folder,file_ref)
     file_ref = glob.glob(file_ref)
     assert len(file_ref) == 1
     file_ref = file_ref[0]
-    return file_ref, classe, num_frame
+    ret = { 'reference_found_file' : file_ref,
+            'class'          : classe,
+            'table_number'   : table_number_str,
+            'object_number'  : object_number_str,
+            'frame_number'   : num_frame,
+            'path_number'    : path_number }
+    return ret
+
+def get_table_number(frame_path):
+    frame_path = frame_path[:frame_path.find('_')]
+    return int(frame_path.replace('t',''))
+
+def get_object_number(frame_path):
+    frame_path = frame_path[frame_path.find('obj'):]
+    frame_path = frame_path[:frame_path.find('_')]
+    return int(frame_path.replace('obj',''))
 
 def get_frame_number(frame_path):
     frame_path = frame_path.replace('_ann','')
     return int(frame_path[frame_path.rfind('_')+1:].replace('.png',''))
+
+def get_path_number(frame_path):
+    frame_path = frame_path[frame_path.find('path'):]
+    frame_path = frame_path[:frame_path.find('_')]
+    return int(frame_path.replace('path',''))
     
 def is_frame_multiple_of(frame_path, value):
     'Given a frame file path, check if it is multiple of a certain value'
@@ -125,26 +156,34 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
                 continue
             # Only obtain feature map if it is multiple of 17 (skip every 14 frames)
             if not is_frame_multiple_of(img_tar_file_path, 17):
-                num_frame_tar = get_frame_number(img_tar_file_path)
-                # print('target is not multiple of 17: %d'% num_frame_tar)
                 continue
             # Find number of target frame and check if it is multiple of 17, in order to skip 17 frames
             print('file target: %s' % os.path.split(img_tar_file_path)[1])
             # Get feature map for target
-            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, layers_and_sizes_224_398)
+            #feature_map_target = get_feature_vector(img_tar_file_path, layer_name, layers_and_sizes_224_398)
             # Get associated reference
-            file_ref, classe, num_frame = get_corresponding_reference(img_tar_file_path)
+            dict_ret = get_corresponding_reference(img_tar_file_path)
+            file_ref = dict_ret['reference_found_file']
+            classe = dict_ret['class']
+            num_frame = dict_ret['frame_number']
+            object_number = dict_ret['object_number']
+            path_number = dict_ret['path_number']
             print('file reference: %s' % os.path.split(file_ref)[1])
-            print('classe: %s num_frame: %s' % (classe, num_frame))
+            print('classe: %s | num_frame: %d | path: %d | object_number: %s' % (classe, num_frame, path_number, object_number))
             # Obtain and save the differences of features
-            feature_map_ref = get_feature_vector(file_ref, layer_name, layers_and_sizes_224_398)
+            #feature_map_ref = get_feature_vector(file_ref, layer_name, layers_and_sizes_224_398)
             # Make sure both feature maps have the same shape
-            assert feature_map_ref.shape == feature_map_target.shape
-            diff = (feature_map_ref - feature_map_target).numpy()
-            path_to_save = 'feat_%s_diff_%s_frame_%s.npy' % (classe,layer_name,num_frame)
-            np.save(os.path.join(dir_to_save_features,path_to_save),diff)
+            #assert feature_map_ref.shape == feature_map_target.shape
+            #diff = (feature_map_ref - feature_map_target).numpy()
+
+
+            #path_to_save = 'feat_%s_diff_%s_frame_%s.npy' % (classe,layer_name,num_frame)
+            path_to_save = 'feat_%s_diff_%s_obj%s_path%s_frame%s.npy' % (classe,layer_name, object_number, path_number,num_frame)
+            
+            #np.save(os.path.join(dir_to_save_features,path_to_save),diff)
             print('Feature %s sucessfully saved.' % path_to_save)
             print('-')
+            return path_to_save
 
 
 # Load the pretrained model
@@ -254,7 +293,8 @@ dir_read, dir_save = define_folders()
 dir_read = os.path.join(dir_read,'shortest_distance_results','frames','*')
 dir_save = os.path.join(dir_save,'shortest_distance_results','features')
 
-folds_to_generate = ['fold_1']
+folds_to_generate = ['fold_2']
+_list = []
 for fold_name in folds_to_generate:
     print('#'*80)
     print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
@@ -269,5 +309,7 @@ for fold_name in folds_to_generate:
         # Loop through layers to extract1
         print('Extracting features from layer: %s' % layer_name)
         print('-'*80)
-        generate_features(dir_read,dir_to_save_features,layer_name,search_terms)
+        path_saved = generate_features(dir_read,dir_to_save_features,layer_name,search_terms)
+        _list.append(path_saved)
+        a = 123
 
