@@ -65,11 +65,12 @@ def get_file_filters(fold, types=['tar'], include_table_folder=False):
 
     return search_terms
 
+
 def get_feature_vector(image_path, layer_name, layers_and_sizes):
     # 1. Load the image with Pillow library
     img = Image.open(image_path)
     # 2. Create a PyTorch Variable with the transformed image
-    t_img = Variable(transformations(img).unsqueeze(0))
+    t_img = torch.tensor(transformations(img).unsqueeze(0),dtype=torch.float, device=device)
     # 3. Create a vector of zeros that will hold our feature vector
     layer = layers_and_extractors[layer_name]
     feature_size = layers_and_sizes[layer_name]
@@ -160,31 +161,26 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             # Find number of target frame and check if it is multiple of 17, in order to skip 17 frames
             print('file target: %s' % os.path.split(img_tar_file_path)[1])
             # Get feature map for target
-            #feature_map_target = get_feature_vector(img_tar_file_path, layer_name, layers_and_sizes_224_398)
+            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, layers_and_sizes_224_398)
             # Get associated reference
             dict_ret = get_corresponding_reference(img_tar_file_path)
             file_ref = dict_ret['reference_found_file']
             classe = dict_ret['class']
+            table_number = dict_ret['table_number']
             num_frame = dict_ret['frame_number']
             object_number = dict_ret['object_number']
             path_number = dict_ret['path_number']
             print('file reference: %s' % os.path.split(file_ref)[1])
-            print('classe: %s | num_frame: %d | path: %d | object_number: %s' % (classe, num_frame, path_number, object_number))
+            print('classe: %s | table_number: %s | num_frame: %d | path: %d | object_number: %s' % (classe, table_number, num_frame, path_number, object_number))
             # Obtain and save the differences of features
-            #feature_map_ref = get_feature_vector(file_ref, layer_name, layers_and_sizes_224_398)
+            feature_map_ref = get_feature_vector(file_ref, layer_name, layers_and_sizes_224_398)
             # Make sure both feature maps have the same shape
-            #assert feature_map_ref.shape == feature_map_target.shape
-            #diff = (feature_map_ref - feature_map_target).numpy()
-
-
-            #path_to_save = 'feat_%s_diff_%s_frame_%s.npy' % (classe,layer_name,num_frame)
-            path_to_save = 'feat_%s_diff_%s_obj%s_path%s_frame%s.npy' % (classe,layer_name, object_number, path_number,num_frame)
-            
-            #np.save(os.path.join(dir_to_save_features,path_to_save),diff)
+            assert feature_map_ref.shape == feature_map_target.shape
+            diff = (feature_map_ref - feature_map_target).numpy()
+            path_to_save = 'feat_%s_diff_%s_t%s_obj%s_path%s_frame%s.npy' % (classe,layer_name,table_number,object_number,path_number,num_frame)
+            np.save(os.path.join(dir_to_save_features,path_to_save),diff)
             print('Feature %s sucessfully saved.' % path_to_save)
             print('-')
-            return path_to_save
-
 
 # Load the pretrained model
 resnet50 = My_Resnet.resnet50(pretrained=True)
@@ -276,6 +272,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # input_size = (3,224,398)
 # summary(resnet50.to(device), input_size)
 # Set model to evaluation mode
+resnet50.to(device)
 resnet50.eval()
 # Set normalization to be used with pretrained weights
 normalize = transforms.Normalize(mean=My_Resnet.mean_imagenet,
@@ -293,8 +290,9 @@ dir_read, dir_save = define_folders()
 dir_read = os.path.join(dir_read,'shortest_distance_results','frames','*')
 dir_save = os.path.join(dir_save,'shortest_distance_results','features')
 
-folds_to_generate = ['fold_2']
-_list = []
+layers_to_extract = ['residual1', 'residual2']
+folds_to_generate = ['fold_1']
+
 for fold_name in folds_to_generate:
     print('#'*80)
     print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
@@ -309,7 +307,6 @@ for fold_name in folds_to_generate:
         # Loop through layers to extract1
         print('Extracting features from layer: %s' % layer_name)
         print('-'*80)
-        path_saved = generate_features(dir_read,dir_to_save_features,layer_name,search_terms)
-        _list.append(path_saved)
-        a = 123
-
+        generate_features(dir_read,dir_to_save_features,layer_name,search_terms)
+        
+print('Done!')
