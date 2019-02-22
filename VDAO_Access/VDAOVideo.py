@@ -262,8 +262,6 @@ class VDAOVideo:
             returning_array = np.zeros((len(framesNumbers), total_pixels), dtype=np.uint8)
         else:
             returning_array = np.zeros((len(framesNumbers), frame.shape[0],frame.shape[1],frame.shape[2]), dtype=np.uint8)
-            # TODO
-            raise IOError('Needs implementation!!!')
 
         # We make frameNumber-1, because for this API, our frames go from 1 to max;
         # openCV frame count is 0-based
@@ -284,8 +282,12 @@ class VDAOVideo:
                 else:
                     print('Error reading frame=%d.'%i)
                     return None, None, None
-            # Adding flattened frame TODO: For non flattened
-            returning_array[count] = frame.flatten().astype(np.uint8)
+            # Adding flattened frame
+            if flatten:
+                returning_array[count] = frame.flatten().astype(np.uint8)
+            # Adding frame
+            else:
+                returning_array[count] = frame
             count += 1
         cap.release()
         return returning_array
