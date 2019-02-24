@@ -3,6 +3,7 @@ import numpy as np
 import os
 import socket
 import glob
+import shutil
 import torch
 import torchvision.transforms as transforms
 import My_Resnet
@@ -180,6 +181,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
         st = os.path.join(dir_read, st)
         # Obtain files matching the search term (st)
         files = glob.glob(st)
+        # Loop through each target image
         for img_tar_file_path in files:
             if not img_tar_file_path.endswith('.png'):
                 print('-> Error: not a recognized image file: %s' % file_name)
@@ -187,7 +189,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             # Only obtain feature map if it is multiple of 17 (skip every 14 frames)
             if not is_frame_multiple_of(img_tar_file_path, 17):
                 continue
-            # Find number of target frame and check if it is multiple of 17, in order to skip 17 frames
+            # Find the number of the target frame and check if it is multiple of 17, in order to skip 17 frames
             print('file target: %s' % os.path.split(img_tar_file_path)[1])
             # Get feature map for target
             feature_map_target = get_feature_vector(img_tar_file_path, layer_name, sizes_features, transformations, apply_pooling)
@@ -210,6 +212,40 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             np.save(os.path.join(dir_to_save_features,path_to_save),diff)
             print('Feature %s sucessfully saved.' % path_to_save)
             print('-')
+    separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=True)
+
+def separate_pos_neg(dir_features, compress=True, delete_afterwards=False):
+    # Create pos and neg folders
+    if not os.path.isdir(os.path.join(dir_features,'neg')):
+        os.makedirs(os.path.join(dir_features,'neg'))
+    if not os.path.isdir(os.path.join(dir_features,'pos')):
+        os.makedirs(os.path.join(dir_features,'pos'))
+    # Loop through files
+    files = glob.glob(os.path.join(dir_features,'*.npy'))
+    for f in files:
+        file_name = os.path.split(f)[1]
+        # Define destination folder depending if the feature is positive or negative
+        if 'feat_neg' in file_name:
+            type_feat = 'neg'
+        elif 'feat_pos' in file_name:
+            type_feat = 'pos'
+        else:
+            print('File %s is not positive nor negative' % file_name)
+            continue
+        # Set destination folder
+        dest_folder = os.path.join(dir_features,type_feat)
+        # Move file to the correct folder
+        os.rename(f, os.path.join(dest_folder,file_name))
+    # Compress the neg and pos folders
+    if compress:
+        splitted = dir_features.split('/')
+        fold, layer = splitted[len(splitted)-2:]
+        zip_file_name = 'feats_%s_%s' % (fold,layer)
+        shutil.make_archive(os.path.join(dir_features, zip_file_name), 'gztar', dir_features)
+        # Delete neg and pos folders
+        if delete_afterwards:
+            shutil.rmtree(os.path.join(dir_features,'pos')) 
+            shutil.rmtree(os.path.join(dir_features,'neg')) 
 
 # Load the pretrained model
 resnet50 = My_Resnet.resnet50(pretrained=True)
@@ -331,8 +367,8 @@ dir_read, dir_save = define_folders()
 dir_read = os.path.join(dir_read,'shortest_distance_results','frames','*')
 dir_save = os.path.join(dir_save,'shortest_distance_results','features')
 
-layers_to_extract = ['conv1']
-folds_to_generate = ['fold_2']
+# layers_to_extract = ['conv1']
+folds_to_generate = ['fold_1','fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']
 
 for fold_name in folds_to_generate:
     print('#'*80)
