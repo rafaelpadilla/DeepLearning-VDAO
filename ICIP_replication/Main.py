@@ -66,7 +66,7 @@ def get_file_filters(fold, types=['tar'], include_table_folder=False):
     return search_terms
 
 
-def get_feature_vector(image_path, layer_name, layers_and_sizes):
+def get_feature_vector(image_path, layer_name, layers_and_sizes, transformations):
     # 1. Load the image with Pillow library
     img = Image.open(image_path)
     # 2. Create a PyTorch Variable with the transformed image
@@ -143,7 +143,23 @@ def is_frame_multiple_of(frame_path, value):
     frame_number = get_frame_number(frame_path)
     return True if frame_number%value == 0 else False
 
-def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_term_ref):
+def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_term_ref, resize_input=True):
+    # If resize input image is required
+    if resize_input:
+        sizes_features = layers_and_sizes_224_398
+        # Define transformations to be applied
+        resize = transforms.Resize(224)
+        # Transformations
+        transformations = transforms.Compose([
+                resize,
+                transforms.ToTensor(),
+                normalize])
+    else:
+        sizes_features = layers_and_sizes_no_resize
+        # Define transformations to be applied
+        transformations = transforms.Compose([
+                transforms.ToTensor(),
+                normalize])
     if not os.path.isdir(dir_to_save_features):
         os.makedirs(dir_to_save_features)
     # Loop through search term
@@ -161,7 +177,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             # Find number of target frame and check if it is multiple of 17, in order to skip 17 frames
             print('file target: %s' % os.path.split(img_tar_file_path)[1])
             # Get feature map for target
-            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, layers_and_sizes_224_398)
+            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, sizes_features, transformations)
             # Get associated reference
             dict_ret = get_corresponding_reference(img_tar_file_path)
             file_ref = dict_ret['reference_found_file']
@@ -173,7 +189,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             print('file reference: %s' % os.path.split(file_ref)[1])
             print('classe: %s | table_number: %s | num_frame: %d | path: %d | object_number: %s' % (classe, table_number, num_frame, path_number, object_number))
             # Obtain and save the differences of features
-            feature_map_ref = get_feature_vector(file_ref, layer_name, layers_and_sizes_224_398)
+            feature_map_ref = get_feature_vector(file_ref, layer_name, sizes_features, transformations)
             # Make sure both feature maps have the same shape
             assert feature_map_ref.shape == feature_map_target.shape
             diff = (feature_map_ref - feature_map_target).numpy()
@@ -260,6 +276,25 @@ layers_and_extractors = {
     'residual16': resnet50._modules.get('layer4')._modules.get('2'),
 }
 
+avg_pooling_sizes = {
+    'conv1'     : 20,
+    'residual1' : 28,
+    'residual2' : 28,
+    'residual3' : 28,
+    'residual4' : 21,
+    'residual5' : 21,
+    'residual6' : 21,
+    'residual7' : 21,
+    'residual8' : 14,
+    'residual9' : 14,
+    'residual10': 14,
+    'residual11': 14,
+    'residual12': 14,
+    'residual13': 14,
+    'residual14': 7,
+    'residual15': 7,
+    'residual16': 7,
+}
 layers_to_extract = ['conv1', 'residual1', 'residual2', 'residual3', 
                      'residual4', 'residual5', 'residual6', 'residual7', 
                      'residual8', 'residual9', 'residual10', 'residual11', 
@@ -278,20 +313,13 @@ resnet50.eval()
 normalize = transforms.Normalize(mean=My_Resnet.mean_imagenet,
                                  std=My_Resnet.std_imagenet)
 to_tensor = transforms.ToTensor()
-# Smaller direction (height will be 224) (it will transform the image into width=398, height=224)
-resize = transforms.Resize(224)
-# Transformations
-transformations = transforms.Compose([
-        resize,
-        transforms.ToTensor(),
-        normalize])
 # Get directories to read frames from and write feature maps
 dir_read, dir_save = define_folders()
 dir_read = os.path.join(dir_read,'shortest_distance_results','frames','*')
 dir_save = os.path.join(dir_save,'shortest_distance_results','features')
 
-layers_to_extract = ['residual1', 'residual2']
-folds_to_generate = ['fold_1']
+layers_to_extract = ['conv1']
+folds_to_generate = ['fold_2']
 
 for fold_name in folds_to_generate:
     print('#'*80)
@@ -307,6 +335,6 @@ for fold_name in folds_to_generate:
         # Loop through layers to extract1
         print('Extracting features from layer: %s' % layer_name)
         print('-'*80)
-        generate_features(dir_read,dir_to_save_features,layer_name,search_terms)
+        generate_features(dir_read,dir_to_save_features,layer_name,search_terms, False)
         
 print('Done!')
