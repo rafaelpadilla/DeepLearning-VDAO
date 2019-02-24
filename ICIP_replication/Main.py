@@ -66,7 +66,7 @@ def get_file_filters(fold, types=['tar'], include_table_folder=False):
     return search_terms
 
 
-def get_feature_vector(image_path, layer_name, layers_and_sizes, transformations):
+def get_feature_vector(image_path, layer_name, layers_and_sizes, transformations, apply_pooling):
     # 1. Load the image with Pillow library
     img = Image.open(image_path)
     # 2. Create a PyTorch Variable with the transformed image
@@ -74,10 +74,23 @@ def get_feature_vector(image_path, layer_name, layers_and_sizes, transformations
     # 3. Create a vector of zeros that will hold our feature vector
     layer = layers_and_extractors[layer_name]
     feature_size = layers_and_sizes[layer_name]
+    # Define pooling
+    if apply_pooling:
+        channels,height,width = feature_size
+        # We need to redifine the output feature map
+        pooling_size = avg_pooling_sizes[layer_name]
+        # Calculate output size with padding = 0 and stride = pooling_size: As in the ICIP implementation
+        # [channels,(height-kernel_size+2*padding)/stride)+1,(width-kernel_size+2*padding)/stride)+1]
+        feature_size = (channels,int(((height-pooling_size)/pooling_size)+1),int(((width-pooling_size)/pooling_size)+1))
+        pooling_layer = torch.nn.AvgPool2d(pooling_size)
     feature_map = torch.zeros(feature_size)
+
     # 4. Define a function that will copy the output of a layer
     def copy_data(m, i, o):
-        feature_map.copy_(o.data.squeeze())
+        if apply_pooling:
+            feature_map.copy_(pooling_layer(o.data.squeeze()))
+        else:
+            feature_map.copy_(o.data.squeeze())
     # 5. Attach that function to our selected layer
     h = layer.register_forward_hook(copy_data)
     # 6. Run the model on our transformed image
@@ -143,7 +156,7 @@ def is_frame_multiple_of(frame_path, value):
     frame_number = get_frame_number(frame_path)
     return True if frame_number%value == 0 else False
 
-def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_term_ref, resize_input=True):
+def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_term_ref, resize_input, apply_pooling):
     # If resize input image is required
     if resize_input:
         sizes_features = layers_and_sizes_224_398
@@ -177,7 +190,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             # Find number of target frame and check if it is multiple of 17, in order to skip 17 frames
             print('file target: %s' % os.path.split(img_tar_file_path)[1])
             # Get feature map for target
-            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, sizes_features, transformations)
+            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, sizes_features, transformations, apply_pooling)
             # Get associated reference
             dict_ret = get_corresponding_reference(img_tar_file_path)
             file_ref = dict_ret['reference_found_file']
@@ -189,7 +202,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
             print('file reference: %s' % os.path.split(file_ref)[1])
             print('classe: %s | table_number: %s | num_frame: %d | path: %d | object_number: %s' % (classe, table_number, num_frame, path_number, object_number))
             # Obtain and save the differences of features
-            feature_map_ref = get_feature_vector(file_ref, layer_name, sizes_features, transformations)
+            feature_map_ref = get_feature_vector(file_ref, layer_name, sizes_features, transformations, apply_pooling)
             # Make sure both feature maps have the same shape
             assert feature_map_ref.shape == feature_map_target.shape
             diff = (feature_map_ref - feature_map_target).numpy()
@@ -335,6 +348,6 @@ for fold_name in folds_to_generate:
         # Loop through layers to extract1
         print('Extracting features from layer: %s' % layer_name)
         print('-'*80)
-        generate_features(dir_read,dir_to_save_features,layer_name,search_terms, False)
+        generate_features(dir_read,dir_to_save_features,layer_name,search_terms, resize_input=True, apply_pooling=True)
         
 print('Done!')
