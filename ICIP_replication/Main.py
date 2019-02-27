@@ -27,7 +27,7 @@ def define_folders():
     elif hostname.startswith("node") or hostname.startswith("head"): #nodes do cluster smt
         dirVideos = "/nfs/proc/rafael.padilla/" 
         outputDir = "/nfs/proc/rafael.padilla/"
-    elif hostname.startswith('taiwan'): # maquina com GPU taiwan
+    elif hostname.startswith('taiwan') or hostname.startswith('zermatt'): # maquina com GPU taiwan
          dirVideos = "/nfs/proc/rafael.padilla/" 
          outputDir = "/nfs/proc/rafael.padilla/"
     else:  # Path not defined
@@ -372,25 +372,19 @@ dir_read, dir_save = define_folders()
 database_type = 'research'
 # Change here 'shortest_distance' or 'dtw'
 alignment_mode = 'shortest_distance'
-
-dir_read = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
-dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
-
 # layers_to_extract = ['conv1']
 folds_to_generate = ['fold_1','fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']
-
 # Parameters
-folds_to_generate = ['fold_3']
 resize_input = True
 apply_pooling = True
-
 start = time.time()
 print('Starting process at: %s'%start)
 print('Main parameters:')
 print('* resize_input = %s'%resize_input)
 print('* apply_pooling = %s'%apply_pooling)
 
-
+dir_read = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
+dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
 for fold_name in folds_to_generate:
     print('#'*80)
     print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
@@ -407,6 +401,5 @@ for fold_name in folds_to_generate:
         print('-'*80)
         generate_features(dir_read,dir_to_save_features,layer_name,search_terms, resize_input=resize_input, apply_pooling=apply_pooling)
         
-print('Done!')
 end = time.time()
 print('Finished process with %s seconds'%(end-start))
