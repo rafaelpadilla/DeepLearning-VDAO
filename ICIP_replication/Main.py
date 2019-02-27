@@ -20,6 +20,7 @@ def define_folders():
     if hostname == 'rafael-Lenovo-Z40-70': # notebook pessoal
         pass
     elif hostname == 'notesmt': # notebook SMT
+        # Frames are read from the same folder as the features are saved
         dirVideos = '/media/storage/VDAO/' 
         outputDir = '/media/storage/VDAO/' 
     elif hostname == 'teresopolis.smt.ufrj.br': # teresopolis
@@ -383,7 +384,7 @@ print('Main parameters:')
 print('* resize_input = %s'%resize_input)
 print('* apply_pooling = %s'%apply_pooling)
 
-dir_read = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
+dir_read = os.path.join(dir_read,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
 dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
 for fold_name in folds_to_generate:
     print('#'*80)
