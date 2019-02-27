@@ -16,24 +16,24 @@ from torchsummary import summary
 #######################################################################
 def define_folders():
     hostname = socket.gethostname()
-    dirVideos, outputDir = '' , ''
+    dirFrames, outputDir = '' , ''
     if hostname == 'rafael-Lenovo-Z40-70': # notebook pessoal
         pass
     elif hostname == 'notesmt': # notebook SMT
         # Frames are read from the same folder as the features are saved
-        dirVideos = '/media/storage/VDAO/' 
+        dirFrames = '/media/storage/VDAO/' 
         outputDir = '/media/storage/VDAO/' 
     elif hostname == 'teresopolis.smt.ufrj.br': # teresopolis
         pass
     elif hostname.startswith("node") or hostname.startswith("head"): #nodes do cluster smt
-        dirVideos = "/nfs/proc/rafael.padilla/" 
+        dirFrames = "/nfs/proc/rafael.padilla/" 
         outputDir = "/nfs/proc/rafael.padilla/"
     elif hostname.startswith('taiwan') or hostname.startswith('zermatt'): # maquina com GPU taiwan
-         dirVideos = "/nfs/proc/rafael.padilla/" 
+         dirFrames = "/nfs/proc/rafael.padilla/" 
          outputDir = "/nfs/proc/rafael.padilla/"
     else:  # Path not defined
         raise Exception('Error: Folder with videos is not defined!')
-    return dirVideos, outputDir
+    return dirFrames, outputDir
 
 def get_objects_info(classes):
     ret = {}
@@ -158,7 +158,7 @@ def is_frame_multiple_of(frame_path, value):
     frame_number = get_frame_number(frame_path)
     return True if frame_number%value == 0 else False
 
-def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_term_ref, resize_input, apply_pooling):
+def generate_features(dir_features, dir_to_save_features, layer_name, frame_search_term_ref, resize_input, apply_pooling):
     # If resize input image is required
     if resize_input:
         sizes_features = layers_and_sizes_224_398
@@ -179,7 +179,7 @@ def generate_features(dir_read, dir_to_save_features, layer_name, frame_search_t
         os.makedirs(dir_to_save_features)
     # Loop through search term
     for st in frame_search_term_ref:
-        st = os.path.join(dir_read, st)
+        st = os.path.join(dir_features, st)
         # Obtain files matching the search term (st)
         files = glob.glob(st)
         # Loop through each target image
@@ -364,10 +364,10 @@ normalize = transforms.Normalize(mean=My_Resnet.mean_imagenet,
                                  std=My_Resnet.std_imagenet)
 to_tensor = transforms.ToTensor()
 # Get directories to read frames from and write feature maps
-dir_read, dir_save = define_folders()
+dir_read_frames, dir_save = define_folders()
 
 ####################################################################################
-####################################Definitions ####################################
+################################### Definitions ####################################
 ####################################################################################
 # Change here to 'research' or 'object'
 database_type = 'research'
@@ -384,7 +384,7 @@ print('Main parameters:')
 print('* resize_input = %s'%resize_input)
 print('* apply_pooling = %s'%apply_pooling)
 
-dir_read = os.path.join(dir_read,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
+dir_read_frames = os.path.join(dir_read_frames,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
 dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
 for fold_name in folds_to_generate:
     print('#'*80)
@@ -400,7 +400,7 @@ for fold_name in folds_to_generate:
         # Loop through layers to extract1
         print('Extracting features from layer: %s' % layer_name)
         print('-'*80)
-        generate_features(dir_read,dir_to_save_features,layer_name,search_terms, resize_input=resize_input, apply_pooling=apply_pooling)
+        generate_features(dir_read_frames,dir_to_save_features,layer_name,search_terms, resize_input=resize_input, apply_pooling=apply_pooling)
         
 end = time.time()
 print('Finished process with %s seconds'%(end-start))
