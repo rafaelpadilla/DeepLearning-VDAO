@@ -364,8 +364,17 @@ normalize = transforms.Normalize(mean=My_Resnet.mean_imagenet,
 to_tensor = transforms.ToTensor()
 # Get directories to read frames from and write feature maps
 dir_read, dir_save = define_folders()
-dir_read = os.path.join(dir_read,'shortest_distance_results','frames','*')
-dir_save = os.path.join(dir_save,'shortest_distance_results','features')
+
+####################################################################################
+####################################Definitions ####################################
+####################################################################################
+# Change here to 'research' or 'object'
+database_type = 'research'
+# Change here 'shortest_distance' or 'dtw'
+alignment_mode = 'shortest_distance'
+
+dir_read = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
+dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
 
 # layers_to_extract = ['conv1']
 folds_to_generate = ['fold_1','fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']
