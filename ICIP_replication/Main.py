@@ -65,7 +65,6 @@ def get_file_filters(fold, types=['tar'], include_table_folder=False):
             if 'ref' in types:
                 st = ['t%s_*ref*' % t]
                 [search_terms.append(folder_prefix+s) for s in st]
-
     return search_terms
 
 
@@ -159,7 +158,7 @@ def is_frame_multiple_of(frame_path, value):
     frame_number = get_frame_number(frame_path)
     return True if frame_number%value == 0 else False
 
-def generate_features(dir_features, dir_to_save_features, layer_name, frame_search_term_ref, resize_input, apply_pooling):
+def get_sizeFeatures_transformations(resize_input):
     # If resize input image is required
     if resize_input:
         sizes_features = layers_and_sizes_224_398
@@ -176,6 +175,11 @@ def generate_features(dir_features, dir_to_save_features, layer_name, frame_sear
         transformations = transforms.Compose([
                 transforms.ToTensor(),
                 normalize])
+    return sizes_features, transformations
+
+def generate_features(dir_features, dir_to_save_features, layer_name, frame_search_term_ref, resize_input, apply_pooling):
+    # Get sizes of the features and transformations based on the resize_input (True/False)
+    sizes_features, transformations = get_sizeFeatures_transformations(resize_input)
     if not os.path.isdir(dir_to_save_features):
         os.makedirs(dir_to_save_features)
     # Loop through search term
@@ -387,21 +391,63 @@ print('* apply_pooling = %s'%apply_pooling)
 
 dir_read_frames = os.path.join(dir_read_frames,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
 dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
-for fold_name in folds_to_generate:
-    print('#'*80)
-    print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
-    # Get reference 
-    search_terms = get_file_filters(fold_name,['tar'])
-    print('-'*80)
-    [print('Search term: %s'%st) for st in search_terms]
-    print('-'*80)
-    for layer_name in layers_to_extract:
-        # Define directory to save features
-        dir_to_save_features = os.path.join(dir_save, fold_name, layer_name) 
-        # Loop through layers to extract1
-        print('Extracting features from layer: %s' % layer_name)
+
+# The fold concept is used only for training. Therefore for testing, get all videos
+if database_type == 'object':
+    for fold_name in folds_to_generate:
+        print('#'*80)
+        print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
+        # Get reference 
+        search_terms = get_file_filters(fold_name,['tar'])
         print('-'*80)
-        generate_features(dir_read_frames,dir_to_save_features,layer_name,search_terms, resize_input=resize_input, apply_pooling=apply_pooling)
-        
+        [print('Search term: %s'%st) for st in search_terms]
+        print('-'*80)
+        for layer_name in layers_to_extract:
+            # Define directory to save features
+            dir_to_save_features = os.path.join(dir_save, fold_name, layer_name) 
+            # Loop through layers to extract1
+            print('Extracting features from layer: %s' % layer_name)
+            print('-'*80)
+            generate_features(dir_read_frames,dir_to_save_features,layer_name,search_terms, resize_input=resize_input, apply_pooling=apply_pooling)
+elif database_type == 'research':
+# For research, the loop is performed in each one of the 59 pair of videos
+    # Get sizes of the features and transformations based on the resize_input (True/False)
+    sizes_features, transformations = get_sizeFeatures_transformations(resize_input)
+    # Loop through each table containing the frames
+    for table_path in glob.glob(dir_read_frames+'/'):
+        table_path = os.path.normpath(table_path)
+        table_name = table_path.split(os.sep)[-1]
+        # Loop through each layer to extract
+        for layer_name in layers_to_extract:
+            # Define directory to save features
+            dir_to_save_features = os.path.join(dir_save, table_name, layer_name)
+            if not os.path.isdir(dir_to_save_features):
+                os.makedirs(dir_to_save_features)
+            # Get target term to search
+            term_to_search_tar = os.path.join(table_path,'*_tar*png')
+            # Loop through each target file
+            for tar_file_path in glob.glob(term_to_search_tar):
+                print('file target: %s' % os.path.split(tar_file_path)[1])
+                # Get feature map for the target
+                feature_map_target = get_feature_vector(tar_file_path, layer_name, sizes_features, transformations, apply_pooling)
+                # Get associated reference
+                dict_ret = get_corresponding_reference(tar_file_path)
+                file_ref = dict_ret['reference_found_file']
+                classe = dict_ret['class']
+                table_number = dict_ret['table_number']
+                num_frame = dict_ret['frame_number']
+                object_number = dict_ret['object_number']
+                path_number = dict_ret['path_number']
+                print('file reference: %s' % os.path.split(file_ref)[1])
+                print('classe: %s | table_number: %s | num_frame: %d | path: %d | object_number: %s' % (classe, table_number, num_frame, path_number, object_number))
+                # Get feature map for reference
+                feature_map_ref = get_feature_vector(file_ref, layer_name, sizes_features, transformations, apply_pooling)
+                assert feature_map_ref.shape == feature_map_target.shape
+                diff = (feature_map_ref - feature_map_target).numpy()
+                path_to_save = 'feat_%s_diff_%s_t%s_obj%s_path%s_frame%s.npy' % (classe,layer_name,table_number,object_number,path_number,num_frame)
+                np.save(os.path.join(dir_to_save_features,path_to_save),diff)
+                print('Feature %s sucessfully saved.' % path_to_save)
+                print('-')
+
 end = time.time()
 print('Finished process with %s seconds'%(end-start))
