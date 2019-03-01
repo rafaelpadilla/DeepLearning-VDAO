@@ -450,6 +450,7 @@ elif database_type == 'research':
                 np.save(os.path.join(dir_to_save_features,path_to_save),diff)
                 print('Feature %s sucessfully saved.' % path_to_save)
                 print('-')
+            separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=False)
 
 end = time.time()
 print('Finished process with %s seconds'%(end-start))
