@@ -36,9 +36,9 @@ def define_folders():
         raise Exception('Error: Folder with videos is not defined!')
     return dirFrames, outputDir
 
-def get_objects_info(classes):
+def get_objects_info(classes, json_file):
     ret = {}
-    with open(JSON_FILE, "r") as read_file:
+    with open(json_file, "r") as read_file:
         data = json.load(read_file)
         for t in data['tables']:
             for o in data['tables'][t]['objects']:
@@ -55,7 +55,7 @@ def get_file_filters(fold, types=['tar'], include_table_folder=False):
     items = target_objects.copy()
     items.remove(target_class)
     for item in items:
-        obj_info = get_objects_info(item)
+        obj_info = get_objects_info(item, JSON_FILE)
         for table in obj_info:
             folder_prefix = folder_prefix = '%s/'%table if include_table_folder else ''
             t = table.replace('table_','')
