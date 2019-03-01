@@ -192,8 +192,8 @@ def generate_features(dir_features, dir_to_save_features, layer_name, frame_sear
             if not img_tar_file_path.endswith('.png'):
                 print('-> Error: not a recognized image file: %s' % file_name)
                 continue
-            # Only obtain feature map if it is multiple of 17 (skip every 14 frames)
-            if not is_frame_multiple_of(img_tar_file_path, 17):
+            # For training (object) database, only obtain feature map if it is multiple of 17 (skip every 17 frames)
+            if database_type == 'object' and not is_frame_multiple_of(img_tar_file_path, 17):
                 continue
             # Find the number of the target frame and check if it is multiple of 17, in order to skip 17 frames
             print('file target: %s' % os.path.split(img_tar_file_path)[1])
@@ -218,7 +218,7 @@ def generate_features(dir_features, dir_to_save_features, layer_name, frame_sear
             np.save(os.path.join(dir_to_save_features,path_to_save),diff)
             print('Feature %s sucessfully saved.' % path_to_save)
             print('-')
-    separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=True)
+    separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=False)
 
 def separate_pos_neg(dir_features, compress=True, delete_afterwards=False):
     # Create pos and neg folders
@@ -391,6 +391,8 @@ print('* apply_pooling = %s'%apply_pooling)
 
 dir_read_frames = os.path.join(dir_read_frames,'vdao_alignment_%s'%database_type ,alignment_mode,'frames', '*') # frames to read
 dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
+print('Folder to read frames: %s' % dir_read_frames)
+print('Folder to save features: %s' % dir_save)
 
 # The fold concept is used only for training. Therefore for testing, get all videos
 if database_type == 'object':
