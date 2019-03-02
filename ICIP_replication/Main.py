@@ -177,14 +177,14 @@ def get_sizeFeatures_transformations(resize_input):
                 normalize])
     return sizes_features, transformations
 
-def generate_features(dir_features, dir_to_save_features, layer_name, frame_search_term_ref, resize_input, apply_pooling):
+def generate_features(dir_frames, dir_to_save_features, layer_name, frame_search_term_targets, resize_input, apply_pooling):
     # Get sizes of the features and transformations based on the resize_input (True/False)
     sizes_features, transformations = get_sizeFeatures_transformations(resize_input)
     if not os.path.isdir(dir_to_save_features):
         os.makedirs(dir_to_save_features)
     # Loop through search term
-    for st in frame_search_term_ref:
-        st = os.path.join(dir_features, st)
+    for st in frame_search_term_targets:
+        st = os.path.join(dir_frames, st)
         # Obtain files matching the search term (st)
         files = glob.glob(st)
         # Loop through each target image
@@ -218,7 +218,8 @@ def generate_features(dir_features, dir_to_save_features, layer_name, frame_sear
             np.save(os.path.join(dir_to_save_features,path_to_save),diff)
             print('Feature %s sucessfully saved.' % path_to_save)
             print('-')
-    separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=False)
+    # separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=False)
+    separate_pos_neg(dir_to_save_features, compress=False, delete_afterwards=False)
 
 def separate_pos_neg(dir_features, compress=True, delete_afterwards=False):
     # Create pos and neg folders
@@ -375,7 +376,7 @@ dir_read_frames, dir_save = define_folders()
 ################################### Definitions ####################################
 ####################################################################################
 # Change here to 'research' or 'object'
-database_type = 'research'
+database_type = 'object'
 # Change here 'shortest_distance' or 'dtw'
 alignment_mode = 'shortest_distance'
 # layers_to_extract = ['conv1']
@@ -399,10 +400,10 @@ if database_type == 'object':
     for fold_name in folds_to_generate:
         print('#'*80)
         print('Fold: %s (%s)' % (fold_name, folds_number[fold_name]))
-        # Get reference 
-        search_terms = get_file_filters(fold_name,['tar'])
+        # Get targets 
+        search_terms_targets = get_file_filters(fold_name,['tar'])
         print('-'*80)
-        [print('Search term: %s'%st) for st in search_terms]
+        [print('Search term: %s'%st) for st in search_terms_targets]
         print('-'*80)
         for layer_name in layers_to_extract:
             # Define directory to save features
@@ -410,7 +411,7 @@ if database_type == 'object':
             # Loop through layers to extract1
             print('Extracting features from layer: %s' % layer_name)
             print('-'*80)
-            generate_features(dir_read_frames,dir_to_save_features,layer_name,search_terms, resize_input=resize_input, apply_pooling=apply_pooling)
+            generate_features(dir_read_frames,dir_to_save_features,layer_name,search_terms_targets, resize_input=resize_input, apply_pooling=apply_pooling)
 elif database_type == 'research':
 # For research, the loop is performed in each one of the 59 pair of videos
     # Get sizes of the features and transformations based on the resize_input (True/False)
