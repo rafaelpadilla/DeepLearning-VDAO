@@ -92,14 +92,14 @@ def get_features(_features_dir, max_features_per_class = None, shuffle=True, bal
 
 target_objects = ['shoe', 'towel', 'brown box', 'black coat', 'black backpack', 'dark blue box', 'camera box', 'white jar', 'pink bottle']
 folds = {'fold_1': target_objects[0],
-         'fold_2': target_objects[1],
-         'fold_3': target_objects[2],
-         'fold_4': target_objects[3],
-         'fold_5': target_objects[4],
-         'fold_6': target_objects[5],
-         'fold_7': target_objects[6],
-         'fold_8': target_objects[7],
-         'fold_9': target_objects[8]
+         #'fold_2': target_objects[1],
+         #'fold_3': target_objects[2],
+         #'fold_4': target_objects[3],
+         #'fold_5': target_objects[4],
+         #'fold_6': target_objects[5],
+         #'fold_7': target_objects[6],
+         #'fold_8': target_objects[7],
+         #'fold_9': target_objects[8]
 }
 
 n_estimators = 10
@@ -118,6 +118,9 @@ for fold in folds:
     all_TP = 0
     all_FP = 0
     all_DIS = 0
+    # Total number of positive and negative ground truth frames
+    total_number_pos_gt_frames = 0
+    total_number_neg_gt_frames = 0
     # Loop through every layer
     for layer in layers:
         # Print out status for new training
@@ -175,6 +178,9 @@ for fold in folds:
             # Get amount of positives and negatives
             amount_pos = (Y_test_hat == 1).sum()
             amount_neg = (Y_test_hat == 0).sum()
+            # Update total number of positive and negative frames
+            total_number_pos_gt_frames += amount_pos
+            total_number_neg_gt_frames += amount_neg
             # Predict
             Y_test_pred = rnd_clf.predict(X_test)
             # Append prediction and gt for an overall accuracy  measurement
@@ -198,13 +204,25 @@ for fold in folds:
                 if final_results[paths_feat_testing[idx]]['predicted_class']  == 1:
                     # Predicted an object and there was an object
                     if final_results[paths_feat_testing[idx]]['groundtruth_class'] == 1:
-                        TP += 1
+                        TP += 1 
                     # Predicted an object but there was no object
                     else:
                         FP += 1
-            print('TP: %d' % TP)
-            print('FP: %d' % FP)
-            DIS = np.sqrt((1-TP)**2 + FP**2)
+            print('(TP, FP): (%d, %d)' % (TP, FP))
+            # TP_rate: TP / (TP+FN)
+            # TP is the number of true positives, FP is the number of false negatives and TP+FN is the total number of positives 
+            if amount_pos != 0:
+                TP_rate = TP / amount_pos            
+            else:
+                TP_rate = 0
+            # FP_rate: FP / (FP+TN)
+            # FP is the number of false positives, TN is the number of true negatives and FP+TN is the total number of negatives
+            if amount_neg != 0:
+                FP_rate = FP / amount_neg
+            else:
+                FP_rate = 0
+            print('(TP rate, FP rate): (%.2f, %.2f)' % (TP_rate, FP_rate))
+            DIS = np.sqrt((1-TP_rate)**2 + FP_rate**2)
             print('DIS: %.2f' % DIS)
             # Update FP and TP for the currenct layer
             all_TP += TP
@@ -217,21 +235,27 @@ for fold in folds:
             results_table[table]['summary_results'] = final_results
             results_table[table]['TP'] = TP
             results_table[table]['FP'] = FP
+            results_table[table]['TPR'] = TP_rate
+            results_table[table]['FPR'] = FP_rate
             results_table[table]['DIS'] = DIS
             # Add table results to the result_testing dict
             results['result_testing'][table] = results_table[table]
         # Obtain the overall accuracy considering features of all tables
-        # overall_accuracy = sum([results[t]['accuracy'] for t in results])/len(results)
         overall_accuracy = accuracy_score(overall_Y_test_hat, overall_Y_test_pred)
-        all_DIS = np.sqrt((1-all_TP)**2 + all_FP**2)
+        # overall TP and FP rates
+        overall_TP_rate = all_TP/total_number_pos_gt_frames
+        overall_FP_rate = all_FP/total_number_neg_gt_frames
+        all_DIS = np.sqrt((1-overall_TP_rate)**2 + overall_FP_rate**2)
         results['result_testing']['overall_accuracy'] = overall_accuracy
         results['result_testing']['overall_TP'] = all_TP
         results['result_testing']['overall_FP'] = all_FP
+        results['result_testing']['overall_TPR'] = overall_TP_rate
+        results['result_testing']['overall_FPR'] = overall_FP_rate
         results['result_testing']['overall_DIS'] = all_DIS
         print('-'*40)
         print('Overall accuracy: {:.2%}'.format(overall_accuracy))
-        print('Overall TP: %d' % all_TP)
-        print('Overall FP: %d' % all_FP)
+        print('(Overall TP, FP): (%d, %d)' % (all_TP, all_FP))
+        print('(Overall TPR, FPR): (%.2f, %.2f)' % (overall_TP_rate, overall_FP_rate))
         print('Overall DIS: %.2f' % all_DIS)
         # Save results
         dir_save_results = f'RF_results/{fold}'
@@ -244,4 +268,3 @@ for fold in folds:
         print('Saving results in: %s' % path_save_results)
 
 print('Finished!')
-
