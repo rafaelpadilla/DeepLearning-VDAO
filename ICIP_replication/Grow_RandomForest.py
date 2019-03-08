@@ -114,15 +114,15 @@ for fold in folds:
     tar_obj = folds[fold]
     # Obtain target objects info into the testing structure
     test_object_info = get_objects_info([tar_obj], JSON_FILE_RESEARCH)
-    # Calculate TP and FP for the whole layer considering all tables (videos)
-    all_TP = 0
-    all_FP = 0
-    all_DIS = 0
-    # Total number of positive and negative ground truth frames
-    total_number_pos_gt_frames = 0
-    total_number_neg_gt_frames = 0
     # Loop through every layer
     for layer in layers:
+        # Calculate TP and FP for the whole layer considering all tables (videos)
+        all_TP = 0
+        all_FP = 0
+        all_DIS = 0
+        # Total number of positive and negative ground truth frames
+        total_number_pos_gt_frames = 0
+        total_number_neg_gt_frames = 0       
         # Print out status for new training
         print('='*40)
         print('\n')
