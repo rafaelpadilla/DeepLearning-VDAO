@@ -45,6 +45,37 @@ def get_plot_compare_detections(npy_file, table_name=None):
         ret_plots[tn] = fig
     return ret_plots
 
+
+def print_accuracy(layer_name, npy_file, table_name=None):
+    # Given the npy file with the result of the RF classifier,
+    # plot a graph showing the frames with and without objects of a given layer of a particular video
+
+    # Load pickle file
+    pkl_file = pickle.load(open(npy_file, "rb"))
+    tables = []
+    # If table was not specified, get all tables
+    if table_name == None:
+        for key in pkl_file['result_testing']:
+            if key.startswith('table_'):
+                tables.append(key)
+    # If table was specified
+    else:
+        tables.append(table_name)
+    accuracies = ''
+    # Loop through tables to generate plot
+    for tn in tables:
+        table_number = l_double_digit(tn.replace('table_',''))
+        table_info = pkl_file['result_testing'][tn]
+        # Get values to be added in the title
+        accuracy = table_info['accuracy']
+        if accuracies == '':
+            accuracies = '%s\t%f'%(layer_name,accuracy)
+        else:
+            accuracies = '%s\t\t%f' % (accuracies, accuracy)
+    accuracies = '%s\t\t%f' % (accuracies, pkl_file['result_testing']['overall_accuracy'])
+    print(accuracies.replace('.',','))
+
+
 def plota():
     # Given the npy file with the result of the RF classifier of a given fold,
     # plot the performance of each layer given a particular video
@@ -77,8 +108,8 @@ def separate_gts_and_detections(summary_results):
 ####################################################################################################
 # Parameters to change (folder names)
 ####################################################################################################
-folder_read_results = '/home/rafael/thesis/DeepLearning-VDAO/ICIP_replication/RF_results/Novos/'
-folder_to_save = '/home/rafael/thesis/DeepLearning-VDAO/ICIP_replication/RF_results/figures/'
+folder_read_results = './RF_results/'
+folder_to_save = './RF_results/figures/'
 if not os.path.isdir(folder_to_save):
     os.makedirs(folder_to_save)
 
@@ -98,7 +129,13 @@ folds_objects = {'fold_1': target_objects[0],
 layers_to_generate_plots = ['conv1','residual1','residual2','residual3','residual4','residual5',
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
-          
+
+#for fold in folds_objects:
+#    for layer in layers_to_generate_plots:
+#        # Get npy file with results
+#        npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+#        print_accuracy(layer, npy_file) 
+
 for fold in folds_objects:
     for layer in layers_to_generate_plots:
         # Get npy file with results
