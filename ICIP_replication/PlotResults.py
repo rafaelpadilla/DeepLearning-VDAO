@@ -4,12 +4,12 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-def get_plot_compare_detections(npy_file, table_name=None):
-    # Given the npy file with the result of the RF classifier,
+def get_plot_compare_detections(pkl_file, fold_name, layer_name, table_name=None):
+    # Given the file with the result of the RF classifier,
     # plot a graph showing the frames with and without objects of a given layer of a particular video
-
+    fold_number = l_double_digit(fold_name.replace('fold_',''))
     # Load pickle file
-    pkl_file = pickle.load(open(npy_file, "rb"))
+    pkl_file = pickle.load(open(pkl_file, "rb"))
     tables = []
     # If table was not specified, get all tables
     if table_name == None:
@@ -30,7 +30,7 @@ def get_plot_compare_detections(npy_file, table_name=None):
         TP = table_info['TP']
         FP = table_info['FP']
         DIS = table_info['DIS']
-        title = f'Classification results [table {table_number}] [{fold}] [taget {folds_objects[fold]}] [{layer}]\n[TP:{TP}] [FP:{FP}] [DIS:%.2f] [acc:%s]' % (DIS, acc_perc)
+        title = f'Classification results [table {table_number}] [fold {fold_number}] [target {folds_objects[fold_name]}] [{layer_name}]\n[TP:{TP}] [FP:{FP}] [DIS:%.2f] [acc:%s]' % (DIS, acc_perc)
         # Get results with information of the gt and detections 
         summary_results = table_info['summary_results']
         gt_and_detections = separate_gts_and_detections(summary_results)
@@ -46,12 +46,12 @@ def get_plot_compare_detections(npy_file, table_name=None):
     return ret_plots
 
 
-def print_accuracy(layer_name, npy_file, table_name=None):
-    # Given the npy file with the result of the RF classifier,
+def print_accuracy(layer_name, pkl_file, table_name=None):
+    # Given the file with the result of the RF classifier,
     # plot a graph showing the frames with and without objects of a given layer of a particular video
 
     # Load pickle file
-    pkl_file = pickle.load(open(npy_file, "rb"))
+    pkl_file = pickle.load(open(pkl_file, "rb"))
     tables = []
     # If table was not specified, get all tables
     if table_name == None:
@@ -75,9 +75,9 @@ def print_accuracy(layer_name, npy_file, table_name=None):
     print(accuracies.replace('.',','))
 
 
-def print_DIS(layer_name, npy_file, table_name=None):
+def print_DIS(layer_name, pkl_file, table_name=None):
     # Load pickle file
-    pkl_file = pickle.load(open(npy_file, "rb"))
+    pkl_file = pickle.load(open(pkl_file, "rb"))
     tables = []
     # If table was not specified, get all tables
     if table_name == None:
@@ -158,37 +158,154 @@ layers_to_generate_plots = ['conv1','residual1','residual2','residual3','residua
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
 
-def print_DISs(folds_objects = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
+def print_DISs(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
     for fold in folds_objects:
         for layer in layers_to_generate_plots:
             # Get npy file with results
-            npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
-            print_DIS(layer, npy_file)
+            pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            print_DIS(layer, pkl_file)
 
-def generate_plots_frames():
-    for fold in folds_objects:
+def generate_plots_frames(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
+    for fold in folds_names:
         for layer in layers_to_generate_plots:
             # Get npy file with results
-            npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
             # Get plot for all tables in the npy file
-            plots = get_plot_compare_detections(npy_file)
+            plots = get_plot_compare_detections(pkl_file, fold, layer)
             # Save
             for tn, plot in plots.items():
                 name_file = f'class_results_[{tn}][{fold}][{layer}].png'
                 plot.savefig(os.path.join(folder_to_save,name_file))
                 print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
 
-def print_accuracies():
-    for fold in folds_objects:
+def print_accuracies(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
+    for fold in folds_names:
         for layer in layers_to_generate_plots:
             # Get npy file with results
             npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
             print_accuracy(layer, npy_file) 
 
+
+def generate_plots_results(folds_names=['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
+    dic = {'DIS': 'overall_DIS',
+        'accuracy': 'overall_accuracy'}
+    # Create plots for each folder
+    for d in dic:
+        plots = get_plots_by_folds(folds_names,metric_tag=dic[d])
+        for func_name, plot in plots.items():
+            name_file = f'{func_name}_{d}_results.png'
+            plot.savefig(os.path.join(folder_to_save,name_file))
+            print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
+    # Create plots for functions max, min and average among all folds
+    for d in dic:
+        plots = get_plots_among_all_folds(folds_names,metric_tag=dic[d])
+        for func_name, plot in plots.items():
+            name_file = f'{func_name}_{d}_results.png'
+            plot.savefig(os.path.join(folder_to_save,name_file))
+            print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
+
+            
+def get_plots_by_folds(folds_names, metric_tag='overall_accuracy'):
+# metric_tag='overall_accuracy' or metric_tag='overall_DIS'
+    if metric_tag == 'overall_accuracy':
+        title_metric = 'Accuracy'
+        label_metric = 'accuracies'
+    elif metric_tag == 'overall_DIS':
+        title_metric = 'DIS'
+        label_metric = 'DIS'
+    else:
+        raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
+    ret_plots = {}
+    for fold in folds_names:
+        fold_number = l_double_digit(fold.replace('fold_',''))
+        x = []
+        y = []
+        for layer in layers_to_generate_plots:
+            # Get file with results
+            pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            # Get overall accuracies in the npy file
+            pkl_file = pickle.load(open(pkl_file, "rb"))
+            best_accuracy_layer = pkl_file['result_testing'][metric_tag]
+            x.append(layer.replace('residual','res'))
+            y.append(best_accuracy_layer)
+        # Create plot
+        fig, ax = plt.subplots()
+        title = f'{title_metric} [fold {fold_number}] [target {folds_objects[fold]}]'
+        ax.plot(x, y, '-ob', label=f'{label_metric}')
+        ax.plot(x, len(y)*[np.average(y)], color='r', label='average', linestyle='--')
+        plt.xticks(rotation=90)
+        ax.set(xlabel='layer', ylabel=f'{title_metric}',title=title)
+        ax.legend(loc='best', fancybox=True, shadow=True, ncol=2)
+        ax.grid()
+        # plt.show()
+        ret_plots[fold] = fig
+    return ret_plots
+
+
+def get_plots_among_all_folds(folds_names,metric_tag='overall_accuracy'):
+# metric_tag='overall_accuracy' or metric_tag='overall_DIS'
+    if metric_tag == 'overall_accuracy':
+        title_metric = 'accuracy'
+        label_metric = 'accuracies'
+    elif metric_tag == 'overall_DIS':
+        title_metric = 'DIS'
+        label_metric = 'DIS'
+    else:
+        raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
+    functions = {'max':np.max,'min':np.min,'avg':np.average}
+    # Dictionary with all folds
+    dict_all_folds = {}
+    for fold in folds_names:
+        for layer in layers_to_generate_plots:
+            # Get file with results
+            pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            # Get overall accuracies in the npy file
+            pkl_file = pickle.load(open(pkl_file, "rb"))
+            best_accuracy_layer = pkl_file['result_testing'][metric_tag]
+            name_layer = layer.replace('residual','res')
+            if name_layer not in dict_all_folds:
+                dict_all_folds[name_layer] = [best_accuracy_layer]
+            else:
+                dict_all_folds[name_layer].append(best_accuracy_layer)
+    # Loop trough all results of all folds and get all functions results per layer
+    results_functions = {}
+    for func_name, func in functions.items():
+        # Results
+        results_functions[func_name] = {}
+        for f, l in dict_all_folds.items():
+            results_functions[func_name][f] = func(l)
+    ret_plots = {}
+    # Go through all functions and create plot
+    for func_name in results_functions:
+        x = list(results_functions[func_name].keys())
+        y = []
+        for l in x:
+            y.append(results_functions[func_name][l])
+        # Create plot
+        fig, ax = plt.subplots()
+        func_name = func_name[0].upper()+func_name[1:]
+        title = f'{func_name} {title_metric} among all folds per layer'
+        ax.plot(x, y, '-ob', label=f'{label_metric}')
+        # ax.plot(x, len(y)*[np.average(y)], color='r', label='average', linestyle='--')
+        plt.xticks(rotation=90)
+        ax.set(xlabel='layer', ylabel=f'{title_metric}',title=title)
+        ax.legend(loc='best', fancybox=True, shadow=True, ncol=2)
+        ax.grid()
+        # plt.show()
+        ret_plots[func_name] = fig
+    return ret_plots
+
 #################################################
 #### Generate plot results for each frame  ######
 #################################################
 # generate_plots_frames()
+
+
+#################################################
+#### Generate plot results for the folds   ######
+#################################################
+generate_plots_results()
+
 
 ###########################################################
 #### Print accuracies to Ctr+C Ctrl+V in the table   ######
@@ -198,4 +315,5 @@ def print_accuracies():
 ###########################################################
 #### Print DIS to Ctr+C Ctrl+V in the table   ######
 ###########################################################
-print_DISs(['fold_1'])
+# print_DISs(['fold_1'])
+
