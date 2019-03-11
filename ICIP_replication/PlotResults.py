@@ -64,7 +64,6 @@ def print_accuracy(layer_name, npy_file, table_name=None):
     accuracies = ''
     # Loop through tables to generate plot
     for tn in tables:
-        table_number = l_double_digit(tn.replace('table_',''))
         table_info = pkl_file['result_testing'][tn]
         # Get values to be added in the title
         accuracy = table_info['accuracy']
@@ -76,10 +75,39 @@ def print_accuracy(layer_name, npy_file, table_name=None):
     print(accuracies.replace('.',','))
 
 
-def plota():
-    # Given the npy file with the result of the RF classifier of a given fold,
-    # plot the performance of each layer given a particular video
-    b = 123
+def print_DIS(layer_name, npy_file, table_name=None):
+    # Load pickle file
+    pkl_file = pickle.load(open(npy_file, "rb"))
+    tables = []
+    # If table was not specified, get all tables
+    if table_name == None:
+        for key in pkl_file['result_testing']:
+            if key.startswith('table_'):
+                tables.append(key)
+    # If table was specified
+    else:
+        tables.append(table_name)
+    overall_TP = pkl_file['result_testing']['overall_TP']
+    overall_TPR = pkl_file['result_testing']['overall_TPR']
+    overall_FP = pkl_file['result_testing']['overall_FP']
+    overall_FPR = pkl_file['result_testing']['overall_FPR']
+    overall_DIS = pkl_file['result_testing']['overall_DIS']
+    linha = ''
+    # Loop through tables to generate plot
+    for tn in tables:
+        table_info = pkl_file['result_testing'][tn]
+        # Get values to be added in the title
+        TP = table_info['TP']
+        TPR = table_info['TPR']
+        FP = table_info['FP']
+        FPR = table_info['FPR']
+        DIS = table_info['DIS']
+        if linha == '':
+            linha = '%s\t%s\t%s\t%s\t%s\t%s' % (layer_name,TP,TPR,FP,FPR,DIS)
+        else:
+            linha = '%s\t%s\t%s\t%s\t%s\t%s' % (linha,TP,TPR,FP,FPR,DIS)
+    linha = '%s\t%s\t%s\t%s\t%s\t%s' % (linha,overall_TP,overall_TPR,overall_FP,overall_FPR,overall_DIS)
+    print(linha.replace('.',','))
 
 # Lambda to insert "0" in 1-digit numbers (eg: 4->"04")
 l_double_digit = lambda x : '0'+str(x) if len(str(x)) == 1 else str(x)
@@ -130,23 +158,44 @@ layers_to_generate_plots = ['conv1','residual1','residual2','residual3','residua
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
 
-#for fold in folds_objects:
-#    for layer in layers_to_generate_plots:
-#        # Get npy file with results
-#        npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
-#        print_accuracy(layer, npy_file) 
+def print_DISs(folds_objects = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
+    for fold in folds_objects:
+        for layer in layers_to_generate_plots:
+            # Get npy file with results
+            npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            print_DIS(layer, npy_file)
 
-for fold in folds_objects:
-    for layer in layers_to_generate_plots:
-        # Get npy file with results
-        npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
-        # Get plot for all tables in the npy file
-        plots = get_plot_compare_detections(npy_file)
-        # Save
-        for tn, plot in plots.items():
-            name_file = f'class_results_[{tn}][{fold}][{layer}].png'
-            plot.savefig(os.path.join(folder_to_save,name_file))
-            print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
+def generate_plots_frames():
+    for fold in folds_objects:
+        for layer in layers_to_generate_plots:
+            # Get npy file with results
+            npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            # Get plot for all tables in the npy file
+            plots = get_plot_compare_detections(npy_file)
+            # Save
+            for tn, plot in plots.items():
+                name_file = f'class_results_[{tn}][{fold}][{layer}].png'
+                plot.savefig(os.path.join(folder_to_save,name_file))
+                print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
 
+def print_accuracies():
+    for fold in folds_objects:
+        for layer in layers_to_generate_plots:
+            # Get npy file with results
+            npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+            print_accuracy(layer, npy_file) 
 
+#################################################
+#### Generate plot results for each frame  ######
+#################################################
+# generate_plots_frames()
 
+###########################################################
+#### Print accuracies to Ctr+C Ctrl+V in the table   ######
+###########################################################
+# print_accuracies()
+
+###########################################################
+#### Print DIS to Ctr+C Ctrl+V in the table   ######
+###########################################################
+print_DISs(['fold_1'])
