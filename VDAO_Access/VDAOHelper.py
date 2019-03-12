@@ -148,7 +148,8 @@ class VDAOInfo:
                 self._durationTS = ffoutput['streams'][self._idxVideoInfo]['duration_ts']
                 self._duration = ffoutput['streams'][self._idxVideoInfo]['duration']
                 # self._durationReal = ffoutput['streams'][self._idxVideoInfo]['duration']
-                self._bitRate = ffoutput['streams'][self._idxVideoInfo]['bit_rate']
+                if 'bit_rate' in ffoutput['streams'][self._idxVideoInfo]:
+                    self._bitRate = ffoutput['streams'][self._idxVideoInfo]['bit_rate']
                 self._numberOfFrames = ffoutput['streams'][self._idxVideoInfo]['nb_frames']
         else:
             raise IOError('This is not a valid media file ' + video_file)
