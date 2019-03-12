@@ -17,10 +17,10 @@ from VDAOHelper import VideoType
 from VDAOVideo import VDAOVideo
 from VideoPlayer import VideoPlayer
 
-if sys.version_info[0] < 2:  # add tkinker depending on the
+if sys.version_info[0] <= 2:  # add tkinker depending on the
     import Tkinter as tk
-    import Tkinter.ttk as ttk
-    import Tkinter.tkFont as tkFont
+    import ttk
+    import tkFont
 else:
     import tkinter as tk
     import tkinter.ttk as ttk
@@ -454,8 +454,10 @@ class Player:
         self.frame1 = self.frame2 = None
 
 
-# videosFolder = '/media/rafael/Databases/databases/VDAO/references/table_01/'
-# video1FilePath = os.path.join(videosFolder,'Table_01-Reference_01','_1_ref-sing-amb-part01-video01.avi')
+# i = '52'
+# videosFolder = '/home/rafael/teste/'
+# video1FilePath = os.path.join(videosFolder,'t%s_obj01_path0.avi'%i)
+# video2FilePath = os.path.join(videosFolder,'t%s_path0_ref.avi'%i)
 # video1FilePath = os.path.join(videosFolder,'Table_01-Reference_01','_2_ref-sing-amb-part01-video01.avi')
 # video1FilePath = os.path.join(videosFolder,'Table_01-Object_03','obj-sing-amb-part01-video03.avi')
 # video2FilePath = os.path.join(videosFolder,'Table_01-Object_01','align__1_obj-sing-amb-part01-video01.avi')
@@ -469,7 +471,7 @@ class Player:
 # root = tk.Tk()
 # player = Player(root, video1FilePath, None, video2FilePath, None)
 # player.AddVideo1(video1FilePath, None, currentFrameNbr=0)
-# # player.AddVideo2(video2FilePath, None, currentFrameNbr=0)
+# player.AddVideo2(video2FilePath, None, currentFrameNbr=0)
 # player.AddVideo2(video2FilePath, annotFile, currentFrameNbr=0)
 # player.callback_PlayFrame1
 # root.mainloop()

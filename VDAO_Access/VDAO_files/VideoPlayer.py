@@ -1,3 +1,4 @@
+#coding=utf-8
 import os
 import sys
 import threading
@@ -12,10 +13,10 @@ from Annotation import Annotation
 from InputWindow import InputWindow
 from MyEnums import StatusPlayer
 
-if sys.version_info[0] < 2:  # add tkinker depending on the
+if sys.version_info[0] <= 2:  # add tkinker depending on the
     import Tkinter as tk
-    import Tkinter.font as tkFont
-    import Tkinter.ttk as ttk
+    import tkFont
+    import ttk
 else:
     import tkinter as tk
     import tkinter.font as tkFont

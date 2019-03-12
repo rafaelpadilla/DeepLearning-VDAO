@@ -102,7 +102,7 @@ venv.bak/
 .mypy_cache/
 
 ### VisualStudioCode ###
-.vscode/*
+*.vscode
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json

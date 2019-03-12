@@ -1,5 +1,5 @@
 import sys
-if sys.version_info[0] < 2: # add tkinker depending on the 
+if sys.version_info[0] <= 2: # add tkinker depending on the 
     import Tkinter as tk
     import ttk
 else:

@@ -1,6 +1,6 @@
 {
 "source": "http://www02.smt.ufrj.br/~tvdigital/database/research/page_01.html",
-"description": "The following tables contain links to entire parts of the VDAO database used for training.",
+"description": "The following tables contain links to entire parts of the VDAO database used for testing.",
 "tables": {
 "table_01": {
     "description": "Video ",

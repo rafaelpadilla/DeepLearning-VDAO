@@ -207,7 +207,15 @@ def euclideanDistance(list1, list2):
     #     dist = dist + pow(vect1[i]-vect2[i],2)
     # return math.sqrt(dist)
     # OR
-    return np.linalg.norm(np.asarray(list1)-np.asarray(list2))
+    return np.linalg.norm(np.asarray(list1).astype(float)-np.asarray(list2).astype(float))
+
+
+def psnr(x, y):
+    mse = np.mean((x - y) ** 2)
+    if mse == 0:
+        return 100
+    PIXEL_MAX = 255.0
+    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 def secsToMinSecMs(seconds):
     frac,whole = math.modf(round(seconds/60,9))

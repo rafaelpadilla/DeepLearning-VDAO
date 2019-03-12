@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import utils
 import time
+import imageio
 # To get video information
 from VDAOHelper import VDAOInfo, VideoType, ImageExtension
 from YoloTrainingHelper import YOLOHelper
@@ -72,6 +73,16 @@ class VDAOVideo:
             elif key == 'q':
                 cv2.destroyAllWindows()
                 return
+    
+    @staticmethod
+    def GenerateVideosFromImages(listImages, outputFilePath, quality=6, fps=24):
+        # Using imageio to generate output video
+        writer = imageio.get_writer(outputFilePath, fps=fps, quality=quality, codec='libx264')
+        for i in listImages:
+            image = cv2.imread(i)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            writer.append_data(image)
+        writer.close()
 
     def PlayVideo(self, showInfo=True, showBoundingBoxes=False, frameCallback=None):
         # Parse annotations
@@ -212,6 +223,74 @@ class VDAOVideo:
             if withInfo:
                 frame = self.AddInfoToFrame(frame, frameNumber)
         return ret,frame, sizeImg
+
+    def GetFrames(self, framesNumbers=[], raiseException=True, flatten=False):
+        """Frame count starts from 1 to max frames -> self.infoVideo.getNumberOfFrames()"""
+
+        maxPossibleNumberFrames = self.videoInfo.getNumberOfFrames()
+        if  maxPossibleNumberFrames == None:
+            raise IOError('It was not possible to detect the number of frames in the file')
+        
+        if  framesNumbers == []:
+            raise IOError('Pass a valid array of frames')
+        
+        maxRequiredFrames = max(framesNumbers)
+
+        # Check if frame exist within the video
+        if maxRequiredFrames < 1 or maxRequiredFrames > int(maxPossibleNumberFrames):
+            if raiseException == True:
+                raise IOError('Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),maxRequiredFrames))
+            else:
+                print('Error: Frame number must be between 1 and %s. Required frame=%d.'%(str(self.videoInfo.getNumberOfFrames()),maxRequiredFrames))
+                return None, None, None
+
+        cap = cv2.VideoCapture(self.videoPath)
+        # Get first frame to define the size of the returning array
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        ret,frame = cap.read()
+        if ret == False:
+            if raiseException == True:
+                raise IOError('Error reading frame=0.')
+            else:
+                print('Error reading frame=0.')
+                return None, None, None
+        
+        # Create output vector namely returning_array
+        if flatten == True:
+            # Based on the amount of pixels ([len(framesNumber),width*height*channels])
+            total_pixels = np.prod(frame.shape)
+            returning_array = np.zeros((len(framesNumbers), total_pixels), dtype=np.uint8)
+        else:
+            returning_array = np.zeros((len(framesNumbers), frame.shape[0],frame.shape[1],frame.shape[2]), dtype=np.uint8)
+
+        # We make frameNumber-1, because for this API, our frames go from 1 to max;
+        # openCV frame count is 0-based
+        # Reference: https://docs.opencv.org/3.0-beta/modules/videoio/doc/reading_and_writing_video.html
+        
+        # Approach #1: Slower
+        # fr = self.videoInfo.getFrameRateFloat() 
+        # frameTime = 1000 * (frameNumber-1)/fr 
+        # cap.set(cv2.CAP_PROP_POS_MSEC, frameTime)
+        # Approach #2: Faster -> We immediately get to the frame we want
+        count = 0
+        for i in framesNumbers:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, i-1)
+            ret,frame = cap.read()
+            if ret == False:
+                if raiseException == True:
+                    raise IOError('Error reading frame=%d.'%i)
+                else:
+                    print('Error reading frame=%d.'%i)
+                    return None, None, None
+            # Adding flattened frame
+            if flatten:
+                returning_array[count] = frame.flatten().astype(np.uint8)
+            # Adding frame
+            else:
+                returning_array[count] = frame
+            count += 1
+        cap.release()
+        return returning_array
 
     def AddInfoToFrame(self, frame, frameNumber):
       # Parameters to display video info

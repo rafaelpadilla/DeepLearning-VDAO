@@ -1,0 +1,31 @@
+Para alinhar os vídeos da base de teste (research):
+
+Rodar o script Align_research.py
+1) Método AlignWithShortestDistance() gera os seguintes arquivos intermediários:
+/{shortest_distance}/intermediate_files/table_0X/Table_0X-Reference_01/reference_01_path_0.npy -> Arquivo com os frames já carregados e colocados em flatten() do vídeo de referência
+/{shortest_distance}/intermediate_files/table_0X/Table_0X-Object_0X/aligned_path_0-obj-video0X.npy -> Arquivo com a ordem de alinhamento dos frames.
+
+2) Método Generate_CSV_Files() procura o arquivo de alinhamento .npy gerado no passo anterior (aligned_path_0-obj-video0X.npy) e o arquivo de anotação original distribuído com a base (exemplo: /vdao_research/table_0X/Table_0X-Object_01/obj-video0X.txt - Lembrando que este arquivo foi gerado pelo script AlignResearch.py e não é o vídeo alinhado. São apenas as anotações dos arquivos da base research NÃO ALINHADOS)
+O Método Generate_CVS_Files() irá gerar o .cvs /{shortest_distance}/intermediate_files/table_0X/Table_0X-Object_0X/aligned_frames_path_0_table_0X_object_01.csv com os frames de referência (sempre começando em 0 (e sequenciais) e os frames target correspondentes alinhados. Também mostrará uma coluna com as anotações dos objetos.
+Lembre-se que o arquivo csv tem como base tanto para o referencia quando para o target, o frame inicial sendo o 0.
+
+
+3) Método Generate_Frames() procura o arquivo com a ordem do alinhamento .csv gerado no passo anterior (aligned_frames_path_0_table_0X_object_01.csv)
+
+Nomenclatura para frames COM OBJETOS:
+t{tabela}_obj{objeto}_path{path*}_tar{numero_frame_target**}_{frame_count***}.png
+
+path* = para a base research, só tem um path (0), pois o robô só faz uma passada.
+numero_frame_target** = número do frame target do arquivo csv. Sempre considerando o frame inicial sendo o 0.
+frame_count*** = é a ordem do frame target (comecando no 0) para ser montado o vídeo posteriormente.
+
+Nomenclatura para frames sem objetos REFERENCIA:
+t{tabela}_path{path*}_ref{numero_frame_referencia****}_{frame_count*****}.png
+
+numero_frame_referencia**** => número do frame de referencia do arquivo csv. Sempre considerando o frame incial sendo o 0.
+frame_count***** => é a ordem do frame TARGET (começando no 0). 
+
+Obs: Para localizar o frame alvo associado ao frame de referencia basta procurar pelo último dígito:
+Ex: 
+t{tabela}_obj{objeto}_path{path*}_tar{numero_frame_target**}_{111}.png está associado ao frame de referëncia t{tabela}_path{path*}_ref{numero_frame_referencia****}_{111}.png
+
