@@ -84,6 +84,20 @@ class VDAOVideo:
             writer.append_data(image)
         writer.close()
 
+    @staticmethod
+    def GenerateNewVideoFromFramesList(videoSource, listFrames, outputFilePath, quality=6, fps=24):
+        vdao = VDAOVideo(videoSource)
+        # Using imageio to generate output video
+        writer = imageio.get_writer(outputFilePath, fps=fps, quality=quality, codec='libx264')
+        for i in listFrames:
+            frameInfo = vdao.GetFrame(i)
+            if frameInfo[0] is False:
+                raise Exception("Error reading frame %d" % i)
+            image = frameInfo[1]
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            writer.append_data(image)
+        writer.close()
+
     def PlayVideo(self, showInfo=True, showBoundingBoxes=False, frameCallback=None):
         # Parse annotations
         if showBoundingBoxes and self._annotation.parsed == False:
