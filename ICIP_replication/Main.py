@@ -7,6 +7,9 @@ import glob
 import shutil
 import torch
 import torchvision.transforms as transforms
+import _init_paths_
+from VDAOVideo import VDAOVideo
+import cv2
 import My_Resnet
 from PIL import Image
 from torch.autograd import Variable
@@ -17,24 +20,24 @@ from torchsummary import summary
 #######################################################################
 def define_folders():
     hostname = socket.gethostname()
-    dirFrames, outputDir = '' , ''
+    dirRead, outputDir = '' , ''
     if hostname == 'rafael-Lenovo-Z40-70': # notebook pessoal
         pass
     elif hostname == 'notesmt': # notebook SMT
         # Frames are read from the same folder as the features are saved
-        dirFrames = '/media/storage/VDAO/' 
+        dirRead = '/media/storage/VDAO/' 
         outputDir = '/media/storage/VDAO/' 
     elif hostname == 'teresopolis.smt.ufrj.br': # teresopolis
         pass
     elif hostname.startswith("node") or hostname.startswith("head"): #nodes do cluster smt
-        dirFrames = "/nfs/proc/rafael.padilla/" 
+        dirRead = "/nfs/proc/rafael.padilla/" 
         outputDir = "/nfs/proc/rafael.padilla/"
     elif hostname.startswith('taiwan') or hostname.startswith('zermatt'): # maquina com GPU taiwan
-         dirFrames = "/nfs/proc/rafael.padilla/" 
+         dirRead = "/nfs/proc/rafael.padilla/" 
          outputDir = "/nfs/proc/rafael.padilla/"
     else:  # Path not defined
         raise Exception('Error: Folder with videos is not defined!')
-    return dirFrames, outputDir
+    return dirRead, outputDir
 
 def get_objects_info(classes, json_file):
     ret = {}
@@ -68,28 +71,55 @@ def get_file_filters(fold, types=['tar'], include_table_folder=False):
     return search_terms
 
 
-def get_feature_vector(image_path, layer_name, layers_and_sizes, transformations, apply_pooling):
-    # 1. Load the image with Pillow library
-    img = Image.open(image_path)
-    # 2. Create a PyTorch Variable with the transformed image
-    t_img = torch.tensor(transformations(img).unsqueeze(0),dtype=torch.float, device=device)
-    # 3. Create a vector of zeros that will hold our feature vector
-    layer = layers_and_extractors[layer_name]
-    feature_size = layers_and_sizes[layer_name]
-    # Define pooling
-    if apply_pooling:
-        channels,height,width = feature_size
-        # We need to redifine the output feature map
-        pooling_size = avg_pooling_sizes[layer_name]
-        # Calculate output size with padding = 0 and stride = pooling_size: As in the ICIP implementation
-        # [channels,(height-kernel_size+2*padding)/stride)+1,(width-kernel_size+2*padding)/stride)+1]
-        feature_size = (channels,int(((height-pooling_size)/pooling_size)+1),int(((width-pooling_size)/pooling_size)+1))
-        pooling_layer = torch.nn.AvgPool2d(pooling_size)
-    feature_map = torch.zeros(feature_size)
+# def get_feature_vector(image_path, layer_name, layers_and_sizes, transformations, apply_pooling):
+#     # 1. Load the image with Pillow library
+#     image = Image.open(image_path)
+#     # 2. Create a PyTorch Variable with the transformed image
+#     t_img = torch.tensor(transformations(image).unsqueeze(0),dtype=torch.float, device=device)
+#     # 3. Create a vector of zeros that will hold our feature vector
+#     layer = layers_and_extractors[layer_name]
+#     feature_size = layers_and_sizes[layer_name]
+#     # Define pooling
+#     if apply_pooling:
+#         channels,height,width = feature_size
+#         # We need to redifine the output feature map
+#         pooling_size = avg_pooling_sizes[layer_name]
+#         # Calculate output size with padding = 0 and stride = pooling_size: As in the ICIP implementation
+#         # [channels,(height-kernel_size+2*padding)/stride)+1,(width-kernel_size+2*padding)/stride)+1]
+#         feature_size = (channels,int(((height-pooling_size)/pooling_size)+1),int(((width-pooling_size)/pooling_size)+1))
+#         pooling_layer = torch.nn.AvgPool2d(pooling_size)
+#     feature_map = torch.zeros(feature_size)
+#     # 4. Define a function that will copy the output of a layer
+#     def copy_data(m, i, o):
+#         if apply_pooling:
+#             feature_map.copy_(pooling_layer(o.data.squeeze()))
+#         else:
+#             feature_map.copy_(o.data.squeeze())
+#     # 5. Attach that function to our selected layer
+#     h = layer.register_forward_hook(copy_data)
+#     # 6. Run the model on our transformed image
+#     resnet50(t_img)
+#     # 7. Detach our copy function from the layer
+#     h.remove()
+#     # 8. Return the feature vector
+#     return feature_map
 
+def get_feature_vector(image, layer_name, feature_size, transformations, pooling_size):
+    # 1. Load the image with Pillow library
+    if isinstance(image, str):
+        image = Image.open(image)
+    # 2. Create a PyTorch Variable with the transformed image
+    t_img = torch.tensor(transformations(image).unsqueeze(0),dtype=torch.float, device=device)
+    # 3. Create a vector of zeros that will hold our feature vector
+    layer = resnet_layers_and_extractors[layer_name]
+    # Define pooling
+    if pooling_size != None:
+        pooling_layer = torch.nn.AvgPool2d(pooling_size)
+
+    feature_map = torch.zeros(feature_size)
     # 4. Define a function that will copy the output of a layer
     def copy_data(m, i, o):
-        if apply_pooling:
+        if pooling_size != None:
             feature_map.copy_(pooling_layer(o.data.squeeze()))
         else:
             feature_map.copy_(o.data.squeeze())
@@ -158,68 +188,68 @@ def is_frame_multiple_of(frame_path, value):
     frame_number = get_frame_number(frame_path)
     return True if frame_number%value == 0 else False
 
-def get_sizeFeatures_transformations(resize_input):
-    # If resize input image is required
-    if resize_input:
-        sizes_features = layers_and_sizes_224_398
-        # Define transformations to be applied
-        resize = transforms.Resize(224)
-        # Transformations
-        transformations = transforms.Compose([
-                resize,
-                transforms.ToTensor(),
-                normalize])
-    else:
-        sizes_features = layers_and_sizes_no_resize
-        # Define transformations to be applied
-        transformations = transforms.Compose([
-                transforms.ToTensor(),
-                normalize])
-    return sizes_features, transformations
+# def get_sizeFeatures_transformations(resize_input):
+#     # If resize input image is required
+#     if resize_input:
+#         sizes_features = layers_and_sizes_224_398
+#         # Define transformations to be applied
+#         resize = transforms.Resize(224)
+#         # Transformations
+#         transformations = transforms.Compose([
+#                 resize,
+#                 transforms.ToTensor(),
+#                 normalize])
+#     else:
+#         sizes_features = layers_and_sizes_no_resize
+#         # Define transformations to be applied
+#         transformations = transforms.Compose([
+#                 transforms.ToTensor(),
+#                 normalize])
+#     return sizes_features, transformations
 
-def generate_features(dir_frames, dir_to_save_features, layer_name, frame_search_term_targets, resize_input, apply_pooling):
-    # Get sizes of the features and transformations based on the resize_input (True/False)
-    sizes_features, transformations = get_sizeFeatures_transformations(resize_input)
-    if not os.path.isdir(dir_to_save_features):
-        os.makedirs(dir_to_save_features)
-    # Loop through search term
-    for st in frame_search_term_targets:
-        st = os.path.join(dir_frames, st)
-        # Obtain files matching the search term (st)
-        files = glob.glob(st)
-        # Loop through each target image
-        for img_tar_file_path in files:
-            if not img_tar_file_path.endswith('.png'):
-                print('-> Error: not a recognized image file: %s' % file_name)
-                continue
-            # For training (object) database, only obtain feature map if it is multiple of 17 (skip every 17 frames)
-            if database_type == 'object' and not is_frame_multiple_of(img_tar_file_path, 17):
-                continue
-            # Find the number of the target frame and check if it is multiple of 17, in order to skip 17 frames
-            print('file target: %s' % os.path.split(img_tar_file_path)[1])
-            # Get feature map for target
-            feature_map_target = get_feature_vector(img_tar_file_path, layer_name, sizes_features, transformations, apply_pooling)
-            # Get associated reference
-            dict_ret = get_corresponding_reference(img_tar_file_path)
-            file_ref = dict_ret['reference_found_file']
-            classe = dict_ret['class']
-            table_number = dict_ret['table_number']
-            num_frame = dict_ret['frame_number']
-            object_number = dict_ret['object_number']
-            path_number = dict_ret['path_number']
-            print('file reference: %s' % os.path.split(file_ref)[1])
-            print('classe: %s | table_number: %s | num_frame: %d | path: %d | object_number: %s' % (classe, table_number, num_frame, path_number, object_number))
-            # Obtain and save the differences of features
-            feature_map_ref = get_feature_vector(file_ref, layer_name, sizes_features, transformations, apply_pooling)
-            # Make sure both feature maps have the same shape
-            assert feature_map_ref.shape == feature_map_target.shape
-            diff = (feature_map_ref - feature_map_target).numpy()
-            path_to_save = 'feat_%s_diff_%s_t%s_obj%s_path%s_frame%s.npy' % (classe,layer_name,table_number,object_number,path_number,num_frame)
-            np.save(os.path.join(dir_to_save_features,path_to_save),diff)
-            print('Feature %s sucessfully saved.' % path_to_save)
-            print('-')
-    # separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=False)
-    separate_pos_neg(dir_to_save_features, compress=False, delete_afterwards=False)
+# def generate_features(dir_frames, dir_to_save_features, layer_name, frame_search_term_targets, resize_input, apply_pooling):
+#     # Get sizes of the features and transformations based on the resize_input (True/False)
+#     sizes_features, transformations = get_sizeFeatures_transformations(resize_input)
+#     if not os.path.isdir(dir_to_save_features):
+#         os.makedirs(dir_to_save_features)
+#     # Loop through search term
+#     for st in frame_search_term_targets:
+#         st = os.path.join(dir_frames, st)
+#         # Obtain files matching the search term (st)
+#         files = glob.glob(st)
+#         # Loop through each target image
+#         for img_tar_file_path in files:
+#             if not img_tar_file_path.endswith('.png'):
+#                 print('-> Error: not a recognized image file: %s' % file_name)
+#                 continue
+#             # For training (object) database, only obtain feature map if it is multiple of 17 (skip every 17 frames)
+#             if database_type == 'object' and not is_frame_multiple_of(img_tar_file_path, 17):
+#                 continue
+#             # Find the number of the target frame and check if it is multiple of 17, in order to skip 17 frames
+#             print('file target: %s' % os.path.split(img_tar_file_path)[1])
+#             # Get feature map for target
+#             feature_map_target = get_feature_vector(img_tar_file_path, layer_name, sizes_features, transformations, apply_pooling)
+#             # Get associated reference
+#             dict_ret = get_corresponding_reference(img_tar_file_path)
+#             file_ref = dict_ret['reference_found_file']
+#             classe = dict_ret['class']
+#             table_number = dict_ret['table_number']
+#             num_frame = dict_ret['frame_number']
+#             object_number = dict_ret['object_number']
+#             path_number = dict_ret['path_number']
+#             print('file reference: %s' % os.path.split(file_ref)[1])
+#             print('classe: %s | table_number: %s | num_frame: %d | path: %d | object_number: %s' % (classe, table_number, num_frame, path_number, object_number))
+#             # Obtain and save the differences of features
+#             feature_map_ref = get_feature_vector(file_ref, layer_name, sizes_features, transformations, apply_pooling)
+#             # Make sure both feature maps have the same shape
+#             assert feature_map_ref.shape == feature_map_target.shape
+#             diff = (feature_map_ref - feature_map_target).numpy()
+#             path_to_save = 'feat_%s_diff_%s_t%s_obj%s_path%s_frame%s.npy' % (classe,layer_name,table_number,object_number,path_number,num_frame)
+#             np.save(os.path.join(dir_to_save_features,path_to_save),diff)
+#             print('Feature %s sucessfully saved.' % path_to_save)
+#             print('-')
+#     # separate_pos_neg(dir_to_save_features, compress=True, delete_afterwards=False)
+#     separate_pos_neg(dir_to_save_features, compress=False, delete_afterwards=False)
 
 def separate_pos_neg(dir_features, compress=True, delete_afterwards=False):
     # Create pos and neg folders
@@ -312,7 +342,7 @@ layers_and_sizes_224_398 = {
     'residual16': (2048,7,13),  # layer 4
 }
 
-layers_and_extractors = {
+resnet_layers_and_extractors = {
     'conv1'     : resnet50._modules.get('conv1'),
     'residual1' : resnet50._modules.get('layer1')._modules.get('0'),
     'residual2' : resnet50._modules.get('layer1')._modules.get('1'),
@@ -351,6 +381,7 @@ avg_pooling_sizes = {
     'residual15': 7,
     'residual16': 7,
 }
+
 layers_to_extract = ['conv1', 'residual1', 'residual2', 'residual3', 
                      'residual4', 'residual5', 'residual6', 'residual7', 
                      'residual8', 'residual9', 'residual10', 'residual11', 
@@ -370,7 +401,159 @@ normalize = transforms.Normalize(mean=My_Resnet.mean_imagenet,
                                  std=My_Resnet.std_imagenet)
 to_tensor = transforms.ToTensor()
 # Get directories to read frames from and write feature maps
-dir_read_frames, dir_save = define_folders()
+dir_read, dir_save = define_folders()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### TESTANDO NOVO APPROACH ####
+def get_size_feature_vector(input_size, layers_to_extract, post_pooling=False):
+    # Create empty input
+    transformations = transforms.Compose([transforms.ToTensor()])
+    img = np.zeros(input_size)
+    t_img = torch.tensor(transformations(img).unsqueeze(0),dtype=torch.float, device=device)
+    # Create feature_map dictionary to store the sizes
+    feature_maps_sizes = {}
+    # Define a function that will copy the output of a layer
+    def get_activation(name):
+        def hook(m, i, o):
+            # Define pooling
+            if post_pooling:
+                pooling_size = avg_pooling_sizes[name]
+                # Calculate output size with padding = 0 and stride = pooling_size: As in the ICIP implementation
+                # [channels,(height-kernel_size+2*padding)/stride)+1,(width-kernel_size+2*padding)/stride)+1]
+                pooling_layer = torch.nn.AvgPool2d(pooling_size)
+                feature_maps_sizes[name] = pooling_layer(o.data.squeeze()).shape
+            else:
+                feature_maps_sizes[name] = o.data.squeeze().shape
+        return hook
+    for layer_name in layers_to_extract:
+        # Get layer to add a hook
+        layer = resnet_layers_and_extractors[layer_name]
+        # Attach that function to our selected layer
+        h = layer.register_forward_hook(get_activation(layer_name))
+        # pass the image empty by the model
+        resnet50(t_img)
+        # Detach hook from thelayer
+        h.remove()
+    # Return the feature vector
+    return feature_maps_sizes
+
+def generate_and_save_features(dir_videos, table_name, dir_to_save_features, layer_name, resize_factor, post_pooling):
+    input_size=[720,1280,3]
+    # Resize according to the factor
+    input_size = [int(input_size[0]/resize_factor),int(input_size[1]/resize_factor),input_size[2]]
+    # Get the size of the feature given the layer_name, input_size and the post_poolint (bool)
+    size_feature = get_size_feature_vector(input_size=input_size, layers_to_extract=[layer_name], post_pooling=post_pooling)
+    size_feature = size_feature[layer_name]
+    # Define transformation to be used to extract features
+    resize = transforms.Resize(input_size[:2])
+    transformations = transforms.Compose([
+            resize,
+            transforms.ToTensor(),
+            normalize])
+    if post_pooling:
+        pooling_size = avg_pooling_sizes[layer_name]
+    else:
+        pooling_size = None
+    # Get all videos within the dir_videos
+    videos_paths = glob.glob(os.path.join(dir_videos,table_name.replace(' ','_'),'*','*.avi'))
+    # Loop through each video
+    for video_path in videos_paths:
+        print('Reading frames from video %s' % video_path)
+        vid = VDAOVideo(video_path)
+        # Create dir chain to store the features
+        dirs = os.path.dirname(video_path).split('/')
+        idx = dirs.index(table_name.replace(' ','_'))
+        dir_features_to_save_table = dir_to_save_features
+        for i in dirs[idx:]:
+            dir_features_to_save_table = os.path.join(dir_features_to_save_table,i)
+        dir_features_to_save_table = os.path.join(dir_features_to_save_table,layer_name)
+        print('Saving frames in %s' % dir_features_to_save_table)
+        if not os.path.isdir(dir_features_to_save_table):
+            os.makedirs(dir_features_to_save_table)
+        total_frames = vid.videoInfo.getNumberOfFrames()
+        for frame_num in range(1,total_frames+1):
+            frame = vid.GetFrame(frame_num)
+            if not frame[0]:
+                raise Exception('Error: Invalid frame!')
+            # As frames are retrived as BGR, convert it to RGB
+            frame = cv2.cvtColor(frame[1], cv2.COLOR_BGR2RGB)
+            feature_vector = get_feature_vector(Image.fromarray(np.uint8(frame)), layer_name, size_feature, transformations, pooling_size)
+            # Define name to save the feature
+            feat_name = 'feat_%s_%s_frame_%d.feature' % (layer_name, os.path.basename(video_path).replace('.avi',''), frame_num-1)
+            feat_path = os.path.join(dir_features_to_save_table,feat_name)
+            np.save(feat_path,feature_vector)
+
+
+        
+# Definitions
+# Change here to 'research' or 'object'
+database_type = 'object'
+# Change here 'shortest_distance' or 'dtw'
+alignment_mode = 'shortest_distance'
+# layers_to_extract = ['conv1']
+folds_to_generate = ['fold_1','fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']
+# Parameters
+resize_factor = 2
+apply_pooling = True
+start = time.time()
+print('Starting process at: %s'%start)
+print('Main parameters:')
+print('* resize_factor = %f'%resize_factor)
+print('* apply_pooling = %s'%apply_pooling)
+
+dir_videos = os.path.join(dir_read, 'vdao_%s/'%database_type)
+dir_save = os.path.join(dir_save,'vdao_alignment_%s'%database_type ,alignment_mode,'features')
+print('Folder to read videos: %s' % dir_videos)
+print('Folder to save features: %s' % dir_save)
+
+
+dir_save_features = os.path.join(dir_videos,)
+tables_to_process = ['table 01', 'table 02']
+for table_name in tables_to_process:
+    for layer_name in layers_to_extract:
+        generate_and_save_features(dir_videos, table_name, dir_save, layer_name, resize_factor=resize_factor,post_pooling=apply_pooling)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ####################################################################################
 ################################### Definitions ####################################
@@ -455,3 +638,5 @@ elif database_type == 'research':
 
 end = time.time()
 print('Finished process with %s seconds'%(end-start))
+
+
