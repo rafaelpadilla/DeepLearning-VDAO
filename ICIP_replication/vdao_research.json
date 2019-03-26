@@ -15,7 +15,7 @@
     "objects":[
         {
 	    "name": "object 01",
-		"object_class": "dark blue box",
+		"object_class": "dark-blue box",
 		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video01.avi"
         }
@@ -34,7 +34,7 @@
     "objects":[
         {
 	    "name": "object 02",
-		"object_class": "dark blue box",
+		"object_class": "dark-blue box",
 		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video02.avi"
         }
@@ -189,7 +189,7 @@
     "objects":[
         {
 	    "name": "object 10",
-		"object_class": "dark blue box",
+		"object_class": "dark-blue box",
 		"position": 2,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video10.avi"
         }
@@ -208,7 +208,7 @@
     "objects":[
         {
 	    "name": "object 11",
-		"object_class": "dark blue box",
+		"object_class": "dark-blue box",
 		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video11.avi"
         }
@@ -702,7 +702,7 @@
     "objects":[
         {
 	    "name": "object 37",
-		"object_class": "dark blue box",
+		"object_class": "dark-blue box",
 		"position": 1,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video37.avi"
         }
@@ -721,7 +721,7 @@
     "objects":[
         {
 	    "name": "object 38",
-		"object_class": "dark blue box",
+		"object_class": "dark-blue box",
 		"position": 3,
 		"url": "http://www02.smt.ufrj.br/~tvdigital/database/research/data/avi/obj-video38.avi"
         }
