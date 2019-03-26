@@ -32,10 +32,10 @@ def define_folders():
     elif hostname == 'teresopolis.smt.ufrj.br': # teresopolis
         pass
     elif hostname.startswith("node") or hostname.startswith("head"): #nodes do cluster smt
-        dirRead = "/nfs/proc/rafael.padilla/" 
+        dirRead = "/home/rafael.padilla/workspace/rafael.padilla/" 
         outputDir = "/nfs/proc/rafael.padilla/"
     elif hostname.startswith('taiwan') or hostname.startswith('zermatt'): # maquina com GPU taiwan
-         dirRead = "/nfs/proc/rafael.padilla/" 
+         dirRead = "/home/rafael.padilla/workspace/rafael.padilla/" 
          outputDir = "/nfs/proc/rafael.padilla/"
     else:  # Path not defined
         raise Exception('Error: Folder with videos is not defined!')
@@ -220,6 +220,7 @@ def generate_and_save_features(dir_videos, table_name, dir_to_save_features, lay
     else:
         pooling_size = None
     # Get all videos within the dir_videos
+    print(os.path.join(dir_videos,table_name.replace(' ','_'),'*','*.avi'))
     videos_paths = glob.glob(os.path.join(dir_videos,table_name.replace(' ','_'),'*','*.avi'))
     # Loop through each video
     for video_path in videos_paths:
@@ -276,8 +277,8 @@ layers_to_extract = ['conv1', 'residual1', 'residual2', 'residual3',
                      'residual8', 'residual9', 'residual10', 'residual11', 
                      'residual12', 'residual13', 'residual14', 'residual15', 
                      'residual16']
-folds_to_generate = ['fold_1','fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']
-tables_to_process = ['table 01', 'table 02']
+tables_to_process = ['table %s' % l_double_digit(i) for i in range(1,60)]
+tables_to_process = ['table 01']
 # Parameters
 resize_factor = 2
 apply_pooling = True
