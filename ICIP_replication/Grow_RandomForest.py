@@ -186,7 +186,7 @@ def validate_detections(list_name_features, Y_test_pred, Y_test_hat):
             else:
                 fp += 1
     assert tp == TP and fp == FP
-    
+
     return final_results, TP, FP
 
 
@@ -286,11 +286,11 @@ def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, ty
                 # Check if filename we are looking for is found
                     if neg[1] in bn_tar:
                         # Get reference features based on the name of the feature
-                        ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[0]}', recursive=True)
+                        ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[0]}', recursive=True)
                         assert len(ref_feat_path) == 1
                         ref_feat_path = ref_feat_path[0]
                         # Get target features based on the name of the feature
-                        tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[1]}', recursive=True)
+                        tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[1]}', recursive=True)
                         assert len(tar_feat_path) == 1
                         tar_feat_path = tar_feat_path[0]
                         # Get features
