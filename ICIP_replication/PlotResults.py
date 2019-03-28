@@ -75,7 +75,7 @@ def print_accuracy(layer_name, pkl_file, table_name=None):
     print(accuracies.replace('.',','))
 
 
-def print_DIS(layer_name, pkl_file, table_name=None):
+def print_DIS(layer_name, pkl_file, table_name=None, temporal_voting=False):
     # Load pickle file
     pkl_file = pickle.load(open(pkl_file, "rb"))
     tables = []
@@ -87,21 +87,36 @@ def print_DIS(layer_name, pkl_file, table_name=None):
     # If table was specified
     else:
         tables.append(table_name)
-    overall_TP = pkl_file['result_testing']['overall_TP']
-    overall_TPR = pkl_file['result_testing']['overall_TPR']
-    overall_FP = pkl_file['result_testing']['overall_FP']
-    overall_FPR = pkl_file['result_testing']['overall_FPR']
-    overall_DIS = pkl_file['result_testing']['overall_DIS']
+    # Overall metrics
+    if temporal_voting:
+        overall_TP = pkl_file['result_testing']['overall_TP_temporal_voting']
+        overall_TPR = pkl_file['result_testing']['overall_TPR_temporal_voting']
+        overall_FP = pkl_file['result_testing']['overall_FP_temporal_voting']
+        overall_FPR = pkl_file['result_testing']['overall_FPR_temporal_voting']
+        overall_DIS = pkl_file['result_testing']['overall_DIS_temporal_voting']
+    else:
+        overall_TP = pkl_file['result_testing']['overall_TP']
+        overall_TPR = pkl_file['result_testing']['overall_TPR']
+        overall_FP = pkl_file['result_testing']['overall_FP']
+        overall_FPR = pkl_file['result_testing']['overall_FPR']
+        overall_DIS = pkl_file['result_testing']['overall_DIS']
     linha = ''
     # Loop through tables to generate plot
     for tn in tables:
         table_info = pkl_file['result_testing'][tn]
         # Get values to be added in the title
-        TP = table_info['TP']
-        TPR = table_info['TPR']
-        FP = table_info['FP']
-        FPR = table_info['FPR']
-        DIS = table_info['DIS']
+        if temporal_voting:
+            TP = table_info['TP_temporal_voting']
+            TPR = table_info['TPR_temporal_voting']
+            FP = table_info['FP_temporal_voting']
+            FPR = table_info['FPR_temporal_voting']
+            DIS = table_info['DIS_temporal_voting']
+        else:
+            TP = table_info['TP']
+            TPR = table_info['TPR']
+            FP = table_info['FP']
+            FPR = table_info['FPR']
+            DIS = table_info['DIS']
         if linha == '':
             linha = '%s\t%s\t%s\t%s\t%s\t%s' % (layer_name,TP,TPR,FP,FPR,DIS)
         else:
@@ -158,12 +173,25 @@ layers_to_generate_plots = ['conv1','residual1','residual2','residual3','residua
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
 
-def print_DISs(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
-    for fold in folds_objects:
-        for layer in layers_to_generate_plots:
-            # Get npy file with results
-            pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
-            print_DIS(layer, pkl_file)
+def print_DISs(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9'], temporal_voting=False):
+    # Print both with temporal and without temporal
+    if temporal_voting == None:
+        par = [False,True]
+    # Print either with temporal voting or without it
+    else: 
+        par = [temporal_voting]
+    for p in par:
+        if p == True:
+            print('\nWith temporal voting:')
+        else:
+            print('\nWithout temporal voting:')
+        for fold in folds_names:
+            print(f'Fold: {fold}')
+            for layer in layers_to_generate_plots:
+                # Get npy file with results
+                pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+                print_DIS(layer, pkl_file, temporal_voting=p)
+
 
 def generate_plots_frames(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
     for fold in folds_names:
@@ -304,16 +332,16 @@ def get_plots_among_all_folds(folds_names,metric_tag='overall_accuracy'):
 #################################################
 #### Generate plot results for the folds   ######
 #################################################
-generate_plots_results()
+# generate_plots_results()
 
 
 ###########################################################
 #### Print accuracies to Ctr+C Ctrl+V in the table   ######
 ###########################################################
-# print_accuracies()
+# print_accuracies(['fold_1'])
 
 ###########################################################
 #### Print DIS to Ctr+C Ctrl+V in the table   ######
 ###########################################################
-# print_DISs(['fold_1'])
+print_DISs(['fold_3'], temporal_voting=False)
 
