@@ -169,7 +169,7 @@ def validate_detections(list_name_features, Y_test_pred, Y_test_hat):
         # NAO FAZ SENTIDO VERIFICAR COM O PROEDICT SENDO QUE O VETOR FOI MUDADO COM O VOTING
         # assert int(Y_test_pred[idx]) == int(rnd_clf.predict(X_test[idx].reshape(1,-1))) # double checking
         final_results[list_name_features[idx]]['predicted_correcly'] = final_results[list_name_features[idx]]['groundtruth_class'] == final_results[list_name_features[idx]]['predicted_class']
-        # If an object was predicted in the scene
+        # If an object was detected in the scene
         if final_results[list_name_features[idx]]['predicted_class']  == 1:
             # Predicted an object and there was an object
             if final_results[list_name_features[idx]]['groundtruth_class'] == 1:
@@ -177,18 +177,7 @@ def validate_detections(list_name_features, Y_test_pred, Y_test_hat):
             # Predicted an object but there was no object
             else:
                 FP += 1
-    tp = 0
-    fp = 0
-    for idx in range(len(Y_test_pred)):
-        if Y_test_pred[idx] == 1:
-            if Y_test_hat[idx] == Y_test_pred[idx]:
-                tp += 1
-            else:
-                fp += 1
-    assert tp == TP and fp == FP
-
     return final_results, TP, FP
-
 
 def apply_temporal_voting(Y_predict, window_size=[2,2]):
     classes_temporally_voted = []
