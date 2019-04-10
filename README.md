@@ -79,6 +79,4 @@ YOLO: **You Only Look Once: Unified, Readl-Time Object Detection** (2016)
 
 Find below pretrained weights to be used with its respective networks:
 
-https://github.com/AlexeyAB/darknet#how-to-use
-
-https://github.com/AlexeyAB/darknet/tree/master/build/darknet/x64
+**To do**
