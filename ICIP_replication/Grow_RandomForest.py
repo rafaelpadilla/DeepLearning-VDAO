@@ -1,14 +1,16 @@
-import os
-import glob
-import random
-import numpy as np
-import json
-import pickle
 import csv
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import make_classification
-from sklearn.metrics import accuracy_score
+import glob
+import json
+import os
+import pickle
+import random
 import warnings
+
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
 warnings.filterwarnings("ignore")
 
 random.seed(0)
@@ -16,13 +18,13 @@ np.random.seed(0)
 
 BASE_DIR = '/nfs/proc/rafael.padilla'
 BASE_DIR = '/media/storage/VDAO'
-features_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/_shortest_distance/features/'),
+features_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/features/'),
                  'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/features/') }
-csv_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/_shortest_distance/intermediate_files/'),
+csv_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/intermediate_files/'),
             'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/intermediate_files/') }
-JSON_FILE_RESEARCH = 'vdao_research.json'
-JSON_FILE_OBJECT = 'vdao_object.json'
-
+current_dir = os.path.dirname(os.path.abspath(__file__))
+JSON_FILE_RESEARCH = os.path.join(current_dir,'vdao_research.json')
+JSON_FILE_OBJECT = os.path.join(current_dir,'vdao_object.json')
 
 ############# AQUI INICIO ##############
 def get_objects_info(classes, json_file):
@@ -50,7 +52,7 @@ folds_number = {'fold_1': target_objects[0],
 }
 #type = 'tar' e 'ref'
 def get_file_filters_train(fold, json_file, layer, include_table_folder=False, types=['tar']):
-    raise Exception('conferir aqui se este método está retonando as informacoes corretamente')
+    # raise Exception('conferir aqui se este método está retonando as informacoes corretamente')
     target_class = folds_number[fold]
     search_terms = []
     items = target_objects.copy()
@@ -104,7 +106,7 @@ def compare_predictions(y_1, y_2):
             same.append(i)
         else:
             incorrect.append(i)
-    return {'correct_ids': same, 
+    return {'correct_ids': same,
             'total_correct': len(same),
             'accuracy': len(same)/len(y_1),
             'incorrect_ids': incorrect,
@@ -173,7 +175,7 @@ def validate_detections(list_name_features, Y_test_pred, Y_test_hat):
         if final_results[list_name_features[idx]]['predicted_class']  == 1:
             # Predicted an object and there was an object
             if final_results[list_name_features[idx]]['groundtruth_class'] == 1:
-                TP += 1 
+                TP += 1
             # Predicted an object but there was no object
             else:
                 FP += 1
@@ -296,13 +298,15 @@ def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, ty
 def get_info_dir_path(file_path):
     info = {}
     for part in file_path.split(os.sep)[:-1]:
-        if 'table_' in part : info['table_name'] = part 
+        if 'table_' in part : info['table_name'] = part
         if 'table_' in part : info['table_number'] = part[-2:]
         if '-Object_' in part : info['object_number'] = part[-2:]
         if '-Object_' in part : info['type'] = 'tar'
         if '-Reference_' in part : info['type'] = 'ref'
         for l in layers:
             if part == l : info['layer'] = l
+    basename = os.path.basename(file_path)
+    if 'path_' in basename : info['path'] = basename[basename.index('path_')+5:basename.index('path_')+6]
     return info
 
 def get_all_csv_info(csv_dir):
@@ -313,6 +317,7 @@ def get_all_csv_info(csv_dir):
         info_csv = get_info_dir_path(csv_path)
         table_number = info_csv['table_number']
         object_number = info_csv['object_number']
+        path = info_csv['path']
         # Open the csv
         f = open(csv_path)
         csv_file = csv.reader(f, delimiter=',')
@@ -336,7 +341,9 @@ def get_all_csv_info(csv_dir):
         f.close()
         if 'table_%s'%table_number not in dict_features:
             dict_features['table_%s'%table_number] = {}
-        dict_features['table_%s'%table_number]['object_%s'%object_number] = dict_features_table
+        if 'object_%s'%object_number not in dict_features['table_%s'%table_number]:
+            dict_features['table_%s'%table_number]['object_%s'%object_number] = {}
+        dict_features['table_%s'%table_number]['object_%s'%object_number]['path_%s'%path]= dict_features_table
     return dict_features
 
 
@@ -352,22 +359,17 @@ layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
 # type_features = 'research' #ou 'object'
 # layer = 'conv1'
 
-csv_dir_research = csv_dir['test']
-features_dir_research = features_dir['test']
 # types_features = ['tar']
 # if type_features == 'object':
 #     json_file = JSON_FILE_OBJECT
 # elif type_features == 'research':
 #     json_file = JSON_FILE_RESEARCH
 
-# Get testing features
-# diff_features = get_diff_features(csv_dir_research,features_dir_research,name_fold,type_features,layer,types_features)
-
 # Loop through every fold
 for fold in folds:
     # Get target object
     tar_obj = folds[fold]
-    # Obtain target objects info into the testing structure 
+    # Obtain target objects info into the testing structure
     test_object_info = get_objects_info([tar_obj], JSON_FILE_RESEARCH) #AQUI
     # Loop through every layer
     for layer in layers:
@@ -380,7 +382,7 @@ for fold in folds:
         all_DIS_with_temporal_voting = 0
         # Total number of positive and negative ground truth frames
         total_number_pos_gt_frames = 0
-        total_number_neg_gt_frames = 0       
+        total_number_neg_gt_frames = 0
         # Print out status for new training
         print('='*40)
         print('\n')
@@ -388,9 +390,12 @@ for fold in folds:
         print(f'Fold: {fold}')
         print(f'Layer: {layer}')
         # Define path with features for training
-        dir_features_train = os.path.join(features_dir['train'], f'{fold}',f'{layer}')
+        # dir_features_train = os.path.join(features_dir['train'], f'{fold}',f'{layer}')
+        # AQUI
+        _, X_train, Y_train_hat, paths_feat_training = get_diff_features(csv_dir['train'],features_dir['train'],fold,'object',layer,['tar'])
+
         # Get features for training
-        X, Y_hat, paths_feat_training = get_features(dir_features_train, max_features_per_class=None, shuffle=True, balance_classes=True)
+        # X, Y_hat, paths_feat_training = get_features(dir_features_train, max_features_per_class=None, shuffle=True, balance_classes=True)
         # Get amount of positives and negatives
         amount_pos = (Y_hat == 1).sum()
         amount_neg = (Y_hat == 0).sum()
@@ -428,7 +433,7 @@ for fold in folds:
             print('-'*40)
             print(f'Table: [{table}][{layer}][{tar_obj}]')
             # AQUI -> Para test
-            _, X_test, Y_test_hat, paths_feat_testing = get_diff_features(csv_dir_research,features_dir_research,fold,'research',layer,['tar'], list_consider_tables=[table])
+            _, X_test, Y_test_hat, paths_feat_testing = get_diff_features(csv_dir['test'],features_dir['test'],fold,'research',layer,['tar'], list_consider_tables=[table])
             # Get features for testing
             # X_test, Y_test_hat, paths_feat_testing = get_features(dir_features_test, max_features_per_class=None, shuffle=False, balance_classes=False)
             # Get amount of positives and negatives
@@ -449,9 +454,9 @@ for fold in folds:
             final_results, TP, FP = validate_detections(paths_feat_testing, Y_test_pred, Y_test_hat)
             print('(TP, FP): (%d, %d)' % (TP, FP))
             # TP_rate: TP / (TP+FN)
-            # TP is the number of true positives, FP is the number of false negatives and TP+FN is the total number of positives 
+            # TP is the number of true positives, FP is the number of false negatives and TP+FN is the total number of positives
             if amount_pos != 0:
-                TP_rate = TP / amount_pos            
+                TP_rate = TP / amount_pos
             else:
                 TP_rate = 0
             # FP_rate: FP / (FP+TN)
@@ -469,9 +474,9 @@ for fold in folds:
             final_results_temporal_voting, TP_temporal_voting, FP_temporal_voting = validate_detections(paths_feat_testing, classes_temporally_voted, Y_test_hat)
             print('Temporal voting: (TP, FP): (%d, %d)' % (TP_temporal_voting, FP_temporal_voting))
             # TP_rate: TP / (TP+FN)
-            # TP is the number of true positives, FP is the number of false negatives and TP+FN is the total number of positives 
+            # TP is the number of true positives, FP is the number of false negatives and TP+FN is the total number of positives
             if amount_pos != 0:
-                TP_rate_temporal_voting = TP_temporal_voting / amount_pos            
+                TP_rate_temporal_voting = TP_temporal_voting / amount_pos
             else:
                 TP_rate_temporal_voting = 0
             # FP_rate: FP / (FP+TN)
