@@ -71,6 +71,18 @@ mkdir table_03/Table_03-Object_02 &&
 mkdir table_03/Table_03-Object_03 &&
 mkdir table_03/Table_03-Object_04 &&
 mkdir table_03/Table_03-Object_05 &&
+mkdir table_03/Table_03-Object_06 &&
+mkdir table_03/Table_03-Object_07 &&
+mkdir table_03/Table_03-Object_08 &&
+mkdir table_03/Table_03-Object_09 &&
+mkdir table_03/Table_03-Object_10 &&
+mkdir table_03/Table_03-Object_11 &&
+mkdir table_03/Table_03-Object_12 &&
+mkdir table_03/Table_03-Object_13 &&
+mkdir table_03/Table_03-Object_14 &&
+mkdir table_03/Table_03-Object_15 &&
+mkdir table_03/Table_03-Object_16 &&
+mkdir table_03/Table_03-Object_17 &&
 # Videos - Table 03
 wget http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/ref-sing-amb-part03-video01.avi -P table_03/Table_03-Reference_01/ &&
 wget http://www02.smt.ufrj.br/~tvdigital/database/objects/data/avi/obj-sing-amb-part03-video01.avi -P table_03/Table_03-Object_01/ &&
