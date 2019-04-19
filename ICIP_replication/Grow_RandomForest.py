@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 random.seed(123)
 np.random.seed(123)
 
-BASE_DIR = '/nfs/proc/rafael.padilla'
+# BASE_DIR = '/nfs/proc/rafael.padilla'
 BASE_DIR = '/media/storage/VDAO'
 features_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/features/'),
                  'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/features/') }
@@ -26,7 +26,17 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE_RESEARCH = os.path.join(current_dir,'vdao_research.json')
 JSON_FILE_OBJECT = os.path.join(current_dir,'vdao_object.json')
 
-############# AQUI INICIO ##############
+############ DEFINITIONS #################
+number_trees = 10
+
+layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
+          'residual6','residual7','residual8','residual9','residual10','residual11',
+          'residual12','residual13','residual14','residual15','residual16']
+
+folds_to_test = ['fold_1', 'fold_2', 'fold_3', 'fold_4', 'fold_5', 'fold_6', 'fold_7', 'fold_8', 'fold_9']
+
+##########################################
+
 def get_objects_info(classes, json_file):
     ret = {}
     with open(json_file, "r") as read_file:
@@ -50,9 +60,9 @@ folds_number = {'fold_1': target_objects[0],
                 'fold_8': target_objects[7],
                 'fold_9': target_objects[8]
 }
+
 #type = 'tar' e 'ref'
 def get_file_filters_train(fold, json_file, layer, include_table_folder=False, types=['tar']):
-    # raise Exception('conferir aqui se este método está retonando as informacoes corretamente')
     target_class = folds_number[fold]
     search_terms = []
     items = target_objects.copy()
@@ -93,11 +103,10 @@ def get_file_filters_test(fold, json_file, layer, include_table_folder=False, ty
                 st = f'{table}/Table_{table_number}-Reference_{obj_num}/{layer}/feat_*_{layer}_t{table_number}_ref_vid{obj_num}_frame_*.npy'
             search_terms.append(st)
     return search_terms
-############# AQUI FIM ##############
 
 def compare_predictions(y_1, y_2):
-    # one could also use the code below to obtain the accuracy
-    # accuracy = accuracy_score(Y_hat, Y_pred)
+    # one could also use the line below to obtain the accuracy
+    # -> accuracy = accuracy_score(Y_hat, Y_pred)
     assert len(y_1) == len(y_2)
     incorrect = []
     same = []
@@ -121,43 +130,7 @@ def get_predict_probabilities(predict_proba, list_name_features, classes=[0,1]):
         ret[list_name_features[id]] = {str(classe): predict_proba[id][classe] for classe in classes}
     return ret
 
-def get_features(_features_dir, max_features_per_class = None, shuffle=True, balance_classes=True):
-    # Get paths of negative samples
-    neg_path = os.path.join(_features_dir,'neg')
-    negative_npys_paths = glob.glob(neg_path+'/*.npy')
-    # Get paths of positive samples
-    pos_path = os.path.join(_features_dir,'pos')
-    positive_npys_paths = glob.glob(pos_path+'/*.npy')
-    # Shuffle features inside their classes
-    if shuffle:
-        random.shuffle(negative_npys_paths)
-        random.shuffle(positive_npys_paths)
-    # Balance by the class with the lowest number of features
-    if balance_classes:
-        min_features = min(len(negative_npys_paths), len(positive_npys_paths))
-        # Get only the first min_features
-        if max_features_per_class == None:
-            negative_npys_paths = negative_npys_paths[0:min_features]
-            positive_npys_paths = positive_npys_paths[0:min_features]
-        else:
-            negative_npys_paths = negative_npys_paths[0:max_features_per_class]
-            positive_npys_paths = positive_npys_paths[0:max_features_per_class]
-    # Obtain features
-    X = []
-    paths_features = []
-    for f in negative_npys_paths:
-        X.append(np.load(f).flatten())
-        paths_features.append(os.path.split(f)[1])
-    for f in positive_npys_paths:
-        X.append(np.load(f).flatten())
-        paths_features.append(os.path.split(f)[1])
-    # Changing X from list to array
-    X = np.array(X)
-    # Create labels
-    Y = np.array([0]*len(negative_npys_paths)+[1]*len(positive_npys_paths))
-    return X, Y, paths_features
-
-
+# Dada uma lista de features X, labels Y e lista com caminhos, esta função faz o shuffle e balanceia as classes
 def prepare_features(X, Y, list_paths, max_features_per_class = None, shuffle=True, balance_classes=True):
     # Get index of negative samples
     neg_idx = np.where(Y == 0)[0]
@@ -208,8 +181,6 @@ def validate_detections(list_name_features, Y_test_pred, Y_test_hat):
         final_results[list_name_features[idx]]['groundtruth_class'] = int('pos' in list_name_features[idx])
         assert int(Y_test_hat[idx]) == int('pos' in list_name_features[idx]) # double checking
         final_results[list_name_features[idx]]['predicted_class'] = int(Y_test_pred[idx])
-        # NAO FAZ SENTIDO VERIFICAR COM O PROEDICT SENDO QUE O VETOR FOI MUDADO COM O VOTING
-        # assert int(Y_test_pred[idx]) == int(rnd_clf.predict(X_test[idx].reshape(1,-1))) # double checking
         final_results[list_name_features[idx]]['predicted_correcly'] = final_results[list_name_features[idx]]['groundtruth_class'] == final_results[list_name_features[idx]]['predicted_class']
         # If an object was detected in the scene
         if final_results[list_name_features[idx]]['predicted_class']  == 1:
@@ -236,32 +207,7 @@ def apply_temporal_voting(Y_predict, window_size=[2,2]):
             classes_temporally_voted.append(0) # It is counted as a negative
     return classes_temporally_voted
 
-target_objects = ['shoe', 'towel', 'brown box', 'black coat', 'black backpack', 'dark-blue box', 'camera box', 'white jar', 'pink bottle']
-folds = {'fold_1': target_objects[0],
-         'fold_2': target_objects[1],
-         'fold_3': target_objects[2],
-         'fold_4': target_objects[3],
-         'fold_5': target_objects[4],
-         'fold_6': target_objects[5],
-         'fold_7': target_objects[6],
-         'fold_8': target_objects[7],
-         'fold_9': target_objects[8]
-}
-
-
-
-
-
-
-
-
-def get_table_name(file_path):
-    for f in file_path.split(os.sep):
-        if f.startswith('table'):
-            return f
-    return None
-
-# Tentativa de dado um cvs com o alinhamento + folder com features + nome do fold, retorna as features
+# Dado caminho com cvs contendo alinhamentos + folder com features + nome do fold, retorna as features alvo e referencia correspondentes
 def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, types_features, list_consider_tables=None, frames_multiple_of = None):
     # Define variables to be returned
     X, Y_hat, paths_feat = [], [], [] # samples, labels, paths of the features
@@ -276,7 +222,6 @@ def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, ty
     filters = [os.path.join(features_dir,f) for f in filters]
     # Get all pairs ref-tar associated frames listed in all csv files
     dict_features_names = get_all_csv_info(csv_dir, frames_multiple_of)
-
     # Loop through each filter
     for fil in filters:
         # Get all files based on the filter
@@ -337,49 +282,6 @@ def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, ty
                 paths_feat.append('[pos] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(file_feature))) # pair of features
             else:
                 paths_feat.append('[neg] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(file_feature))) # pair of features
-
-
-            # # Get features
-            # for pos in pos_feats:
-            #     # Check if filename we are looking for is found
-            #     if pos[1] in bn_tar:
-            #         # Get reference features based on the name of the feature
-            #         ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[0]}', recursive=True)
-            #         assert len(ref_feat_path) == 1
-            #         ref_feat_path = ref_feat_path[0]
-            #         # Get target features based on the name of the feature
-            #         tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[1]}', recursive=True)
-            #         assert len(tar_feat_path) == 1
-            #         tar_feat_path = tar_feat_path[0]
-            #         # Get features
-            #         feat_map_ref = np.load(ref_feat_path).flatten()
-            #         feat_map_tar = np.load(tar_feat_path).flatten()
-            #         diff = feat_map_ref - feat_map_tar
-            #         all_diff_features['pos'].append(diff)
-            #         X.append(diff)
-            #         Y_hat.append(1) # positive class
-            #         paths_feat.append('[pos] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(tar_feat_path))) # pair of features
-            #         break
-            # for neg in neg_feats:
-            #     # Check if filename we are looking for is found
-            #         if neg[1] in bn_tar:
-            #             # Get reference features based on the name of the feature
-            #             ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[0]}', recursive=True)
-            #             assert len(ref_feat_path) == 1
-            #             ref_feat_path = ref_feat_path[0]
-            #             # Get target features based on the name of the feature
-            #             tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[1]}', recursive=True)
-            #             assert len(tar_feat_path) == 1
-            #             tar_feat_path = tar_feat_path[0]
-            #             # Get features
-            #             feat_map_ref = np.load(ref_feat_path).flatten()
-            #             feat_map_tar = np.load(tar_feat_path).flatten()
-            #             diff = feat_map_ref - feat_map_tar
-            #             all_diff_features['neg'].append(diff)
-            #             X.append(diff)
-            #             Y_hat.append(0) # negative class
-            #             paths_feat.append('[neg] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(tar_feat_path))) # pair of features
-            #             break
     return np.array(X), np.array(Y_hat), paths_feat
 
 def get_info_dir_path(file_path):
@@ -436,31 +338,15 @@ def get_all_csv_info(csv_dir, frames_multiple_of = None):
         dict_features['table_%s'%table_number]['object_%s'%object_number]['path_%s'%path]= dict_features_table
     return dict_features
 
-
-
-
-n_estimators = 100
-
-layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
-          'residual6','residual7','residual8','residual9','residual10','residual11',
-          'residual12','residual13','residual14','residual15','residual16']
-
-# type_features = 'object' #ou 'research'
-# type_features = 'research' #ou 'object'
-# layer = 'conv1'
-
-# types_features = ['tar']
-# if type_features == 'object':
-#     json_file = JSON_FILE_OBJECT
-# elif type_features == 'research':
-#     json_file = JSON_FILE_RESEARCH
-
+################################################################################
+# MAGIC STARTS HERE
+################################################################################
 # Loop through every fold
-for fold in folds:
+for fold in folds_to_test:
     # Get target object
     tar_obj = folds[fold]
     # Obtain target objects info into the testing structure
-    test_object_info = get_objects_info([tar_obj], JSON_FILE_RESEARCH) #AQUI
+    test_object_info = get_objects_info([tar_obj], JSON_FILE_RESEARCH)
     # Loop through every layer
     for layer in layers:
         # Calculate TP and FP for the whole layer considering all tables (videos)
@@ -479,21 +365,15 @@ for fold in folds:
         print('TRAINING')
         print(f'Fold: {fold}')
         print(f'Layer: {layer}')
-        # Define path with features for training
-        # dir_features_train = os.path.join(features_dir['train'], f'{fold}',f'{layer}')
-        # AQUI!!! DESCOMENTA A LINHA ABAIXO E LIMPA OS .NPY
-        # X_train, Y_train_hat, paths_feat_training = get_diff_features(csv_dir['train'],features_dir['train'],fold,'object',layer,['tar'], frames_multiple_of=17)
-        X_train = np.load('del_X_train.npy')
-        Y_train_hat = np.load('del_Y_train_hat.npy')
-        paths_feat_training  = np.load('del_paths_feat_training.npy')
-        X_train, Y_train_hat, paths_feat_training = prepare_features(X_train, Y_train_hat, paths_feat_training)
         # Get features for training
-        # X, Y_hat, paths_feat_training = get_features(dir_features_train, max_features_per_class=None, shuffle=True, balance_classes=True)
+        X_train, Y_train_hat, paths_feat_training = get_diff_features(csv_dir['train'],features_dir['train'],fold,'object',layer,['tar'], frames_multiple_of=17)
+        # Shuffle and balance features for training
+        X_train, Y_train_hat, paths_feat_training = prepare_features(X_train, Y_train_hat, paths_feat_training)
         # Get amount of positives and negatives
         amount_pos = (Y_train_hat == 1).sum()
         amount_neg = (Y_train_hat == 0).sum()
-        # Apply random forest classification
-        rnd_clf = RandomForestClassifier(n_estimators=n_estimators)
+        # Create random forest classificator
+        rnd_clf = RandomForestClassifier(n_estimators=number_trees)
         rnd_clf.fit(X_train,Y_train_hat)
         # Predict the training data (validation)
         Y_pred = rnd_clf.predict(X_train)
@@ -527,10 +407,8 @@ for fold in folds:
         for table in test_object_info:
             print('-'*40)
             print(f'Table: [{table}][{layer}][{tar_obj}]')
-            # AQUI -> Para test
-            X_test, Y_test_hat, paths_feat_testing = get_diff_features(csv_dir['test'],features_dir['test'],fold,'research',layer,['tar'], list_consider_tables=[table])
             # Get features for testing
-            # X_test, Y_test_hat, paths_feat_testing = get_features(dir_features_test, max_features_per_class=None, shuffle=False, balance_classes=False)
+            X_test, Y_test_hat, paths_feat_testing = get_diff_features(csv_dir['test'],features_dir['test'],fold,'research',layer,['tar'], list_consider_tables=[table])
             # Get amount of positives and negatives
             amount_pos = (Y_test_hat == 1).sum()
             amount_neg = (Y_test_hat == 0).sum()
@@ -585,7 +463,6 @@ for fold in folds:
             print('Temporal voting: (TP rate, FP rate): (%.2f, %.2f)' % (TP_rate_temporal_voting, FP_rate_temporal_voting))
             DIS_temporal_voting = np.sqrt((1-TP_rate_temporal_voting)**2 + FP_rate_temporal_voting**2)
             print('Temporal voting: (DIS): %.2f' % DIS_temporal_voting)
-
             # Update FP and TP for the currenct layer
             all_TP_no_temporal_voting += TP
             all_FP_no_temporal_voting += FP
