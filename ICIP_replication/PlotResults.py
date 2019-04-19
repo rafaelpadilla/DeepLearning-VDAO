@@ -1,10 +1,12 @@
 import os
 import pickle
-import numpy as np
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
-def get_plot_compare_detections(pkl_file, fold_name, layer_name, table_name=None):
+
+def get_plot_compare_detections(pkl_file, fold_name, layer_name, table_name=None, temporal_voting=False):
     # Given the file with the result of the RF classifier,
     # plot a graph showing the frames with and without objects of a given layer of a particular video
     fold_number = l_double_digit(fold_name.replace('fold_',''))
@@ -19,19 +21,42 @@ def get_plot_compare_detections(pkl_file, fold_name, layer_name, table_name=None
     # If table was specified
     else:
         tables.append(table_name)
+
+
+
+    col_TP = 'TP'
+    col_FP = 'FP'
+    col_DIS = 'DIS'
+
+
+
+    raise Exception('TODO! É preciso analisar o temporal voting: PlotResults.py linha 35')
+
+    # TODO: Ainda nao estou aplicando o temporal voting para gerar os gráficos individuais de cada tabela.
+    # É preciso analisar cuidadosamente as tags do dicionário que a Grow Random Forest gera.
+    # Acho que está faltando separar o que é com temporal voting e o que não é!!!
+    # É preciso fazer esta análise cuidadosamente. #
+    # if temporal_voting == True:
+    #     col_TP = 'TP_temporal_voting'
+    #     col_FP = 'FP_temporal_voting'
+    #     col_DIS = 'DIS_temporal_voting'
+    # else:
+    #     col_TP = 'TP'
+    #     col_FP = 'FP'
+    #     col_DIS = 'DIS'
+
+
     ret_plots = { }
     # Loop through tables to generate plot
     for tn in tables:
         table_number = l_double_digit(tn.replace('table_',''))
         table_info = pkl_file['result_testing'][tn]
         # Get values to be added in the title
-        accuracy = table_info['accuracy']
-        acc_perc = '{:.2f}%'.format(accuracy*100)
-        TP = table_info['TP']
-        FP = table_info['FP']
-        DIS = table_info['DIS']
-        title = f'Classification results [table {table_number}] [fold {fold_number}] [target {folds_objects[fold_name]}] [{layer_name}]\n[TP:{TP}] [FP:{FP}] [DIS:%.2f] [acc:%s]' % (DIS, acc_perc)
-        # Get results with information of the gt and detections 
+        TP = table_info[col_TP]
+        FP = table_info[col_FP]
+        DIS = table_info[col_DIS]
+        title = f'Classification results [table {table_number}] [fold {fold_number}] [target {folds_objects[fold_name]}] [{layer_name}]\n[TP:{TP}] [FP:{FP}] [DIS:%.2f]' % (DIS)
+        # Get results with information of the gt and detections
         summary_results = table_info['summary_results']
         gt_and_detections = separate_gts_and_detections(summary_results)
         # Create plot
@@ -75,7 +100,7 @@ def print_accuracy(layer_name, pkl_file, table_name=None):
     print(accuracies.replace('.',','))
 
 
-def print_DIS(layer_name, pkl_file, table_name=None):
+def print_DIS(layer_name, pkl_file, table_name=None, temporal_voting=False):
     # Load pickle file
     pkl_file = pickle.load(open(pkl_file, "rb"))
     tables = []
@@ -87,21 +112,36 @@ def print_DIS(layer_name, pkl_file, table_name=None):
     # If table was specified
     else:
         tables.append(table_name)
-    overall_TP = pkl_file['result_testing']['overall_TP']
-    overall_TPR = pkl_file['result_testing']['overall_TPR']
-    overall_FP = pkl_file['result_testing']['overall_FP']
-    overall_FPR = pkl_file['result_testing']['overall_FPR']
-    overall_DIS = pkl_file['result_testing']['overall_DIS']
+    # Overall metrics
+    if temporal_voting:
+        overall_TP = pkl_file['result_testing']['overall_TP_temporal_voting']
+        overall_TPR = pkl_file['result_testing']['overall_TPR_temporal_voting']
+        overall_FP = pkl_file['result_testing']['overall_FP_temporal_voting']
+        overall_FPR = pkl_file['result_testing']['overall_FPR_temporal_voting']
+        overall_DIS = pkl_file['result_testing']['overall_DIS_temporal_voting']
+    else:
+        overall_TP = pkl_file['result_testing']['overall_TP']
+        overall_TPR = pkl_file['result_testing']['overall_TPR']
+        overall_FP = pkl_file['result_testing']['overall_FP']
+        overall_FPR = pkl_file['result_testing']['overall_FPR']
+        overall_DIS = pkl_file['result_testing']['overall_DIS']
     linha = ''
     # Loop through tables to generate plot
     for tn in tables:
         table_info = pkl_file['result_testing'][tn]
         # Get values to be added in the title
-        TP = table_info['TP']
-        TPR = table_info['TPR']
-        FP = table_info['FP']
-        FPR = table_info['FPR']
-        DIS = table_info['DIS']
+        if temporal_voting:
+            TP = table_info['TP_temporal_voting']
+            TPR = table_info['TPR_temporal_voting']
+            FP = table_info['FP_temporal_voting']
+            FPR = table_info['FPR_temporal_voting']
+            DIS = table_info['DIS_temporal_voting']
+        else:
+            TP = table_info['TP']
+            TPR = table_info['TPR']
+            FP = table_info['FP']
+            FPR = table_info['FPR']
+            DIS = table_info['DIS']
         if linha == '':
             linha = '%s\t%s\t%s\t%s\t%s\t%s' % (layer_name,TP,TPR,FP,FPR,DIS)
         else:
@@ -136,8 +176,9 @@ def separate_gts_and_detections(summary_results):
 ####################################################################################################
 # Parameters to change (folder names)
 ####################################################################################################
-folder_read_results = './RF_results/'
-folder_to_save = './RF_results/figures/'
+current_path = os.path.dirname(os.path.abspath(__file__))
+folder_read_results =  os.path.join(current_path,'RF_results')
+folder_to_save = os.path.join(current_path,'RF_results', 'figures')
 if not os.path.isdir(folder_to_save):
     os.makedirs(folder_to_save)
 
@@ -158,20 +199,33 @@ layers_to_generate_plots = ['conv1','residual1','residual2','residual3','residua
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
 
-def print_DISs(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
-    for fold in folds_objects:
-        for layer in layers_to_generate_plots:
-            # Get npy file with results
-            pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
-            print_DIS(layer, pkl_file)
+def print_DISs(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9'], temporal_voting=False):
+    # Print both with temporal and without temporal
+    if temporal_voting == None:
+        par = [False,True]
+    # Print either with temporal voting or without it
+    else:
+        par = [temporal_voting]
+    for p in par:
+        if p == True:
+            print('\nWith temporal voting:')
+        else:
+            print('\nWithout temporal voting:')
+        for fold in folds_names:
+            print(f'Fold: {fold}')
+            for layer in layers_to_generate_plots:
+                # Get npy file with results
+                pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
+                print_DIS(layer, pkl_file, temporal_voting=p)
 
-def generate_plots_frames(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
+
+def generate_plots_frames(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9'],temporal_voting=False):
     for fold in folds_names:
         for layer in layers_to_generate_plots:
             # Get npy file with results
             pkl_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
             # Get plot for all tables in the npy file
-            plots = get_plot_compare_detections(pkl_file, fold, layer)
+            plots = get_plot_compare_detections(pkl_file, fold, layer,temporal_voting=temporal_voting))
             # Save
             for tn, plot in plots.items():
                 name_file = f'class_results_[{tn}][{fold}][{layer}].png'
@@ -183,38 +237,57 @@ def print_accuracies(folds_names = ['fold_1', 'fold_2','fold_3','fold_4','fold_5
         for layer in layers_to_generate_plots:
             # Get npy file with results
             npy_file = os.path.join(folder_read_results,fold,f'{layer}.pkl')
-            print_accuracy(layer, npy_file) 
+            print_accuracy(layer, npy_file)
 
 
-def generate_plots_results(folds_names=['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9']):
-    dic = {'DIS': 'overall_DIS',
-        'accuracy': 'overall_accuracy'}
+def generate_plots_results(folds_names=['fold_1', 'fold_2','fold_3','fold_4','fold_5','fold_6','fold_7','fold_8','fold_9'], temporal_voting=False):
+    dic = {'DIS': 'overall_DIS', 'accuracy': 'overall_accuracy'}
     # Create plots for each folder
     for d in dic:
-        plots = get_plots_by_folds(folds_names,metric_tag=dic[d])
+        plots = get_plots_by_folds(folds_names,metric_tag=dic[d], temporal_voting=temporal_voting)
+        _folder_to_save = os.path.join(folder_to_save, d)
+        if os.path.isdir(_folder_to_save) == False:
+            os.makedirs(_folder_to_save)
         for func_name, plot in plots.items():
             name_file = f'{func_name}_{d}_results.png'
-            plot.savefig(os.path.join(folder_to_save,name_file))
-            print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
+            plot.savefig(os.path.join(_folder_to_save,name_file))
+            print('Plot saved: %s' % os.path.join(_folder_to_save,name_file))
     # Create plots for functions max, min and average among all folds
     for d in dic:
-        plots = get_plots_among_all_folds(folds_names,metric_tag=dic[d])
+        plots = get_plots_among_all_folds(folds_names,metric_tag=dic[d], temporal_voting=temporal_voting)
+        _folder_to_save = os.path.join(folder_to_save, d)
+        if os.path.isdir(_folder_to_save) == False:
+            os.makedirs(_folder_to_save)
         for func_name, plot in plots.items():
             name_file = f'{func_name}_{d}_results.png'
-            plot.savefig(os.path.join(folder_to_save,name_file))
-            print('Plot saved: %s' % os.path.join(folder_to_save,name_file))
+            plot.savefig(os.path.join(_folder_to_save,name_file))
+            print('Plot saved: %s' % os.path.join(_folder_to_save,name_file))
 
-            
-def get_plots_by_folds(folds_names, metric_tag='overall_accuracy'):
+
+def get_plots_by_folds(folds_names, metric_tag='overall_accuracy',temporal_voting=False):
 # metric_tag='overall_accuracy' or metric_tag='overall_DIS'
-    if metric_tag == 'overall_accuracy':
-        title_metric = 'Accuracy'
-        label_metric = 'accuracies'
-    elif metric_tag == 'overall_DIS':
-        title_metric = 'DIS'
-        label_metric = 'DIS'
+    if temporal_voting == True:
+        if metric_tag == 'overall_accuracy':
+            metric_tag = 'overall_accuracy_temporal_voting'
+            title_metric = 'Accuracy with temporal voting'
+            label_metric = 'accuracies'
+        elif metric_tag == 'overall_DIS':
+            metric_tag = 'overall_DIS_temporal_voting'
+            title_metric = 'DIS with temporal voting'
+            label_metric = 'DIS'
+        else:
+            raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
     else:
-        raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
+        if metric_tag == 'overall_accuracy':
+            metric_tag = 'overall_accuracy'
+            title_metric = 'Accuracy without temporal voting'
+            label_metric = 'accuracies'
+        elif metric_tag == 'overall_DIS':
+            metric_tag = 'overall_DIS'
+            title_metric = 'DIS without temporal voting'
+            label_metric = 'DIS'
+        else:
+            raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
     ret_plots = {}
     for fold in folds_names:
         fold_number = l_double_digit(fold.replace('fold_',''))
@@ -242,16 +315,30 @@ def get_plots_by_folds(folds_names, metric_tag='overall_accuracy'):
     return ret_plots
 
 
-def get_plots_among_all_folds(folds_names,metric_tag='overall_accuracy'):
+def get_plots_among_all_folds(folds_names,metric_tag='overall_accuracy', temporal_voting=False):
 # metric_tag='overall_accuracy' or metric_tag='overall_DIS'
-    if metric_tag == 'overall_accuracy':
-        title_metric = 'accuracy'
-        label_metric = 'accuracies'
-    elif metric_tag == 'overall_DIS':
-        title_metric = 'DIS'
-        label_metric = 'DIS'
+    if temporal_voting == True:
+        if metric_tag == 'overall_accuracy':
+            metric_tag = 'overall_accuracy_temporal_voting'
+            title_metric = 'Accuracy with temporal voting'
+            label_metric = 'accuracies'
+        elif metric_tag == 'overall_DIS':
+            metric_tag = 'overall_DIS_temporal_voting'
+            title_metric = 'DIS with temporal voting'
+            label_metric = 'DIS'
+        else:
+            raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
     else:
-        raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
+        if metric_tag == 'overall_accuracy':
+            metric_tag = 'overall_accuracy'
+            title_metric = 'Accuracy without temporal voting'
+            label_metric = 'accuracies'
+        elif metric_tag == 'overall_DIS':
+            metric_tag = 'overall_DIS'
+            title_metric = 'DIS without temporal voting'
+            label_metric = 'DIS'
+        else:
+            raise Exception('metric_tag must be either \'overall_accuracy\' or \'overall_DIS\'')
     functions = {'max':np.max,'min':np.min,'avg':np.average}
     # Dictionary with all folds
     dict_all_folds = {}
@@ -298,22 +385,21 @@ def get_plots_among_all_folds(folds_names,metric_tag='overall_accuracy'):
 #################################################
 #### Generate plot results for each frame  ######
 #################################################
-# generate_plots_frames()
+# generate_plots_frames(temporal_voting=True)
 
 
 #################################################
 #### Generate plot results for the folds   ######
 #################################################
-generate_plots_results()
+generate_plots_results(temporal_voting=True)
 
 
 ###########################################################
 #### Print accuracies to Ctr+C Ctrl+V in the table   ######
 ###########################################################
-# print_accuracies()
+# print_accuracies(['fold_1'])
 
 ###########################################################
 #### Print DIS to Ctr+C Ctrl+V in the table   ######
 ###########################################################
-# print_DISs(['fold_1'])
-
+print_DISs(temporal_voting=True)

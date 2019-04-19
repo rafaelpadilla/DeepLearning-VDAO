@@ -1,11 +1,12 @@
 #############################################################################################
 # Resnet                                                                                    #
-# Refernce: https://pytorch.org/docs/0.4.0/_modules/torchvision/models/resnet.html          #
+# Reference: https://pytorch.org/docs/0.4.0/_modules/torchvision/models/resnet.html          #
 #############################################################################################
 
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-
+import torchvision.transforms as transforms
+import torch
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152']
@@ -107,6 +108,7 @@ class Bottleneck(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False):
         super(ResNet, self).__init__()
+        self.hooks = {}
         self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -170,6 +172,18 @@ class ResNet(nn.Module):
 
         return x
 
+
+    def add_hook(self, name, layer_name, id_module, callback, parameters_callback):
+        if id_module == None:
+            hook = self._modules.get(layer_name)
+        else:
+            hook = self._modules.get(layer_name)._modules.get(str(id_module))
+        self.hooks[name] = hook.register_forward_hook(callback(parameters_callback))
+
+    def remove_all_hooks(self):
+        for hook in self.hooks:
+            self.hooks[hook].remove()
+        self.hooks.clear()
 
 def resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.
