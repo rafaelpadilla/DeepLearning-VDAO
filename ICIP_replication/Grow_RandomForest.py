@@ -16,8 +16,8 @@ warnings.filterwarnings("ignore")
 random.seed(123)
 np.random.seed(123)
 
-# BASE_DIR = '/nfs/proc/rafael.padilla'
-BASE_DIR = '/media/storage/VDAO'
+BASE_DIR = '/nfs/proc/rafael.padilla'
+#BASE_DIR = '/media/storage/VDAO'
 features_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/features/'),
                  'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/features/') }
 csv_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/intermediate_files/'),
@@ -27,13 +27,15 @@ JSON_FILE_RESEARCH = os.path.join(current_dir,'vdao_research.json')
 JSON_FILE_OBJECT = os.path.join(current_dir,'vdao_object.json')
 
 ############ DEFINITIONS #################
-number_trees = 10
+number_trees = 100
 
 layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
 
 folds_to_test = ['fold_1', 'fold_2', 'fold_3', 'fold_4', 'fold_5', 'fold_6', 'fold_7', 'fold_8', 'fold_9']
+
+folds_to_test = ['fold_1']
 
 ##########################################
 
@@ -50,7 +52,7 @@ def get_objects_info(classes, json_file):
     return ret
 
 target_objects = ['shoe', 'towel', 'brown box', 'black coat', 'black backpack', 'dark-blue box', 'camera box', 'white jar', 'pink bottle']
-folds_number = {'fold_1': target_objects[0],
+folds = {'fold_1': target_objects[0],
                 'fold_2': target_objects[1],
                 'fold_3': target_objects[2],
                 'fold_4': target_objects[3],
@@ -63,7 +65,7 @@ folds_number = {'fold_1': target_objects[0],
 
 #type = 'tar' e 'ref'
 def get_file_filters_train(fold, json_file, layer, include_table_folder=False, types=['tar']):
-    target_class = folds_number[fold]
+    target_class = folds[fold]
     search_terms = []
     items = target_objects.copy()
     items.remove(target_class)
