@@ -1,20 +1,23 @@
 import json
-import time
-import numpy as np
 import os
-import socket
-import glob
 import shutil
+import socket
+import time
+import warnings
+
+import numpy as np
+from PIL import Image
+
+import _init_paths_
+import cv2
+import glob21
+import My_Resnet
 import torch
 import torchvision.transforms as transforms
-import _init_paths_
-from VDAOVideo import VDAOVideo
-import cv2
-import My_Resnet
-from PIL import Image
 from torch.autograd import Variable
 from torchsummary import summary
-import warnings
+from VDAOVideo import VDAOVideo
+
 warnings.filterwarnings("ignore")
 
 #######################################################################
@@ -27,15 +30,15 @@ def define_folders():
         pass
     elif hostname == 'notesmt': # notebook SMT
         # Frames are read from the same folder as the features are saved
-        dirRead = '/media/storage/VDAO/' 
-        outputDir = '/media/storage/VDAO/' 
+        dirRead = '/media/storage/VDAO/'
+        outputDir = '/media/storage/VDAO/'
     elif hostname == 'teresopolis.smt.ufrj.br': # teresopolis
         pass
     elif hostname.startswith("node") or hostname.startswith("head"): #nodes do cluster smt
-        dirRead = "/home/rafael.padilla/workspace/rafael.padilla/" 
+        dirRead = "/home/rafael.padilla/workspace/rafael.padilla/"
         outputDir = "/nfs/proc/rafael.padilla/"
     elif hostname.startswith('taiwan') or hostname.startswith('zermatt'): # maquina com GPU taiwan
-         dirRead = "/home/rafael.padilla/workspace/rafael.padilla/" 
+         dirRead = "/home/rafael.padilla/workspace/rafael.padilla/"
          outputDir = "/nfs/proc/rafael.padilla/"
     else:  # Path not defined
         raise Exception('Error: Folder with videos is not defined!')
@@ -45,7 +48,7 @@ def define_folders():
 l_double_digit = lambda x : '0'+str(x) if len(str(x)) == 1 else str(x)
 
 avg_pooling_sizes = {
-    'conv1'     : 20,
+    'conv1'     : 21,
     'residual1' : 28,
     'residual2' : 28,
     'residual3' : 28,
@@ -67,10 +70,10 @@ avg_pooling_sizes = {
 def get_avg_poolings(layer_name):
     return torch.nn.AvgPool2d(avg_pooling_sizes[layer_name])
 
-def get_sizes_features_vector(input_size, layers_to_extract=['conv1', 'residual1', 'residual2', 'residual3', 
-                     'residual4', 'residual5', 'residual6', 'residual7', 
-                     'residual8', 'residual9', 'residual10', 'residual11', 
-                     'residual12', 'residual13', 'residual14', 'residual15', 
+def get_sizes_features_vector(input_size, layers_to_extract=['conv1', 'residual1', 'residual2', 'residual3',
+                     'residual4', 'residual5', 'residual6', 'residual7',
+                     'residual8', 'residual9', 'residual10', 'residual11',
+                     'residual12', 'residual13', 'residual14', 'residual15',
                      'residual16'], post_pooling=False):
     '''
     Given the input size and, names of the layers to extract and the need of a post pooling,
@@ -214,10 +217,10 @@ dir_read, dir_save = define_folders()
 database_type = 'object'
 # Change here 'shortest_distance' or 'dtw'
 alignment_mode = 'shortest_distance'
-layers_to_extract = ['conv1', 'residual1', 'residual2', 'residual3', 
-                     'residual4', 'residual5', 'residual6', 'residual7', 
-                     'residual8', 'residual9', 'residual10', 'residual11', 
-                     'residual12', 'residual13', 'residual14', 'residual15', 
+layers_to_extract = ['conv1', 'residual1', 'residual2', 'residual3',
+                     'residual4', 'residual5', 'residual6', 'residual7',
+                     'residual8', 'residual9', 'residual10', 'residual11',
+                     'residual12', 'residual13', 'residual14', 'residual15',
                      'residual16']
 tables_to_process = ['table %s' % l_double_digit(i) for i in range(1,60)]
 # Parameters
@@ -266,7 +269,7 @@ for table_name in tables_to_process:
         for layer_name in layers_to_extract:
             dir_features_to_save_layer = os.path.join(dir_features_to_save,layer_name)
             if not os.path.isdir(dir_features_to_save_layer) :
-                os.makedirs(dir_features_to_save_layer)    
+                os.makedirs(dir_features_to_save_layer)
         # Name of the file with the feature is defined as: 'feat_[#name_of_the_video#]_#layer_name#_t#table_number#_#type_feature(ref or tar)#_vid#object_number#_frame#frame_number(starts at 0)#.npy'
         prefix_file_name = f'feat_[%s]_#layerName#_t{table_number}_{type_feat}_vid{object_number}_frame_#frameNumber#.npy'% (os.path.basename(video_path).replace('.avi',''))
         # Get features of the frame from all layers
