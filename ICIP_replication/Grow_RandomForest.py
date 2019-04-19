@@ -13,8 +13,8 @@ from sklearn.metrics import accuracy_score
 
 warnings.filterwarnings("ignore")
 
-random.seed(0)
-np.random.seed(0)
+random.seed(123)
+np.random.seed(123)
 
 BASE_DIR = '/nfs/proc/rafael.padilla'
 BASE_DIR = '/media/storage/VDAO'
@@ -66,9 +66,9 @@ def get_file_filters_train(fold, json_file, layer, include_table_folder=False, t
                 name_obj = obj['name']
                 obj_num = name_obj.replace('object ', '')
                 if 'tar' in types:
-                    st = f'{table}/*/*/feat_*_{layer}_t{table_number}_tar_vid{obj_num}_frame_*.npy'
+                    st = f'{table}/Table_{table_number}-Object_{obj_num}/{layer}/feat_*_{layer}_t{table_number}_tar_vid{obj_num}_frame_*.npy'
                 if 'ref' in types:
-                    st = f'{table}/*/*/feat_*_{layer}_t{table_number}_ref_vid{obj_num}_frame_*.npy'
+                    st = f'{table}/Table_{table_number}-Reference_01/{layer}/feat_*_{layer}_t{table_number}_ref_vid{obj_num}_frame_*.npy'
                 search_terms.append(st)
     return search_terms
 
@@ -88,9 +88,9 @@ def get_file_filters_test(fold, json_file, layer, include_table_folder=False, ty
             # Pois só existe 1 object por tabela
             obj_num = '01'
             if 'tar' in types:
-                st = f'{table}/*/*/feat_*_{layer}_t{table_number}_tar_vid{obj_num}_frame_*.npy'
+                st = f'{table}/Table_{table_number}-Object_{obj_num}/{layer}/feat_*_{layer}_t{table_number}_tar_vid{obj_num}_frame_*.npy'
             if 'ref' in types:
-                st = f'{table}/*/*/feat_*_{layer}_t{table_number}_ref_vid{obj_num}_frame_*.npy'
+                st = f'{table}/Table_{table_number}-Reference_{obj_num}/{layer}/feat_*_{layer}_t{table_number}_ref_vid{obj_num}_frame_*.npy'
             search_terms.append(st)
     return search_terms
 ############# AQUI FIM ##############
@@ -157,6 +157,46 @@ def get_features(_features_dir, max_features_per_class = None, shuffle=True, bal
     Y = np.array([0]*len(negative_npys_paths)+[1]*len(positive_npys_paths))
     return X, Y, paths_features
 
+
+def prepare_features(X, Y, list_paths, max_features_per_class = None, shuffle=True, balance_classes=True):
+    # Get index of negative samples
+    neg_idx = np.where(Y == 0)[0]
+    # Get paths of positive samples
+    pos_idx = np.where(Y == 1)[0]
+    # Shuffle features inside their classes
+    if shuffle:
+        random.shuffle(neg_idx)
+        random.shuffle(pos_idx)
+    # Balance by the class with the lowest number of features
+    if balance_classes:
+        min_features = min(len(neg_idx), len(pos_idx))
+        # Get only the first min_features
+        if max_features_per_class == None:
+            neg_idx = neg_idx[0:min_features]
+            pos_idx = pos_idx[0:min_features]
+        else:
+            neg_idx = neg_idx[0:max_features_per_class]
+            pos_idx = pos_idx[0:max_features_per_class]
+    # Obtain features
+    new_X, new_Y, new_list_paths = [], [], []
+    for id in neg_idx:
+        new_X.append(X[id])
+        new_list_paths.append(str(list_paths[id]))
+        new_Y.append(Y[id])
+    for id in pos_idx:
+        new_X.append(X[id])
+        new_list_paths.append(str(list_paths[id]))
+        new_Y.append(Y[id])
+    # Changing X from list to array
+    new_X = np.array(new_X)
+    # Create labels
+    new_Y = np.array(new_Y)
+    # Shuffle all
+    c = list(zip(new_X, new_Y, new_list_paths))
+    random.shuffle(c)
+    new_X, new_Y, new_list_paths = zip(*c)
+    return np.array(new_X), np.array(new_Y), new_list_paths
+
 def validate_detections(list_name_features, Y_test_pred, Y_test_hat):
     # Dictionary whose keys are the names of the features and the values represent gt classes and detections
     final_results = {}
@@ -222,21 +262,20 @@ def get_table_name(file_path):
     return None
 
 # Tentativa de dado um cvs com o alinhamento + folder com features + nome do fold, retorna as features
-def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, types_features, list_consider_tables=None):
-    # Create dictionary to gather all features to be returned
-    all_diff_features = {'pos': [], 'neg': []}
-    X = [] # samples
-    Y_hat = [] # labels
-    paths_feat = [] # paths of the features
+def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, types_features, list_consider_tables=None, frames_multiple_of = None):
+    # Define variables to be returned
+    X, Y_hat, paths_feat = [], [], [] # samples, labels, paths of the features
     if type_features == 'object':
-        # Pega filtros para todas as features, menos a do objeto alvo
+        # Define filters for all features, but the target object
         filters = get_file_filters_train(name_fold, JSON_FILE_OBJECT, layer, include_table_folder=True, types=types_features)
-    if type_features == 'research':
+    elif type_features == 'research':
         filters = get_file_filters_test(name_fold, JSON_FILE_RESEARCH, layer, include_table_folder=True, types=types_features, list_consider_tables=list_consider_tables)
+    else:
+        raise Exception('type_features must be \'object\' or \'research\'')
     # Concat directory with the feature names
     filters = [os.path.join(features_dir,f) for f in filters]
     # Get all pairs ref-tar associated frames listed in all csv files
-    dict_features_names = get_all_csv_info(csv_dir)
+    dict_features_names = get_all_csv_info(csv_dir, frames_multiple_of)
 
     # Loop through each filter
     for fil in filters:
@@ -246,54 +285,102 @@ def get_diff_features(csv_dir, features_dir, name_fold, type_features, layer, ty
             # Get info related to the feature based on its path
             info_feature = get_info_dir_path(file_feature)
             table_name = info_feature['table_name']
+            table_number = info_feature['table_number']
             object_number = info_feature['object_number']
             feat_type = info_feature['type']
             bn_tar = os.path.basename(file_feature)
+            frame_number = bn_tar[bn_tar.find('_frame_'):].replace('_frame_','').replace('.npy','')
+            # To allow skipping frames, discard frame if file represents a frame that is not multiple of the 'frames_multiple_of'
+            if frames_multiple_of != None:
+                if int(frame_number) % frames_multiple_of != 0:
+                    continue
+            # The target frame needs to be found in one of the csv file.
+            # The contents of the csv files are represented in the dict_features_names.
+            # To find the target file represented in one of the csv files, we put the target file's name in the
+            # format of the frames stored in the dict_features_names. So it can be found easier.
+            sub_bn_tar = f't{table_number}_tar_vid{object_number}_frame_{frame_number}.npy'
+            # Make sure sub_bn_tar is a substring of bn_tar
+            assert sub_bn_tar in bn_tar
             # Find feature in the dictinary that relates all tar-ref pairs
-            pos_feats = dict_features_names[table_name]['object_%s'%object_number]['pos']
-            neg_feats = dict_features_names[table_name]['object_%s'%object_number]['neg']
+            pos_feats_ref, pos_feats_tar, neg_feats_ref, neg_feats_tar = [], [], [], []
+            for path in dict_features_names[table_name]['object_%s'%object_number]:
+                pos_feats_ref += [a[0] for a in dict_features_names[table_name]['object_%s'%object_number][path]['pos']]
+                neg_feats_ref += [a[0] for a in dict_features_names[table_name]['object_%s'%object_number][path]['neg']]
+                pos_feats_tar += [a[1] for a in dict_features_names[table_name]['object_%s'%object_number][path]['pos']]
+                neg_feats_tar += [a[1] for a in dict_features_names[table_name]['object_%s'%object_number][path]['neg']]
+            # Check if the feature is positive or negative
+            class_feature = None
+            if sub_bn_tar in pos_feats_tar:
+                # Get reference feature associated with the positive feature in the file 'file_feature'
+                ref_feat = pos_feats_ref[pos_feats_tar.index(sub_bn_tar)]
+                class_feature = 1 # positive
+            elif sub_bn_tar in neg_feats_tar:
+                # Get reference feature associated with the negative feature in the file 'file_feature'
+                ref_feat = neg_feats_ref[neg_feats_tar.index(sub_bn_tar)]
+                class_feature = 0 # negative
+            else:
+                # The feature represents a frame that is not listed in the csv file
+                # print('feature %s not found in the csv file' % bn_tar)
+                continue
+            search_dir = os.path.join(features_dir, table_name, f'Table_{table_number}-Reference_01', layer)
+            ref_feat_path = glob.glob(search_dir+f'/*{layer}_{ref_feat}')
+            # Make sure the reference feature file was found
+            assert len(ref_feat_path) == 1
+            ref_feat_path = ref_feat_path[0]
             # Get features
-            for pos in pos_feats:
-                # Check if filename we are looking for is found
-                if pos[1] in bn_tar:
-                    # Get reference features based on the name of the feature
-                    ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[0]}', recursive=True)
-                    assert len(ref_feat_path) == 1
-                    ref_feat_path = ref_feat_path[0]
-                    # Get target features based on the name of the feature
-                    tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[1]}', recursive=True)
-                    assert len(tar_feat_path) == 1
-                    tar_feat_path = tar_feat_path[0]
-                    # Get features
-                    feat_map_ref = np.load(ref_feat_path).flatten()
-                    feat_map_tar = np.load(tar_feat_path).flatten()
-                    diff = feat_map_ref - feat_map_tar
-                    all_diff_features['pos'].append(diff)
-                    X.append(diff)
-                    Y_hat.append(1) # positive class
-                    paths_feat.append('[pos] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(tar_feat_path))) # pair of features
-                    break
-            for neg in neg_feats:
-                # Check if filename we are looking for is found
-                    if neg[1] in bn_tar:
-                        # Get reference features based on the name of the feature
-                        ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[0]}', recursive=True)
-                        assert len(ref_feat_path) == 1
-                        ref_feat_path = ref_feat_path[0]
-                        # Get target features based on the name of the feature
-                        tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[1]}', recursive=True)
-                        assert len(tar_feat_path) == 1
-                        tar_feat_path = tar_feat_path[0]
-                        # Get features
-                        feat_map_ref = np.load(ref_feat_path).flatten()
-                        feat_map_tar = np.load(tar_feat_path).flatten()
-                        diff = feat_map_ref - feat_map_tar
-                        all_diff_features['neg'].append(diff)
-                        X.append(diff)
-                        Y_hat.append(0) # negative class
-                        paths_feat.append('[neg] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(tar_feat_path))) # pair of features
-                        break
-    return all_diff_features, np.array(X), np.array(Y_hat), paths_feat
+            feat_map_ref = np.load(ref_feat_path).flatten()
+            feat_map_tar = np.load(file_feature).flatten()
+            diff = feat_map_ref - feat_map_tar
+            X.append(diff)
+            Y_hat.append(class_feature) # 1: positive or 0: negative
+            if class_feature == 1:
+                paths_feat.append('[pos] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(file_feature))) # pair of features
+            else:
+                paths_feat.append('[neg] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(file_feature))) # pair of features
+
+
+            # # Get features
+            # for pos in pos_feats:
+            #     # Check if filename we are looking for is found
+            #     if pos[1] in bn_tar:
+            #         # Get reference features based on the name of the feature
+            #         ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[0]}', recursive=True)
+            #         assert len(ref_feat_path) == 1
+            #         ref_feat_path = ref_feat_path[0]
+            #         # Get target features based on the name of the feature
+            #         tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{pos[1]}', recursive=True)
+            #         assert len(tar_feat_path) == 1
+            #         tar_feat_path = tar_feat_path[0]
+            #         # Get features
+            #         feat_map_ref = np.load(ref_feat_path).flatten()
+            #         feat_map_tar = np.load(tar_feat_path).flatten()
+            #         diff = feat_map_ref - feat_map_tar
+            #         all_diff_features['pos'].append(diff)
+            #         X.append(diff)
+            #         Y_hat.append(1) # positive class
+            #         paths_feat.append('[pos] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(tar_feat_path))) # pair of features
+            #         break
+            # for neg in neg_feats:
+            #     # Check if filename we are looking for is found
+            #         if neg[1] in bn_tar:
+            #             # Get reference features based on the name of the feature
+            #             ref_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[0]}', recursive=True)
+            #             assert len(ref_feat_path) == 1
+            #             ref_feat_path = ref_feat_path[0]
+            #             # Get target features based on the name of the feature
+            #             tar_feat_path = glob.glob(features_dir+f'/**/{layer}'+f'/*{neg[1]}', recursive=True)
+            #             assert len(tar_feat_path) == 1
+            #             tar_feat_path = tar_feat_path[0]
+            #             # Get features
+            #             feat_map_ref = np.load(ref_feat_path).flatten()
+            #             feat_map_tar = np.load(tar_feat_path).flatten()
+            #             diff = feat_map_ref - feat_map_tar
+            #             all_diff_features['neg'].append(diff)
+            #             X.append(diff)
+            #             Y_hat.append(0) # negative class
+            #             paths_feat.append('[neg] %s - %s'% (os.path.basename(ref_feat_path), os.path.basename(tar_feat_path))) # pair of features
+            #             break
+    return np.array(X), np.array(Y_hat), paths_feat
 
 def get_info_dir_path(file_path):
     info = {}
@@ -309,7 +396,7 @@ def get_info_dir_path(file_path):
     if 'path_' in basename : info['path'] = basename[basename.index('path_')+5:basename.index('path_')+6]
     return info
 
-def get_all_csv_info(csv_dir):
+def get_all_csv_info(csv_dir, frames_multiple_of = None):
     csv_files = glob.glob(csv_dir + '/**/*.csv', recursive=True)
     dict_features = {}
     for csv_path in csv_files:
@@ -330,7 +417,10 @@ def get_all_csv_info(csv_dir):
                 col_ref = 0
                 col_tar = 1
                 continue
-            ref_feat = f't{table_number}_ref_vid{object_number}_frame_{row[col_ref]}.npy'
+            if frames_multiple_of != None:
+                if int(row[col_tar]) % frames_multiple_of != 0:
+                    continue
+            ref_feat = f't{table_number}_ref_vid01_frame_{row[col_ref]}.npy' # reference video is always vid01
             tar_feat = f't{table_number}_tar_vid{object_number}_frame_{row[col_tar]}.npy'
             # Does not contain annotation -> negative class
             if row[2] == '':
@@ -349,7 +439,7 @@ def get_all_csv_info(csv_dir):
 
 
 
-n_estimators = 10
+n_estimators = 100
 
 layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
           'residual6','residual7','residual8','residual9','residual10','residual11',
@@ -391,26 +481,31 @@ for fold in folds:
         print(f'Layer: {layer}')
         # Define path with features for training
         # dir_features_train = os.path.join(features_dir['train'], f'{fold}',f'{layer}')
-        # AQUI
-        _, X_train, Y_train_hat, paths_feat_training = get_diff_features(csv_dir['train'],features_dir['train'],fold,'object',layer,['tar'])
-
+        # AQUI!!! DESCOMENTA A LINHA ABAIXO E LIMPA OS .NPY
+        # X_train, Y_train_hat, paths_feat_training = get_diff_features(csv_dir['train'],features_dir['train'],fold,'object',layer,['tar'], frames_multiple_of=17)
+        X_train = np.load('del_X_train.npy')
+        Y_train_hat = np.load('del_Y_train_hat.npy')
+        paths_feat_training  = np.load('del_paths_feat_training.npy')
+        X_train, Y_train_hat, paths_feat_training = prepare_features(X_train, Y_train_hat, paths_feat_training)
         # Get features for training
         # X, Y_hat, paths_feat_training = get_features(dir_features_train, max_features_per_class=None, shuffle=True, balance_classes=True)
         # Get amount of positives and negatives
-        amount_pos = (Y_hat == 1).sum()
-        amount_neg = (Y_hat == 0).sum()
+        amount_pos = (Y_train_hat == 1).sum()
+        amount_neg = (Y_train_hat == 0).sum()
         # Apply random forest classification
         rnd_clf = RandomForestClassifier(n_estimators=n_estimators)
-        rnd_clf.fit(X,Y_hat)
+        rnd_clf.fit(X_train,Y_train_hat)
         # Predict the training data (validation)
-        Y_pred = rnd_clf.predict(X)
+        Y_pred = rnd_clf.predict(X_train)
         # Dictionary to save results of this layer for each one of the 59 tables
         results = {}
         # Obtain accuracy of the training data
-        result_training = compare_predictions(Y_hat, Y_pred)
+        result_training = compare_predictions(Y_train_hat, Y_pred)
         accuracy = result_training['accuracy']
+        # Or... rnd_clf.score(X_train,Y_train_hat)
+        # assert rnd_clf.score(X_train,Y_train_hat) == result_training['accuracy']
         # Obtain the probability of each class per prediction
-        predict_proba_training = rnd_clf.predict_proba(X)
+        predict_proba_training = rnd_clf.predict_proba(X_train)
         # Organize in a dictionary the probabilities, correct/incorrect features
         result_training['predict_proba'] = get_predict_probabilities(predict_proba_training, paths_feat_training, classes=[0,1])
         result_training['correct_predict_features'] = [paths_feat_training[id] for id in result_training['correct_ids']]
@@ -418,7 +513,7 @@ for fold in folds:
         # Add it in the results dictionary
         results['result_training'] = result_training
         # Print out accuracy for training
-        print('Dataset distribution (pos, neg): ({}, {}) : ({:.1%}, {:.1%})'.format(amount_pos,amount_neg,amount_pos/len(Y_hat),amount_neg/len(Y_hat)))
+        print('Dataset distribution (pos, neg): ({}, {}) : ({:.1%}, {:.1%})'.format(amount_pos,amount_neg,amount_pos/len(Y_train_hat),amount_neg/len(Y_train_hat)))
         print(f'Training accuracy: {accuracy}')
         print('-'*40)
         print(f'TESTING target [{tar_obj}]:')
@@ -433,7 +528,7 @@ for fold in folds:
             print('-'*40)
             print(f'Table: [{table}][{layer}][{tar_obj}]')
             # AQUI -> Para test
-            _, X_test, Y_test_hat, paths_feat_testing = get_diff_features(csv_dir['test'],features_dir['test'],fold,'research',layer,['tar'], list_consider_tables=[table])
+            X_test, Y_test_hat, paths_feat_testing = get_diff_features(csv_dir['test'],features_dir['test'],fold,'research',layer,['tar'], list_consider_tables=[table])
             # Get features for testing
             # X_test, Y_test_hat, paths_feat_testing = get_features(dir_features_test, max_features_per_class=None, shuffle=False, balance_classes=False)
             # Get amount of positives and negatives
@@ -448,6 +543,8 @@ for fold in folds:
             overall_Y_test_hat += Y_test_hat.tolist()
             overall_Y_test_pred += Y_test_pred.tolist()
             accuracy = accuracy_score(Y_test_hat, Y_test_pred)
+            # Or... rnd_clf.score(X_test,Y_test_hat)
+            # assert rnd_clf.score(X_test,Y_test_hat) == accuracy
             print('Dataset distribution (pos, neg): ({}, {}) : ({:.1%}, {:.1%})'.format(amount_pos,amount_neg,amount_pos/len(Y_test_hat),amount_neg/len(Y_test_hat)))
             print('Accuracy: {:.2%}'.format(accuracy))
             # Validate the predictions
