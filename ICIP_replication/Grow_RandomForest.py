@@ -519,7 +519,7 @@ for fold in folds_to_test:
         print('Temporal voting: (Overall TPR, FPR): (%.2f, %.2f)' % (overall_TP_rate_temporal_voting, overall_FP_rate_temporal_voting))
         print('temporal voting: (Overall DIS): %.2f' % all_DIS_with_temporal_voting)
         # Save results
-        dir_save_results = f'RF_results/{fold}'
+        dir_save_results = 'RF_results/%s_trees/%s'%(str(number_trees),fold)
         if not os.path.isdir(dir_save_results):
             os.makedirs(dir_save_results)
         path_save_results = os.path.join(dir_save_results, '%s.pkl'%layer)
