@@ -85,7 +85,7 @@ def get_file_filters_train(fold, json_file, layer, include_table_folder=False, t
     return search_terms
 
 def get_file_filters_test(fold, json_file, layer, include_table_folder=False, types=['tar'], list_consider_tables=None):
-    target_class = folds_number[fold]
+    target_class = folds[fold]
     search_terms = []
     obj_info = get_objects_info(target_class, json_file)
     for table in obj_info:
