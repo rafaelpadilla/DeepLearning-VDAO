@@ -27,7 +27,6 @@ JSON_FILE_RESEARCH = os.path.join(current_dir,'vdao_research.json')
 JSON_FILE_OBJECT = os.path.join(current_dir,'vdao_object.json')
 
 ############ DEFINITIONS #################
-number_trees = 100
 
 layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
           'residual6','residual7','residual8','residual9','residual10','residual11',
@@ -35,7 +34,9 @@ layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
 
 folds_to_test = ['fold_1', 'fold_2', 'fold_3', 'fold_4', 'fold_5', 'fold_6', 'fold_7', 'fold_8', 'fold_9']
 
-folds_to_test = ['fold_1']
+number_of_trees = 100
+
+save_classifier = False
 
 ##########################################
 
@@ -375,8 +376,16 @@ for fold in folds_to_test:
         amount_pos = (Y_train_hat == 1).sum()
         amount_neg = (Y_train_hat == 0).sum()
         # Create random forest classificator
-        rnd_clf = RandomForestClassifier(n_estimators=number_trees)
+        rnd_clf = RandomForestClassifier(n_estimators=number_of_trees)
         rnd_clf.fit(X_train,Y_train_hat)
+        # Save classifier for further usage
+        if save_classifier:
+            dir_save_classifier = 'RF_results/%s_trees/%s/RF_classifiers/'%(str(number_of_trees),fold)
+            if not os.path.isdir(dir_save_classifier):
+                os.makedirs(dir_save_classifier)
+            name_classifier_file = f'[RF_classifier] [{fold}] [{number_of_trees}_trees].pkl'
+            file_handler = open(os.path.join(dir_save_classifier,name_classifier_file),'wb')
+            s = pickle.dumps(rnd_clf)
         # Predict the training data (validation)
         Y_pred = rnd_clf.predict(X_train)
         # Dictionary to save results of this layer for each one of the 59 tables
@@ -521,7 +530,7 @@ for fold in folds_to_test:
         print('Temporal voting: (Overall TPR, FPR): (%.2f, %.2f)' % (overall_TP_rate_temporal_voting, overall_FP_rate_temporal_voting))
         print('temporal voting: (Overall DIS): %.2f' % all_DIS_with_temporal_voting)
         # Save results
-        dir_save_results = 'RF_results/%s_trees/%s'%(str(number_trees),fold)
+        dir_save_results = 'RF_results/%s_trees/%s'%(str(number_of_trees),fold)
         if not os.path.isdir(dir_save_results):
             os.makedirs(dir_save_results)
         path_save_results = os.path.join(dir_save_results, '%s.pkl'%layer)
