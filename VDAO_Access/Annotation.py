@@ -163,3 +163,26 @@ class Annotation:
         annot.annotationFilePath = refAnnotation.annotationFilePath
         annot.totalFrames = len(annot.listAnnotation)
         return annot
+
+    def GetObjectsArea(self, classes_to_filter=None):
+        if self.parsed == False:
+            self._parseFile()
+
+        # If no classes are specified, consider all classes in the file
+        if classes_to_filter is None:
+            classes_to_filter = self.GetClassesObjects()
+
+        # List containing all areas to be returned
+        ret_areas = []
+        ret_areas_classes = {}
+
+        # Get only annotations of the classes specified in the filter
+        for _class in classes_to_filter:
+            for _ann in self.listAnnotation:
+                if _ann != []:
+                    a= 123
+                # Get areas of bounding boxes of classes specified in the filter
+                areas = [abs(bb[1][0]-bb[1][2])*abs(bb[1][1]-bb[1][3]) for bb in _ann  if bb[0].lower().startswith(_class.lower())]
+                [ret_areas.append(a) for a in areas]
+            ret_areas_classes[_class] = ret_areas
+        return ret_areas_classes
