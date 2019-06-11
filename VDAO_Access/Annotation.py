@@ -1,6 +1,8 @@
-import os 
-import utils
+import os
 import sys
+
+import utils
+
 
 class Annotation:
     """
@@ -12,20 +14,26 @@ class Annotation:
         COPPE - Universidade Federal do Rio de Janeiro
         Last modification: March 9th 2018
     """
-    
+
     def __init__(self, annotationFilePath = None, totalFrames=None):
         self.totalFrames = totalFrames
         self.annotationFilePath = annotationFilePath
         self.listAnnotation = []
         self.parsed = False
         self.error = False
-    
+
     # Returns True if parse was successfully done, otherwise returns False
     def _parseFile(self):
         if self.annotationFilePath == None or os.path.exists(self.annotationFilePath) == False:
             self.parsed = False
             self.error = True
             return self.parsed
+
+        # If total nunber of frames were not provided, read it from the video file
+        if self.totalFrames == None:
+            from VDAOVideo import VDAOVideo
+            vdao_video = VDAOVideo(self.annotationFilePath.replace('.txt','.avi'))
+            self.totalFrames = vdao_video.videoInfo.getNumberOfFrames()
 
         # (*) Annotation objects (not the file) will always start counting from 1
         # it means that if there are 8632 frames, listAnnotation will have
@@ -51,7 +59,7 @@ class Annotation:
         self.parsed = True
         self.error = False
         return self.parsed
-        
+
     # Return True if Annotation file is valid, otherwise return False
     def IsValid(self):
         if self.parsed == False:
@@ -65,7 +73,7 @@ class Annotation:
         listObjects = []
         [[listObjects.append(bb[0][0:len(bb[0])-1]) for bb in annotation] for annotation in self.listAnnotation]
         return list(set(listObjects))
-    
+
     # Ex: [0] = ('shoe0', (a,b,c,d), ..., 1) -> Frame 1 has 'shoe0' in bb (a,b,c,d)
     #     [1] = ('backpack1', (e,f,g,h), ...,3) -> Frame 3 has 'backpack1' in bb (e,f,g,h)
     #     [2] = ('backpack1', (e,f,g,h), ...,4) ('bottle1', (i,j,k,l), 4) -> Frame 4 has 'backpack1' in bb (e,f,g,h) and 'bottle1' in bb (i,j,k,l)
@@ -73,7 +81,7 @@ class Annotation:
         if self.parsed == False:
             self._parseFile()
         return  list(filter(lambda annot: annot != [], (annot for annot in self.listAnnotation)))
-    
+
     def GetNumberOfAnnotatedFrames(self):
         if self.parsed == False:
             self._parseFile()
@@ -103,7 +111,7 @@ class Annotation:
         frameNumber = 0
         for annotation in refAnnotation.listAnnotation:
             if annotation != []:
-                for label in labels:    
+                for label in labels:
                     for a in annotation:
                         if a[0].lower().startswith(label.lower()):
                             annot.listAnnotation[frameNumber].append(a)
@@ -155,6 +163,3 @@ class Annotation:
         annot.annotationFilePath = refAnnotation.annotationFilePath
         annot.totalFrames = len(annot.listAnnotation)
         return annot
-
-
-            
