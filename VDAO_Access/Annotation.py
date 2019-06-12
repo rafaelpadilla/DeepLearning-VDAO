@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 import utils
@@ -173,16 +174,20 @@ class Annotation:
             classes_to_filter = self.GetClassesObjects()
 
         # List containing all areas to be returned
-        ret_areas = []
         ret_areas_classes = {}
 
         # Get only annotations of the classes specified in the filter
-        for _class in classes_to_filter:
-            for _ann in self.listAnnotation:
-                if _ann != []:
-                    a= 123
-                # Get areas of bounding boxes of classes specified in the filter
-                areas = [abs(bb[1][0]-bb[1][2])*abs(bb[1][1]-bb[1][3]) for bb in _ann  if bb[0].lower().startswith(_class.lower())]
-                [ret_areas.append(a) for a in areas]
-            ret_areas_classes[_class] = ret_areas
+        for _ann in self.listAnnotation:
+            if _ann == []:
+                continue
+            # Get areas of bounding boxes of all classses
+            areas = [abs(bb[1][0]-bb[1][2])*abs(bb[1][1]-bb[1][3]) for bb in _ann]
+            # classes = [bb[0] for bb in _ann]
+            classes = [re.sub("\d+", "", bb[0]) for bb in _ann]
+            # Adding classes and quantities to the dictinary
+            for c, qty in zip(classes, areas):
+                if c not in ret_areas_classes:
+                    ret_areas_classes[c] = []
+                ret_areas_classes[c].append(qty)
+
         return ret_areas_classes
