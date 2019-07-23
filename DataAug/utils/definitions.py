@@ -8,8 +8,8 @@ current_path = os.path.dirname(os.path.abspath(__file__))
 random_seed = 123
 
 if hostname == 'notesmt':
-    BASE_DIR = '/media/storage/VDAO'
-    DATABASE_DIR = '???'
+    BASE_DIR = '/media/storage/datasets/aloi'
+    DATABASE_DIR = '/media/storage/VDAO'
 elif 'smt.ufrj.br' in hostname:
     BASE_DIR = '/nfs/proc/rafael.padilla'
     DATABASE_DIR = '/home/rafael.padilla/workspace/rafael.padilla/'
