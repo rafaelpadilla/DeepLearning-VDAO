@@ -219,8 +219,13 @@ class Annotation:
             for bb in _ann:
                 width = (bb[1][2] - bb[1][0])
                 height = (bb[1][3] - bb[1][1])
+
                 if height != 0:
-                    proportions.append(abs(width / height))
+                    prop = abs(width / height)
+                    if prop != 0:
+                        proportions.append(prop)
+                    else:
+                        proportions.append(None)
                 else:
                     proportions.append(None)
             # classes = [bb[0] for bb in _ann]
