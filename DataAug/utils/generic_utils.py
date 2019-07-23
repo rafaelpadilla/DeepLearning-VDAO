@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 
+import _init_paths
 from Align_Annotations_Research import define_tables
 
 
