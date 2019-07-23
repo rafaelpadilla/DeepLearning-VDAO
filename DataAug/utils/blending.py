@@ -1,9 +1,10 @@
 import math
 import os
 
-import cv2
 import numpy as np
 
+import _init_paths
+import cv2
 from generic_utils import euclidean_distance
 
 

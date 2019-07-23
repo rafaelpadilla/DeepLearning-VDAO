@@ -1,22 +1,23 @@
 import os
 import random
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from mpl_toolkits.mplot3d import Axes3D
 
 import _init_paths
 from blending import blend_iterative_blur
+from definitions import (aloi_paths, csv_file_distribution_areas, random_seed, vdao_videos_dir)
 from generic_utils import get_files_paths, get_target_reference_frames
 from my_enums import MethodToBlend
 from ObjectHelper import ObjectDatabase
 from VDAOVideo import VDAOVideo
 
-random_seed = 123
-
 ####################################################################################################
 # Step 1: Get only frames of reference videos that are not present in the testing (research) videos
 ####################################################################################################
-vdao_dir = '/media/storage/VDAO/vdao_object'
+vdao_dir = vdao_videos_dir['train']
 # Get all all videos files from VDAO
 all_videos_vdao = get_files_paths(vdao_dir, 'avi')
 # Separate the reference reference videos
@@ -54,35 +55,61 @@ print('In other words, only %.2f%% of the reference frames are not presented in 
       (100 * total_frames_to_be_used / total_reference_frames))
 
 ####################################################################################################
-# Step 2: Generating data augmentation
+# Step 2: Getting distribution of areas in the VDAO videos
 ####################################################################################################
 # Load probability distributions disconsidering areas=0
-
-current_path = os.path.dirname(os.path.realpath(__file__))
-prob_distr_file = 'bounding_boxes_areas_distribution.csv'
-csv = pd.read_csv(os.path.join(current_path, prob_distr_file))
+csv = pd.read_csv(csv_file_distribution_areas)
 areas = list(csv['área bounding box'])
 occurencies = list(csv['ocorrências'])
 total_occurencies = sum(occurencies)
 distributions = [i / total_occurencies for i in occurencies]
-group_samples_to_obtain = np.arange(1000, 101_000, 1000)
+
+####################################################################################################
+# Step 3: Generating data augmentation
+####################################################################################################
+# Create dict with 100 groups of samples. Each group with 1000 data augmented images
+# Areas of the augmented images have to follow the distribution of the original dataset
+dict_sizes_per_group = {}
+[
+    dict_sizes_per_group.update({'%s' % i: np.random.choice(areas, 1000, p=distributions)})
+    for i in range(1, 101)
+]
 # Create dictionary with VDAOVideo objects
 dict_ref_videos = {}
 [dict_ref_videos.update({i: VDAOVideo(i)}) for i in all_reference_videos]
-# Define aloi database path
-root_samples_dir = '/media/storage/datasets/aloi'
-for samples in group_samples_to_obtain:
-    # choose a random reference video
-    ref_video_path = random.choice(all_reference_videos)
-    # choose a random frame
-    ref_frame_number = random.choice(frames_to_consider[ref_video_path])
+width_background, height_background = (1280, 720)
+# Get all possible ALOI images
+aloi_images = get_files_paths(aloi_paths['images'], 'png')
+width_aloi, height_aloi = (768, 576)
 
-    # TODO:
-    # Fora do loop definir tamanhos (dentro da distribuicao) pra pegar
-    # Pegar objeto de referencia da ALOI
-    # Pegar rotacao e posicao aleatoria
-    # Chamar os métodos
-    # Escrever em um arquivo txt as configuracoes do método
+# For each one of the 100 groups create 1000 background with 1 aloi image inserted on each
+for group, areas in dict_sizes_per_group.items():
+    # For each area, get a random aloi object and a random background
+    for area in areas:
+        # choose a random ALOI image
+        rand_aloi_img = random.choice(aloi_images)
+        # choose a random reference video
+        rand_ref_video_path = random.choice(all_reference_videos)
+        # choose a random frame
+        rand_ref_frame_number = random.choice(frames_to_consider[rand_ref_video_path])
+        # get a random rotation angle
+        rand_angle = random.randrange(0, 361, 1)
+        # get random flip
+        rand_flip = random.choice([True, False])
+        # get random proportional factor
+        rand_proportional_factor = np.random.random_sample()
+
+# xIni=0,
+# yIni=0,
+# scale_factor=1,
+# rotation_angle=0
+
+# TODO:
+# Fora do loop definir tamanhos (dentro da distribuicao) pra pegar
+# Pegar objeto de referencia da ALOI
+# Pegar rotacao e posicao aleatoria
+# Chamar os métodos
+# Escrever em um arquivo txt as configuracoes do método
 
 for video_path, list_frames in frames_to_consider.items():
     video = VDAOVideo(video_path)
