@@ -196,3 +196,39 @@ class Annotation:
                 ret_areas_classes[c].append(qty)
 
         return ret_areas_classes
+
+    def get_object_areas_and_proportions(self, classes_to_filter=None):
+        if self.parsed is False:
+            self._parseFile()
+
+        # If no classes are specified, consider all classes in the file
+        if classes_to_filter is None:
+            classes_to_filter = self.GetClassesObjects()
+
+        # List containing all areas to be returned
+        ret_areas_proportions_classes = {}
+
+        # Get only annotations of the classes specified in the filter
+        for _ann in self.listAnnotation:
+            if _ann == []:
+                continue
+            # Get areas of bounding boxes of all classses
+            areas = [abs(bb[1][0] - bb[1][2]) * abs(bb[1][1] - bb[1][3]) for bb in _ann]
+            # proportion: width/height
+            proportions = []
+            for bb in _ann:
+                width = (bb[1][2] - bb[1][0])
+                height = (bb[1][3] - bb[1][1])
+                if height != 0:
+                    proportions.append(abs(width / height))
+                else:
+                    proportions.append(None)
+            # classes = [bb[0] for bb in _ann]
+            classes = [re.sub("\d+", "", bb[0]) for bb in _ann]
+            # Adding classes and quantities to the dictinary
+            for c, area, prop in zip(classes, areas, proportions):
+                if c not in ret_areas_proportions_classes:
+                    ret_areas_proportions_classes[c] = []
+                ret_areas_proportions_classes[c].append((area, prop))
+
+        return ret_areas_proportions_classes
