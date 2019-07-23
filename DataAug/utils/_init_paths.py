@@ -10,9 +10,5 @@ def add_path(path):
 currentPath = os.path.dirname(os.path.realpath(__file__))
 
 # Add lib to PYTHONPATH
-libPath = os.path.join(currentPath, '..', '..', 'Video-Alignment')
-add_path(libPath)
-libPath = os.path.join(currentPath, 'utils')
-add_path(libPath)
-libPath = os.path.join(currentPath, '..')
+libPath = os.path.join(currentPath, '..', '..', '..', 'Video-Alignment')
 add_path(libPath)
