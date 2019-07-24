@@ -1,10 +1,10 @@
 import math
 import os
 
+import cv2
 import numpy as np
 
 import _init_paths
-import cv2
 from generic_utils import euclidean_distance
 
 
@@ -53,14 +53,18 @@ def rotate_image(mat, angle):
     return rotated_mat
 
 
-def apply_transformations(image, scale_factor, rotation_angle, flip_horizontally):
+def apply_transformations(image, scale_factor_x, scale_factor_y, rotation_angle, flip_horizontally):
     # Flip horizontally
     if flip_horizontally is True:
         image = cv2.flip(image, 0)
     # Rotate image counter-clockwise considering the angle (in degrees)
     image = rotate_image(image, rotation_angle)
     # Rescale image
-    image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_CUBIC)
+    image = cv2.resize(image,
+                       None,
+                       fx=scale_factor_x,
+                       fy=scale_factor_y,
+                       interpolation=cv2.INTER_CUBIC)
     return image
 
 
@@ -85,7 +89,8 @@ def blend_iterative_blur(image,
                          background,
                          xIni=0,
                          yIni=0,
-                         scale_factor=1,
+                         scale_factor_x=1,
+                         scale_factor_y=1,
                          rotation_angle=0,
                          flip_horizontally=False):
     # Check if files exist
@@ -99,8 +104,10 @@ def blend_iterative_blur(image,
         assert os.path.isfile(
             background), f'Background image could not be found in the path: {background}'
         background = cv2.imread(background)
-    image = apply_transformations(image, scale_factor, rotation_angle, flip_horizontally)
-    mask = apply_transformations(mask, scale_factor, rotation_angle, flip_horizontally)
+    image = apply_transformations(image, scale_factor_x, scale_factor_y, rotation_angle,
+                                  flip_horizontally)
+    mask = apply_transformations(mask, scale_factor_x, scale_factor_y, rotation_angle,
+                                 flip_horizontally)
     # Before rotating the mask, the values are either 0 or 255. After rotation, some of these values
     # are changed. Therefore, we need to threshold
     _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)

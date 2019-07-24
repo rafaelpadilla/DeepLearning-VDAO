@@ -1,18 +1,19 @@
 import os
 import random
 
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
 import _init_paths
-from blending import blend_iterative_blur
+from blending import blend_iterative_blur, rotate_image
 from definitions import (aloi_paths, csv_file_distribution_areas, random_seed, vdao_videos_dir)
 from generic_utils import get_files_paths, get_target_reference_frames
 from my_enums import MethodToBlend
-from ObjectHelper import ObjectDatabase
-from VDAOVideo import VDAOVideo
+from VDAO_Access.ObjectHelper import ObjectDatabase
+from VDAO_Access.VDAOVideo import VDAOVideo
 
 ####################################################################################################
 # Step 1: Get only frames of reference videos that are not present in the testing (research) videos
@@ -59,10 +60,13 @@ print('In other words, only %.2f%% of the reference frames are not presented in 
 ####################################################################################################
 # Load probability distributions disconsidering areas=0
 csv = pd.read_csv(csv_file_distribution_areas)
-areas = list(csv['área bounding box'])
-occurencies = list(csv['ocorrências'])
-total_occurencies = sum(occurencies)
-distributions = [i / total_occurencies for i in occurencies]
+areas_bb = list(csv['área bounding box'])
+occurencies_bb = list(csv['ocorrências'])
+# Disconsidering areas=0
+areas_bb = areas_bb[1:]
+occurencies_bb = occurencies_bb[1:]
+total_occurencies_bb = sum(occurencies_bb)
+distributions = [i / total_occurencies_bb for i in occurencies_bb]
 
 ####################################################################################################
 # Step 3: Generating data augmentation
@@ -71,7 +75,7 @@ distributions = [i / total_occurencies for i in occurencies]
 # Areas of the augmented images have to follow the distribution of the original dataset
 dict_sizes_per_group = {}
 [
-    dict_sizes_per_group.update({'%s' % i: np.random.choice(areas, 1000, p=distributions)})
+    dict_sizes_per_group.update({'%s' % i: np.random.choice(areas_bb, 1000, p=distributions)})
     for i in range(1, 101)
 ]
 # Create dictionary with VDAOVideo objects
@@ -82,31 +86,65 @@ width_background, height_background = (1280, 720)
 aloi_images = get_files_paths(aloi_paths['images'], 'png')
 width_aloi, height_aloi = (768, 576)
 
+count = 0
 # For each one of the 100 groups create 1000 background with 1 aloi image inserted on each
-for group, areas in dict_sizes_per_group.items():
+for group, rand_areas in dict_sizes_per_group.items():
     # For each area, get a random aloi object and a random background
-    for area in areas:
+    for area in rand_areas:
         # choose a random ALOI image
         rand_aloi_img = random.choice(aloi_images)
-        # choose a random reference video
+        # get its associated mask
+        rand_aloi_mask = os.path.split(rand_aloi_img)[1].split('_')[0]
+        rand_aloi_mask = os.path.join(
+            os.path.split(rand_aloi_img)[0].replace(aloi_paths['images'], aloi_paths['masks']),
+            rand_aloi_mask + '_c1.png')
+        # choose a random frame from a random reference video
         rand_ref_video_path = random.choice(all_reference_videos)
-        # choose a random frame
         rand_ref_frame_number = random.choice(frames_to_consider[rand_ref_video_path])
+        frame_background = dict_ref_videos[rand_ref_video_path].GetFrame(rand_ref_frame_number)[1]
         # get a random rotation angle
         rand_angle = random.randrange(0, 361, 1)
         # get random flip
         rand_flip = random.choice([True, False])
-        # get random proportional factor
-        rand_proportional_factor = np.random.random_sample()
+        # Como uma área pode aparecer com várias proporções (ex. área 133200 aparece em 24 diferentes
+        # proporções), escolho uma proporção aleatória entre a mín e a máx para poder calcular a
+        # altura (new_height)  e largura (new_width) que a imagem da ALOI será redimensionada. Desta
+        # forma, tento manter a proporção do objeto verdadeiro da VDAO que contém aquela área escolhida.
+        # get random proportional factor between min and max among all occurrences of this area
+        proportions = csv.loc[csv['área bounding box'] == area]
+        prop_min = float(proportions['prop min'].iloc[0].replace(',', '.'))
+        prop_max = float(proportions['prop max'].iloc[0].replace(',', '.'))
+        rand_proportion = np.random.uniform(low=prop_min, high=prop_max)
+        # Calculate new height and width
+        new_height = int(np.sqrt(area / rand_proportion))
+        new_width = int(area / new_height)
+        scale_factor_x = new_width / width_aloi
+        scale_factor_y = new_height / height_aloi
+        # get random position disconsidering proportions after rotating
+        shape_new_size_rotation = rotate_image(np.zeros((new_height, new_width)), rand_angle).shape
+        rand_pos_x = int(np.random.uniform(0, width_background - shape_new_size_rotation[0]))
+        rand_pos_y = int(np.random.uniform(0, height_background - shape_new_size_rotation[1]))
 
-# xIni=0,
-# yIni=0,
-# scale_factor=1,
-# rotation_angle=0
+        print(rand_aloi_img)
+        print(rand_aloi_mask)
+        print(rand_ref_video_path)
+        print(rand_ref_frame_number)
+        print('-' * 40)
 
-# TODO:
-# Fora do loop definir tamanhos (dentro da distribuicao) pra pegar
-# Pegar objeto de referencia da ALOI
+        novo_background, [min_x, min_y, max_x,
+                          max_y] = blend_iterative_blur(rand_aloi_img,
+                                                        rand_aloi_mask,
+                                                        frame_background,
+                                                        xIni=rand_pos_x,
+                                                        yIni=rand_pos_y,
+                                                        scale_factor_x=scale_factor_x,
+                                                        scale_factor_y=scale_factor_y,
+                                                        flip_horizontally=rand_flip)
+        count += 1
+        # cv2.imwrite('00.png', frame_background)
+        frame_background[min_y:max_y, min_x:max_x, :] = novo_background
+        cv2.imwrite('teste/%s.png' % count, frame_background)
+
 # Pegar rotacao e posicao aleatoria
 # Chamar os métodos
 # Escrever em um arquivo txt as configuracoes do método
