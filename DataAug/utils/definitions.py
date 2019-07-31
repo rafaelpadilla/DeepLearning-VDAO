@@ -27,3 +27,5 @@ aloi_paths = {
     'images': os.path.join(aloi_root_path, 'png'),
     'masks': os.path.join(aloi_root_path, 'mask')
 }
+
+dir_save_images = os.path.join(current_path, DATABASE_DIR, 'sample_images')
