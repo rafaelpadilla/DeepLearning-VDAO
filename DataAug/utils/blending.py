@@ -41,31 +41,30 @@ def enlarge_mask(mask, iterations):
 def rotate_image(mat, angle):
     height, width = mat.shape[:2]
     image_center = (width / 2, height / 2)
-    rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1)
-    radians = math.radians(angle)
-    sin = math.sin(radians)
-    cos = math.cos(radians)
-    bound_w = int((height * abs(sin)) + (width * abs(cos)))
-    bound_h = int((height * abs(cos)) + (width * abs(sin)))
-    rotation_mat[0, 2] += ((bound_w / 2) - image_center[0])
-    rotation_mat[1, 2] += ((bound_h / 2) - image_center[1])
-    rotated_mat = cv2.warpAffine(mat, rotation_mat, (bound_w, bound_h))
-    return rotated_mat
+    rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+    rotated_mat = cv2.warpAffine(mat, rotation_mat, (width, height))
+    # Get cos and sin of the rotation
+    cos = np.abs(rotation_mat[0, 0])
+    sin = np.abs(rotation_mat[0, 1])
+    # compute the new bounding dimensions of the image
+    new_width = int((height * sin) + (width * cos))
+    new_height = int((height * cos) + (width * sin))
+    return rotated_mat, (new_height, new_width)
 
 
-def apply_transformations(image, scale_factor_x, scale_factor_y, rotation_angle, flip_horizontally):
+# def apply_transformations(image, scale_factor_x, scale_factor_y, rotation_angle, flip_horizontally):
+def apply_transformations(image, new_height, new_width, rotation_angle, flip_horizontally):
+    if isinstance(image, str):
+        assert os.path.isfile(image), f'Image could not be found in the path: {image}'
+        image = cv2.imread(image)
     # Flip horizontally
     if flip_horizontally is True:
         image = cv2.flip(image, 0)
-    # Rotate image counter-clockwise considering the angle (in degrees)
-    image = rotate_image(image, rotation_angle)
     # Rescale image
-    image = cv2.resize(image,
-                       None,
-                       fx=scale_factor_x,
-                       fy=scale_factor_y,
-                       interpolation=cv2.INTER_CUBIC)
-    return image
+    image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+    # Rotate image counter-clockwise considering the angle (in degrees)
+    image, new_size = rotate_image(image, rotation_angle)
+    return image, new_size
 
 
 def blend_image_into_mask(image, mask):
@@ -84,13 +83,50 @@ def blend_image_into_mask(image, mask):
     return mergedImage
 
 
+def extract_bounding_box_mask(mask):
+    # A path was passed instead of a loaded image mask
+    if isinstance(mask, str) and os.path.isfile(mask) is True:
+        mask = cv2.imread(mask)
+    h, w, _ = mask.shape
+    min_x = w
+    max_x = 0
+    # Obs: masks' channels are identical, so checking existence of a pixel with value 255 could be done in any channel
+
+    # For every line(row) of the image
+    for i in range(h):
+        # Get the max position of the pixel whose value is 255
+        b = mask[i, :, 0][::-1]
+        pos_x = len(b) - np.argmax(b)
+        if pos_x != w and pos_x > max_x:  # checking if pixel of channel 0 is 255
+            max_x = pos_x - 1
+        # Get the min position of the pixel whose value is 255
+        pos_x = np.argmax(mask[i, :, 0] == 255)
+        if pos_x != 0 and pos_x < min_x:  # checking if pixel of channel 0 is 255
+            min_x = pos_x
+
+    min_y = h
+    max_y = 0
+    # For every column of the image
+    for i in range(w):
+        # Get the max position of the pixel whose value is 255
+        b = mask[:, i, 0][::-1]
+        pos_y = len(b) - np.argmax(b)
+        if pos_y != h and pos_y > max_y:  # checking if pixel of channel 0 is 255
+            max_y = pos_y - 1
+        # Get the min position of the pixel whose value is 255
+        pos_y = np.argmax(mask[:, i, 0] == 255)
+        if pos_y != 0 and pos_y < min_y:  # checking if pixel of channel 0 is 255
+            min_y = pos_y
+    return min_x, min_y, max_x, max_y
+
+
 def blend_iterative_blur(image,
                          mask,
                          background,
                          xIni=0,
                          yIni=0,
-                         scale_factor_x=1,
-                         scale_factor_y=1,
+                         new_height=0,
+                         new_width=0,
                          rotation_angle=0,
                          flip_horizontally=False):
     # Check if files exist
@@ -104,10 +140,11 @@ def blend_iterative_blur(image,
         assert os.path.isfile(
             background), f'Background image could not be found in the path: {background}'
         background = cv2.imread(background)
-    image = apply_transformations(image, scale_factor_x, scale_factor_y, rotation_angle,
-                                  flip_horizontally)
-    mask = apply_transformations(mask, scale_factor_x, scale_factor_y, rotation_angle,
-                                 flip_horizontally)
+    image, image_size = apply_transformations(image, new_height, new_width, rotation_angle,
+                                              flip_horizontally)
+    mask, mask_size = apply_transformations(mask, new_height, new_width, rotation_angle,
+                                            flip_horizontally)
+    assert image.shape == mask.shape
     # Before rotating the mask, the values are either 0 or 255. After rotation, some of these values
     # are changed. Therefore, we need to threshold
     _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
@@ -167,4 +204,9 @@ def blend_iterative_blur(image,
             dist = distLoop
             iteration = iteration + 1
         return_image = final_image
-    return return_image, [min_x, min_y, max_x, max_y]
+    # Define coordenadas do bounding box do objeto após rotação e redimensionamento
+    coord_bounding_box = extract_bounding_box_mask(mask)
+    coord_bounding_box_init = (xIni + coord_bounding_box[0], yIni + coord_bounding_box[1])
+    coord_bounding_box_end = (xIni + coord_bounding_box[2], yIni + coord_bounding_box[3])
+    return return_image, [min_x, min_y, max_x,
+                          max_y], (coord_bounding_box_init, coord_bounding_box_end)
