@@ -3,15 +3,23 @@ import os
 import sys
 import time
 
-import cv2
 import imageio
 import numpy as np
 
-# To get video information
-from .Annotation import Annotation
-from .utils import splitPathFile
-from .VDAOHelper import ImageExtension, VDAOInfo, VideoType
-from .YoloTrainingHelper import YOLOHelper
+import cv2
+
+if __name__ == "__main__":
+    # To get video information
+    from .Annotation import Annotation
+    from .utils import splitPathFile
+    from .VDAOHelper import ImageExtension, VDAOInfo, VideoType
+    from .YoloTrainingHelper import YOLOHelper
+else:
+    # To get video information
+    from Annotation import Annotation
+    from utils import splitPathFile
+    from VDAOHelper import ImageExtension, VDAOInfo, VideoType
+    from YoloTrainingHelper import YOLOHelper
 
 
 class VDAOVideo:
@@ -437,48 +445,20 @@ class VDAOVideo:
         # Return frame with information
         return framedImage
 
-    def SkipAndSaveFrames(self, startingFrame, endingFrame, framesToSkip, outputFolder, \
-        extension=ImageExtension.JPG, \
-        # For JPEG format, set the quality from 0 to 100 (the higher, the better)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        jpegQuality=95,
-        # For PNG, set the compression level from 0 to 9 (higher value means a smaller
-        # size and longer compression time)
-        compressionLevel=3, \
-        # For PPM, PGM, and PBM formats set the binary format
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        binaryFormat = 1, \
-        filePrefix='frame_', showInfo=False):
+    # For JPEG format, set the quality from 0 to 100 (the higher, the better)
+    # For PNG, set the compression level from 0 to 9 (higher value means a smaller size and longer compression time)
+    # For PPM, PGM, and PBM formats set the binary format
+    def SkipAndSaveFrames(self,
+                          startingFrame,
+                          endingFrame,
+                          framesToSkip,
+                          outputFolder,
+                          extension=ImageExtension.JPG,
+                          jpegQuality=95,
+                          compressionLevel=3,
+                          binaryFormat=1,
+                          filePrefix='frame_',
+                          showInfo=False):
 
         for i in range(startingFrame, endingFrame + 1, framesToSkip):
             # Get the ith frame
