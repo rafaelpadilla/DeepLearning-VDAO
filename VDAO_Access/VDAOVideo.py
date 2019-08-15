@@ -8,10 +8,16 @@ import imageio
 import numpy as np
 
 # To get video information
-from .Annotation import Annotation
-from .utils import splitPathFile
-from .VDAOHelper import ImageExtension, VDAOInfo, VideoType
-from .YoloTrainingHelper import YOLOHelper
+if __name__ == '__main__':
+    from .Annotation import Annotation
+    from .utils import splitPathFile
+    from .VDAOHelper import ImageExtension, VDAOInfo, VideoType
+    from .YoloTrainingHelper import YOLOHelper
+else:
+    from Annotation import Annotation
+    from utils import splitPathFile
+    from VDAOHelper import ImageExtension, VDAOInfo, VideoType
+    from YoloTrainingHelper import YOLOHelper
 
 
 class VDAOVideo:
@@ -456,11 +462,19 @@ class VDAOVideo:
 
 
 
+
+
+
+
         jpegQuality=95,
         # For PNG, set the compression level from 0 to 9 (higher value means a smaller
         # size and longer compression time)
         compressionLevel=3, \
         # For PPM, PGM, and PBM formats set the binary format
+
+
+
+
 
 
 
