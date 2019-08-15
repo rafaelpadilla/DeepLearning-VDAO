@@ -6,6 +6,7 @@ import socket
 import time
 import warnings
 
+import cv2
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -14,7 +15,6 @@ from torch.autograd import Variable
 from torchsummary import summary
 
 import _init_paths_
-import cv2
 import My_Resnet
 from VDAOVideo import VDAOVideo
 
