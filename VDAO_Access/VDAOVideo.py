@@ -18,6 +18,7 @@ else:
     from VDAOHelper import ImageExtension, VDAOInfo, VideoType
     from YoloTrainingHelper import YOLOHelper
 
+
 class VDAOVideo:
     """
 	VDAOVideo class contains important information all important methods and tools to access VDAO videos.
@@ -441,58 +442,6 @@ class VDAOVideo:
         # Return frame with information
         return framedImage
 
-<<<<<<< HEAD
-    def SkipAndSaveFrames(self, startingFrame, endingFrame, framesToSkip, outputFolder, \
-        extension=ImageExtension.JPG, \
-        # For JPEG format, set the quality from 0 to 100 (the higher, the better)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        jpegQuality=95,
-        # For PNG, set the compression level from 0 to 9 (higher value means a smaller
-        # size and longer compression time)
-        compressionLevel=3, \
-        # For PPM, PGM, and PBM formats set the binary format
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        binaryFormat = 1, \
-        filePrefix='frame_', showInfo=False):
-=======
     # For JPEG format, set the quality from 0 to 100 (the higher, the better)
     # For PNG, set the compression level from 0 to 9 (higher value means a smaller size and longer compression time)
     # For PPM, PGM, and PBM formats set the binary format
@@ -507,7 +456,6 @@ class VDAOVideo:
                           binaryFormat=1,
                           filePrefix='frame_',
                           showInfo=False):
->>>>>>> b1f8aad30c9497330b87948174e159afba19cc7d
 
         for i in range(startingFrame, endingFrame + 1, framesToSkip):
             # Get the ith frame
