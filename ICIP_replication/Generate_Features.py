@@ -34,7 +34,8 @@ def define_folders():
         dirRead = '/media/storage/VDAO/'
         outputDir = '/media/storage/VDAO/'
     elif hostname == 'teresopolis.smt.ufrj.br':  # teresopolis
-        pass
+        dirRead = "/home/rafael.padilla/workspace/rafael.padilla/"
+        outputDir = "/nfs/proc/rafael.padilla/"
     elif hostname.startswith("node") or hostname.startswith("head"):  #nodes do cluster smt
         dirRead = "/home/rafael.padilla/workspace/rafael.padilla/"
         outputDir = "/nfs/proc/rafael.padilla/"
