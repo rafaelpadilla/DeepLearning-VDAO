@@ -151,6 +151,8 @@ def generate_and_save_features(video_path,
 
     def features_extracted_callback(parameters):
         def hook(m, i, o):
+            if parameters['layer_name'] not in layers_to_extract:
+                return
             if parameters['pooling_layer'] != None:
                 feature_vector = parameters['pooling_layer'](o.data.squeeze())
             else:
@@ -169,143 +171,177 @@ def generate_and_save_features(video_path,
     # If you wish not to use average pooling, set pooling_layer as None, such as:
     # resnet50.add_hook('conv1', 'conv1', None, features_extracted_callback, {layer_name:'conv1', 'pooling_layer':None})
     if apply_post_pooling:
-        resnet50.add_hook('conv1', 'conv1', None, features_extracted_callback, {
-            'layer_name': 'conv1',
-            'pooling_layer': get_avg_poolings('conv1')
-        })
-        resnet50.add_hook('residual1', 'layer1', '0', features_extracted_callback, {
-            'layer_name': 'residual1',
-            'pooling_layer': get_avg_poolings('residual1')
-        })
-        resnet50.add_hook('residual2', 'layer1', '1', features_extracted_callback, {
-            'layer_name': 'residual2',
-            'pooling_layer': get_avg_poolings('residual2')
-        })
-        resnet50.add_hook('residual3', 'layer1', '2', features_extracted_callback, {
-            'layer_name': 'residual3',
-            'pooling_layer': get_avg_poolings('residual3')
-        })
-        resnet50.add_hook('residual4', 'layer2', '0', features_extracted_callback, {
-            'layer_name': 'residual4',
-            'pooling_layer': get_avg_poolings('residual4')
-        })
-        resnet50.add_hook('residual5', 'layer2', '1', features_extracted_callback, {
-            'layer_name': 'residual5',
-            'pooling_layer': get_avg_poolings('residual5')
-        })
-        resnet50.add_hook('residual6', 'layer2', '2', features_extracted_callback, {
-            'layer_name': 'residual6',
-            'pooling_layer': get_avg_poolings('residual6')
-        })
-        resnet50.add_hook('residual7', 'layer2', '3', features_extracted_callback, {
-            'layer_name': 'residual7',
-            'pooling_layer': get_avg_poolings('residual7')
-        })
-        resnet50.add_hook('residual8', 'layer3', '0', features_extracted_callback, {
-            'layer_name': 'residual8',
-            'pooling_layer': get_avg_poolings('residual8')
-        })
-        resnet50.add_hook('residual9', 'layer3', '1', features_extracted_callback, {
-            'layer_name': 'residual9',
-            'pooling_layer': get_avg_poolings('residual9')
-        })
-        resnet50.add_hook('residual10', 'layer3', '2', features_extracted_callback, {
-            'layer_name': 'residual10',
-            'pooling_layer': get_avg_poolings('residual10')
-        })
-        resnet50.add_hook('residual11', 'layer3', '3', features_extracted_callback, {
-            'layer_name': 'residual11',
-            'pooling_layer': get_avg_poolings('residual11')
-        })
-        resnet50.add_hook('residual12', 'layer3', '4', features_extracted_callback, {
-            'layer_name': 'residual12',
-            'pooling_layer': get_avg_poolings('residual12')
-        })
-        resnet50.add_hook('residual13', 'layer3', '5', features_extracted_callback, {
-            'layer_name': 'residual13',
-            'pooling_layer': get_avg_poolings('residual13')
-        })
-        resnet50.add_hook('residual14', 'layer4', '0', features_extracted_callback, {
-            'layer_name': 'residual14',
-            'pooling_layer': get_avg_poolings('residual14')
-        })
-        resnet50.add_hook('residual15', 'layer4', '1', features_extracted_callback, {
-            'layer_name': 'residual15',
-            'pooling_layer': get_avg_poolings('residual15')
-        })
-        resnet50.add_hook('residual16', 'layer4', '2', features_extracted_callback, {
-            'layer_name': 'residual16',
-            'pooling_layer': get_avg_poolings('residual16')
-        })
+        if 'conv1' in layers_to_extract:
+            resnet50.add_hook('conv1', 'conv1', None, features_extracted_callback, {
+                'layer_name': 'conv1',
+                'pooling_layer': get_avg_poolings('conv1')
+            })
+        if 'residual1' in layers_to_extract:
+            resnet50.add_hook('residual1', 'layer1', '0', features_extracted_callback, {
+                'layer_name': 'residual1',
+                'pooling_layer': get_avg_poolings('residual1')
+            })
+        if 'residual2' in layers_to_extract:
+            resnet50.add_hook('residual2', 'layer1', '1', features_extracted_callback, {
+                'layer_name': 'residual2',
+                'pooling_layer': get_avg_poolings('residual2')
+            })
+        if 'residual3' in layers_to_extract:
+            resnet50.add_hook('residual3', 'layer1', '2', features_extracted_callback, {
+                'layer_name': 'residual3',
+                'pooling_layer': get_avg_poolings('residual3')
+            })
+        if 'residual4' in layers_to_extract:
+            resnet50.add_hook('residual4', 'layer2', '0', features_extracted_callback, {
+                'layer_name': 'residual4',
+                'pooling_layer': get_avg_poolings('residual4')
+            })
+        if 'residual5' in layers_to_extract:
+            resnet50.add_hook('residual5', 'layer2', '1', features_extracted_callback, {
+                'layer_name': 'residual5',
+                'pooling_layer': get_avg_poolings('residual5')
+            })
+        if 'residual6' in layers_to_extract:
+            resnet50.add_hook('residual6', 'layer2', '2', features_extracted_callback, {
+                'layer_name': 'residual6',
+                'pooling_layer': get_avg_poolings('residual6')
+            })
+        if 'residual7' in layers_to_extract:
+            resnet50.add_hook('residual7', 'layer2', '3', features_extracted_callback, {
+                'layer_name': 'residual7',
+                'pooling_layer': get_avg_poolings('residual7')
+            })
+        if 'residual8' in layers_to_extract:
+            resnet50.add_hook('residual8', 'layer3', '0', features_extracted_callback, {
+                'layer_name': 'residual8',
+                'pooling_layer': get_avg_poolings('residual8')
+            })
+        if 'residual9' in layers_to_extract:
+            resnet50.add_hook('residual9', 'layer3', '1', features_extracted_callback, {
+                'layer_name': 'residual9',
+                'pooling_layer': get_avg_poolings('residual9')
+            })
+        if 'residual10' in layers_to_extract:
+            resnet50.add_hook('residual10', 'layer3', '2', features_extracted_callback, {
+                'layer_name': 'residual10',
+                'pooling_layer': get_avg_poolings('residual10')
+            })
+        if 'residual11' in layers_to_extract:
+            resnet50.add_hook('residual11', 'layer3', '3', features_extracted_callback, {
+                'layer_name': 'residual11',
+                'pooling_layer': get_avg_poolings('residual11')
+            })
+        if 'residual12' in layers_to_extract:
+            resnet50.add_hook('residual12', 'layer3', '4', features_extracted_callback, {
+                'layer_name': 'residual12',
+                'pooling_layer': get_avg_poolings('residual12')
+            })
+        if 'residual13' in layers_to_extract:
+            resnet50.add_hook('residual13', 'layer3', '5', features_extracted_callback, {
+                'layer_name': 'residual13',
+                'pooling_layer': get_avg_poolings('residual13')
+            })
+        if 'residual14' in layers_to_extract:
+            resnet50.add_hook('residual14', 'layer4', '0', features_extracted_callback, {
+                'layer_name': 'residual14',
+                'pooling_layer': get_avg_poolings('residual14')
+            })
+        if 'residual15' in layers_to_extract:
+            resnet50.add_hook('residual15', 'layer4', '1', features_extracted_callback, {
+                'layer_name': 'residual15',
+                'pooling_layer': get_avg_poolings('residual15')
+            })
+        if 'residual16' in layers_to_extract:
+            resnet50.add_hook('residual16', 'layer4', '2', features_extracted_callback, {
+                'layer_name': 'residual16',
+                'pooling_layer': get_avg_poolings('residual16')
+            })
     else:
-        resnet50.add_hook('conv1', 'conv1', None, features_extracted_callback, {
-            'layer_name': 'conv1',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual1', 'layer1', '0', features_extracted_callback, {
-            'layer_name': 'residual1',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual2', 'layer1', '1', features_extracted_callback, {
-            'layer_name': 'residual2',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual3', 'layer1', '2', features_extracted_callback, {
-            'layer_name': 'residual3',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual4', 'layer2', '0', features_extracted_callback, {
-            'layer_name': 'residual4',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual5', 'layer2', '1', features_extracted_callback, {
-            'layer_name': 'residual5',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual6', 'layer2', '2', features_extracted_callback, {
-            'layer_name': 'residual6',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual7', 'layer2', '3', features_extracted_callback, {
-            'layer_name': 'residual7',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual8', 'layer3', '0', features_extracted_callback, {
-            'layer_name': 'residual8',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual9', 'layer3', '1', features_extracted_callback, {
-            'layer_name': 'residual9',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual10', 'layer3', '2', features_extracted_callback, {
-            'layer_name': 'residual10',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual11', 'layer3', '3', features_extracted_callback, {
-            'layer_name': 'residual11',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual12', 'layer3', '4', features_extracted_callback, {
-            'layer_name': 'residual12',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual13', 'layer3', '5', features_extracted_callback, {
-            'layer_name': 'residual13',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual14', 'layer4', '0', features_extracted_callback, {
-            'layer_name': 'residual14',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual15', 'layer4', '1', features_extracted_callback, {
-            'layer_name': 'residual15',
-            'pooling_layer': None
-        })
-        resnet50.add_hook('residual16', 'layer4', '2', features_extracted_callback, {
-            'layer_name': 'residual16',
-            'pooling_layer': None
-        })
+        if 'conv1' in layers_to_extract:
+            resnet50.add_hook('conv1', 'conv1', None, features_extracted_callback, {
+                'layer_name': 'conv1',
+                'pooling_layer': None
+            })
+        if 'residual1' in layers_to_extract:
+            resnet50.add_hook('residual1', 'layer1', '0', features_extracted_callback, {
+                'layer_name': 'residual1',
+                'pooling_layer': None
+            })
+        if 'residual2' in layers_to_extract:
+            resnet50.add_hook('residual2', 'layer1', '1', features_extracted_callback, {
+                'layer_name': 'residual2',
+                'pooling_layer': None
+            })
+        if 'residual3' in layers_to_extract:
+            resnet50.add_hook('residual3', 'layer1', '2', features_extracted_callback, {
+                'layer_name': 'residual3',
+                'pooling_layer': None
+            })
+        if 'residual4' in layers_to_extract:
+            resnet50.add_hook('residual4', 'layer2', '0', features_extracted_callback, {
+                'layer_name': 'residual4',
+                'pooling_layer': None
+            })
+        if 'residual5' in layers_to_extract:
+            resnet50.add_hook('residual5', 'layer2', '1', features_extracted_callback, {
+                'layer_name': 'residual5',
+                'pooling_layer': None
+            })
+        if 'residual6' in layers_to_extract:
+            resnet50.add_hook('residual6', 'layer2', '2', features_extracted_callback, {
+                'layer_name': 'residual6',
+                'pooling_layer': None
+            })
+        if 'residual7' in layers_to_extract:
+            resnet50.add_hook('residual7', 'layer2', '3', features_extracted_callback, {
+                'layer_name': 'residual7',
+                'pooling_layer': None
+            })
+        if 'residual8' in layers_to_extract:
+            resnet50.add_hook('residual8', 'layer3', '0', features_extracted_callback, {
+                'layer_name': 'residual8',
+                'pooling_layer': None
+            })
+        if 'residual9' in layers_to_extract:
+            resnet50.add_hook('residual9', 'layer3', '1', features_extracted_callback, {
+                'layer_name': 'residual9',
+                'pooling_layer': None
+            })
+        if 'residual10' in layers_to_extract:
+            resnet50.add_hook('residual10', 'layer3', '2', features_extracted_callback, {
+                'layer_name': 'residual10',
+                'pooling_layer': None
+            })
+        if 'residual11' in layers_to_extract:
+            resnet50.add_hook('residual11', 'layer3', '3', features_extracted_callback, {
+                'layer_name': 'residual11',
+                'pooling_layer': None
+            })
+        if 'residual12' in layers_to_extract:
+            resnet50.add_hook('residual12', 'layer3', '4', features_extracted_callback, {
+                'layer_name': 'residual12',
+                'pooling_layer': None
+            })
+        if 'residual13' in layers_to_extract:
+            resnet50.add_hook('residual13', 'layer3', '5', features_extracted_callback, {
+                'layer_name': 'residual13',
+                'pooling_layer': None
+            })
+        if 'residual14' in layers_to_extract:
+            resnet50.add_hook('residual14', 'layer4', '0', features_extracted_callback, {
+                'layer_name': 'residual14',
+                'pooling_layer': None
+            })
+        if 'residual15' in layers_to_extract:
+            resnet50.add_hook('residual15', 'layer4', '1', features_extracted_callback, {
+                'layer_name': 'residual15',
+                'pooling_layer': None
+            })
+        if 'residual16' in layers_to_extract:
+            resnet50.add_hook('residual16', 'layer4', '2', features_extracted_callback, {
+                'layer_name': 'residual16',
+                'pooling_layer': None
+            })
     print('Saving frames in %s' % dir_to_save_features)
     if not os.path.isdir(dir_to_save_features):
         os.makedirs(dir_to_save_features)
@@ -346,6 +382,7 @@ layers_to_extract = [
     'residual7', 'residual8', 'residual9', 'residual10', 'residual11', 'residual12', 'residual13',
     'residual14', 'residual15', 'residual16'
 ]
+layers_to_extract = ['residual3']
 tables_to_process = ['table %s' % l_double_digit(i) for i in range(1, 60)]
 # Parameters
 resize_factor = 2
