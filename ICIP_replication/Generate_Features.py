@@ -348,7 +348,10 @@ layers_to_extract = [
 tables_to_process = ['table %s' % l_double_digit(i) for i in range(1, 60)]
 # Parameters
 resize_factor = 2
-apply_pooling = True
+# Change here to True or False
+apply_pooling = False
+# Change here the name of the directory to save the features
+name_dir = 'no_pooling_features'
 start = time.time()
 print('Starting process at: %s' % start)
 print('Main parameters:')
@@ -356,7 +359,7 @@ print('* resize_factor = %f' % resize_factor)
 print('* apply_pooling = %s' % apply_pooling)
 
 dir_videos = os.path.join(dir_read, 'vdao_%s/' % database_type)
-dir_save = os.path.join(dir_save, 'vdao_alignment_%s' % database_type, alignment_mode, 'features')
+dir_save = os.path.join(dir_save, 'vdao_alignment_%s' % database_type, alignment_mode, name_dir)
 print('Folder to read videos: %s' % dir_videos)
 print('Folder to save features: %s' % dir_save)
 
