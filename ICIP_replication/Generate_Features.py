@@ -6,6 +6,7 @@ import socket
 import time
 import warnings
 
+import cv2
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -14,7 +15,6 @@ from torch.autograd import Variable
 from torchsummary import summary
 
 import _init_paths_
-import cv2
 import My_Resnet
 from VDAOVideo import VDAOVideo
 
@@ -215,7 +215,12 @@ def registra_hooks(model, nome_layer, callback):
         })
 
 
-def get_features(model, device, frame, layer_to_extract, resize_input_factor=1, apply_post_pooling=False):
+def get_features(model,
+                 device,
+                 frame,
+                 layer_to_extract,
+                 resize_input_factor=1,
+                 apply_post_pooling=False):
     if next(model.parameters()).is_cuda is False:
         model.to(device)
 
@@ -240,7 +245,8 @@ def get_features(model, device, frame, layer_to_extract, resize_input_factor=1, 
     def features_extracted_callback(parameters):
         def hook(m, i, o):
             assert parameters['layer_name'] == layer_to_extract
-            features_extracted = o.data.squeeze().cpu()
+            get_features.features_extracted = o.data.squeeze().cpu()
+
         return hook
 
     if layer_to_extract not in model.hooks:
@@ -251,7 +257,7 @@ def get_features(model, device, frame, layer_to_extract, resize_input_factor=1, 
     image = Image.fromarray(np.uint8(frame))
     t_img = torch.tensor(transformations(image).unsqueeze(0), dtype=torch.float, device=device)
     model(t_img)
-    a = 123
+    return get_features.features_extracted
 
 
 def generate_and_save_features(video_path,
