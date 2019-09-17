@@ -244,8 +244,6 @@ def get_features(model,
     transformations = transforms.Compose(
         [resize_transform, to_tensor_transform, normalize_transform])
 
-    features_extracted = None
-
     def features_extracted_callback(parameters):
         def hook(m, i, o):
             assert parameters['layer_name'] == layer_to_extract
