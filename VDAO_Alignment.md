@@ -87,3 +87,9 @@
 ## Table 10 ##
 <p align="center">
 <img src="https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/images/table10_video_alignment.png" align="center"/></p>
+
+-----------------
+
+The complete list with aligned frames used for training (**object group**) can be downloaded [here](https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/aligned_frames_object.zip).
+
+The complete list with aligned frames used for testing/validation (**research groun**) can be downloaded [here](https://github.com/rafaelpadilla/DeepLearning-VDAO/blob/master/aligned_frames_research.zip).
