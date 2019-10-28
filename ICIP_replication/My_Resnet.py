@@ -3,17 +3,15 @@
 # Reference: https://pytorch.org/docs/0.4.0/_modules/torchvision/models/resnet.html          #
 #############################################################################################
 
+import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import torchvision.transforms as transforms
-import torch
 
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
-           'resnet152']
+__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
 
-mean_imagenet =[0.485, 0.456, 0.406]
+mean_imagenet = [0.485, 0.456, 0.406]
 std_imagenet = [0.229, 0.224, 0.225]
-
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -26,8 +24,7 @@ model_urls = {
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=1, bias=False)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
 
 def conv1x1(in_planes, out_planes, stride=1):
@@ -110,8 +107,7 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.hooks = {}
         self.inplanes = 64
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
-                               bias=False)
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -172,9 +168,8 @@ class ResNet(nn.Module):
 
         return x
 
-
     def add_hook(self, name, layer_name, id_module, callback, parameters_callback):
-        if id_module == None:
+        if id_module is None:
             hook = self._modules.get(layer_name)
         else:
             hook = self._modules.get(layer_name)._modules.get(str(id_module))
@@ -184,6 +179,7 @@ class ResNet(nn.Module):
         for hook in self.hooks:
             self.hooks[hook].remove()
         self.hooks.clear()
+
 
 def resnet18(pretrained=False, **kwargs):
     """Constructs a ResNet-18 model.

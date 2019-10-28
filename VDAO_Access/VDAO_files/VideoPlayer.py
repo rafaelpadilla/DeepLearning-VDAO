@@ -3,13 +3,14 @@ import os
 import sys
 import threading
 
+import cv2
 import numpy as np
 from PIL import Image, ImageTk
 
 import _init_paths
-import cv2
-import utils
-from Annotation import Annotation
+from VDAO_Access.Annotation import Annotation
+from VDAO_Access.utils import add_bb_into_image
+
 from InputWindow import InputWindow
 from MyEnums import StatusPlayer
 
@@ -73,7 +74,7 @@ class VideoPlayer:
             for b in range(len(fr)):
                 # label = fr[b][0]
                 # box = fr[b][1]
-                imagem = utils.add_bb_into_image(imagem, fr[b][1], (0, 255, 0), 3, fr[b][0])
+                imagem = add_bb_into_image(imagem, fr[b][1], (0, 255, 0), 3, fr[b][0])
         scale_percent = 0.29  # percent of original size
         width = int(imagem.shape[1] * scale_percent)
         height = int(imagem.shape[0] * scale_percent)
@@ -100,8 +101,8 @@ class VideoPlayer:
             # skippingFrame is True when it is played 1x, 5x or 10x buttons
             self.ResizeAndRenderFrame(cvFrame, skippingFrame=False)
             # Update label with current frame number
-            self.lblFrameNumber.configure(
-                text="Frame: %d/%d" % (self.currentFrameNbr, self.totalFrames))
+            self.lblFrameNumber.configure(text="Frame: %d/%d" %
+                                          (self.currentFrameNbr, self.totalFrames))
         # Release video resource
         self.cvVideo.release()
         self.statusPlayer = StatusPlayer.NOT_STARTED
@@ -112,8 +113,8 @@ class VideoPlayer:
         # Define thread to play
         if not hasattr(self, 'threadPlayOn'):
             self.eventPause = threading.Event()
-            self.threadPlayOn = threading.Thread(
-                target=self.PlayOn, args=[])  # Play video from current frame on
+            self.threadPlayOn = threading.Thread(target=self.PlayOn,
+                                                 args=[])  # Play video from current frame on
             self.eventPause.set()
             self.threadPlayOn.start()
         # Depending on the action...
@@ -126,8 +127,8 @@ class VideoPlayer:
             # Define starting frames
             self.currentFrameNbr = 1
             self.cvVideo.set(cv2.CAP_PROP_POS_FRAMES, self.currentFrameNbr - 1)
-            self.lblFrameNumber.configure(
-                text="Frame: %d/%d" % (self.currentFrameNbr, self.totalFrames))
+            self.lblFrameNumber.configure(text="Frame: %d/%d" %
+                                          (self.currentFrameNbr, self.totalFrames))
             # Play thread
             self.eventPause.set()  # set event to release it
         elif self.statusPlayer == StatusPlayer.PLAYING:  # it is playing
@@ -171,12 +172,11 @@ class VideoPlayer:
 
     def btnSelectFrame_Clicked(self):
         self.inputWindow = tk.Toplevel(self.parent)
-        inputWindow = InputWindow(
-            parent=self.inputWindow,
-            eventClose=self.event_SetFrame,
-            title="asd",
-            minValue=1,
-            maxValue=self.totalFrames)
+        inputWindow = InputWindow(parent=self.inputWindow,
+                                  eventClose=self.event_SetFrame,
+                                  title="asd",
+                                  minValue=1,
+                                  maxValue=self.totalFrames)
         inputWindow.Center(self.parent)
 
     def event_SetFrame(self, frameNumber):
@@ -189,8 +189,8 @@ class VideoPlayer:
 
         self.currentFrameNbr = frameNumber
         self.cvVideo.set(cv2.CAP_PROP_POS_FRAMES, frameNumber - 1)
-        self.lblFrameNumber.configure(
-            text="Frame: %d/%d" % (self.currentFrameNbr, self.totalFrames))
+        self.lblFrameNumber.configure(text="Frame: %d/%d" %
+                                      (self.currentFrameNbr, self.totalFrames))
         if self.cvVideo.isOpened():
             ret, frame = self.cvVideo.read()
             if ret:
@@ -237,8 +237,8 @@ class VideoPlayer:
             self.btnPlayPause.config(state="normal")
             # Cria evento e mostra o primeiro frame
             self.eventPause = threading.Event()
-            self.threadPlayOn = threading.Thread(
-                target=self.PlayOn, args=[])  # Play video from current frame on
+            self.threadPlayOn = threading.Thread(target=self.PlayOn,
+                                                 args=[])  # Play video from current frame on
             self.eventPause.set()
             self.threadPlayOn.start()
             self.callBack_PlayPauseBtn_Clicked(
@@ -286,19 +286,20 @@ class VideoPlayer:
         self.lfVideo = tk.LabelFrame(self.pnlPrincipal)
         self.lfVideo.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         # Label with the title of the video
-        lblTitle = tk.Label(
-            self.lfVideo,
-            text=titleVideo,
-            font=("TkDefaultFont", 10, "bold", "underline"),
-            justify=tk.CENTER,
-            anchor=tk.W)
+        lblTitle = tk.Label(self.lfVideo,
+                            text=titleVideo,
+                            font=("TkDefaultFont", 10, "bold", "underline"),
+                            justify=tk.CENTER,
+                            anchor=tk.W)
         lblTitle.pack()
         # Label with the file name
         pnlFileName = tk.PanedWindow(self.lfVideo, orient=tk.HORIZONTAL)
         pnlFileName.pack(anchor=tk.W, fill=tk.BOTH)
         if self.videoIsProcessed == False:
-            self.lblFileName = tk.Label(
-                pnlFileName, text="File: " + fileName, justify=tk.LEFT, anchor=tk.W)
+            self.lblFileName = tk.Label(pnlFileName,
+                                        text="File: " + fileName,
+                                        justify=tk.LEFT,
+                                        anchor=tk.W)
         else:
             self.lblFileName = tk.Label(pnlFileName, text=" ", justify=tk.LEFT, anchor=tk.W)
         pnlFileName.add(self.lblFileName)
@@ -322,24 +323,23 @@ class VideoPlayer:
         pnlFrameNumber.pack()
         if self.videoIsProcessed == False:
             # Checkbox showing if annotation is possible
-            self.chkAnnotations = tk.Checkbutton(
-                pnlFrameNumber,
-                text='show bounding boxes',
-                variable=self.showBoundingBox,
-                justify=tk.LEFT,
-                anchor=tk.W,
-                onvalue=1,
-                offvalue=0,
-                command=self.CheckBoxAnnotaion_Changed)
+            self.chkAnnotations = tk.Checkbutton(pnlFrameNumber,
+                                                 text='show bounding boxes',
+                                                 variable=self.showBoundingBox,
+                                                 justify=tk.LEFT,
+                                                 anchor=tk.W,
+                                                 onvalue=1,
+                                                 offvalue=0,
+                                                 command=self.CheckBoxAnnotaion_Changed)
             pnlFrameNumber.add(self.chkAnnotations)
             self.showBoundingBox = False
             if not hasAnnotations:
                 self.chkAnnotations.configure(state='disabled')
-            self.lblFrameNumber = tk.Label(
-                pnlFrameNumber,
-                text="Frame: %d/%d" % (self.currentFrameNbr, self.totalFrames),
-                justify=tk.LEFT,
-                anchor=tk.W)
+            self.lblFrameNumber = tk.Label(pnlFrameNumber,
+                                           text="Frame: %d/%d" %
+                                           (self.currentFrameNbr, self.totalFrames),
+                                           justify=tk.LEFT,
+                                           anchor=tk.W)
             pnlFrameNumber.add(self.lblFrameNumber)
             # Buttons
             pnlButtons = tk.PanedWindow(self.lfVideo)
@@ -367,85 +367,75 @@ class VideoPlayer:
             self.imgSelectFrame = tk.PhotoImage(
                 file=os.path.join(currentPath, 'aux_images', 'select_frame.png'))
             # # Create and add buttons
-            self.btnBackwardsBeg = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgBackwardsBeg,
-                state=tk.NORMAL,
-                command=self.btnBackwardsBeg_Clicked)
+            self.btnBackwardsBeg = tk.Button(pnlButtons,
+                                             width=24,
+                                             height=24,
+                                             image=self.imgBackwardsBeg,
+                                             state=tk.NORMAL,
+                                             command=self.btnBackwardsBeg_Clicked)
             self.btnBackwardsBeg.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnBackwards10 = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgBackwards10,
-                state=tk.NORMAL,
-                command=self.btnBackwards10_Clicked)
+            self.btnBackwards10 = tk.Button(pnlButtons,
+                                            width=24,
+                                            height=24,
+                                            image=self.imgBackwards10,
+                                            state=tk.NORMAL,
+                                            command=self.btnBackwards10_Clicked)
             self.btnBackwards10.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnBackwards5 = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgBackwards5,
-                state=tk.NORMAL,
-                command=self.btnBackwards5_Clicked)
+            self.btnBackwards5 = tk.Button(pnlButtons,
+                                           width=24,
+                                           height=24,
+                                           image=self.imgBackwards5,
+                                           state=tk.NORMAL,
+                                           command=self.btnBackwards5_Clicked)
             self.btnBackwards5.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnBackwards1 = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgBackwards1,
-                state=tk.NORMAL,
-                command=self.btnBackwards1_Clicked)
+            self.btnBackwards1 = tk.Button(pnlButtons,
+                                           width=24,
+                                           height=24,
+                                           image=self.imgBackwards1,
+                                           state=tk.NORMAL,
+                                           command=self.btnBackwards1_Clicked)
             self.btnBackwards1.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnPlayPause = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgPlay,
-                state=tk.NORMAL,
-                command=self.btnPlayPause_Clicked)
+            self.btnPlayPause = tk.Button(pnlButtons,
+                                          width=24,
+                                          height=24,
+                                          image=self.imgPlay,
+                                          state=tk.NORMAL,
+                                          command=self.btnPlayPause_Clicked)
             self.btnPlayPause.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnForward1 = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgForward1,
-                state=tk.NORMAL,
-                command=self.btnForward1_Clicked)
+            self.btnForward1 = tk.Button(pnlButtons,
+                                         width=24,
+                                         height=24,
+                                         image=self.imgForward1,
+                                         state=tk.NORMAL,
+                                         command=self.btnForward1_Clicked)
             self.btnForward1.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnForward5 = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgForward5,
-                state=tk.NORMAL,
-                command=self.btnForward5_Clicked)
+            self.btnForward5 = tk.Button(pnlButtons,
+                                         width=24,
+                                         height=24,
+                                         image=self.imgForward5,
+                                         state=tk.NORMAL,
+                                         command=self.btnForward5_Clicked)
             self.btnForward5.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnForward10 = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgForward10,
-                state=tk.NORMAL,
-                command=self.btnForward10_Clicked)
+            self.btnForward10 = tk.Button(pnlButtons,
+                                          width=24,
+                                          height=24,
+                                          image=self.imgForward10,
+                                          state=tk.NORMAL,
+                                          command=self.btnForward10_Clicked)
             self.btnForward10.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnForwardEnd = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgForwardEnd,
-                state=tk.NORMAL,
-                command=self.btnForwardEnd_Clicked)
+            self.btnForwardEnd = tk.Button(pnlButtons,
+                                           width=24,
+                                           height=24,
+                                           image=self.imgForwardEnd,
+                                           state=tk.NORMAL,
+                                           command=self.btnForwardEnd_Clicked)
             self.btnForwardEnd.pack(side=tk.LEFT, padx=2, pady=2)
-            self.btnSelectFrame = tk.Button(
-                pnlButtons,
-                width=24,
-                height=24,
-                image=self.imgSelectFrame,
-                state=tk.NORMAL,
-                command=self.btnSelectFrame_Clicked)
+            self.btnSelectFrame = tk.Button(pnlButtons,
+                                            width=24,
+                                            height=24,
+                                            image=self.imgSelectFrame,
+                                            state=tk.NORMAL,
+                                            command=self.btnSelectFrame_Clicked)
             self.btnSelectFrame.pack(side=tk.LEFT, padx=2, pady=2)
             # Só permite tocar o play (se vídeo tiver frames para tocar)
             self.ChangeNavButtonsStatus(False)
