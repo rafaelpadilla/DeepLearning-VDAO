@@ -10,13 +10,12 @@ import numpy as np
 from PIL import Image, ImageTk
 
 import _init_paths
+from InputWindow import InputWindow
+from MyEnums import StatusPlayer
 from VDAO_Access.utils import splitPathFile
 from VDAO_Access.VDAOHelper import VideoType
 from VDAO_Access.VDAOVideo import VDAOVideo
-
-from .InputWindow import InputWindow
-from .MyEnums import StatusPlayer
-from .VideoPlayer import VideoPlayer
+from VideoPlayer import VideoPlayer
 
 if sys.version_info[0] <= 2:  # add tkinker depending on the
     import Tkinter as tk

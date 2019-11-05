@@ -11,8 +11,8 @@ import _init_paths
 from VDAO_Access.Annotation import Annotation
 from VDAO_Access.utils import add_bb_into_image
 
-from .InputWindow import InputWindow
-from .MyEnums import StatusPlayer
+from InputWindow import InputWindow
+from MyEnums import StatusPlayer
 
 if sys.version_info[0] <= 2:  # add tkinker depending on the
     import Tkinter as tk
