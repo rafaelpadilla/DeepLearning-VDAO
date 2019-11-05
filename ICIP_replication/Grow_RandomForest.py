@@ -18,8 +18,8 @@ np.random.seed(123)
 
 BASE_DIR = '/nfs/proc/rafael.padilla'
 #BASE_DIR = '/media/storage/VDAO'
-features_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/features/'),
-                 'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/features/') }
+features_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/features/max_pooling/'),
+                 'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/features/max_pooling/') }
 csv_dir = { 'train': os.path.join(BASE_DIR,'vdao_alignment_object/shortest_distance/intermediate_files/'),
             'test': os.path.join(BASE_DIR,'vdao_alignment_research/shortest_distance/intermediate_files/') }
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -31,6 +31,8 @@ JSON_FILE_OBJECT = os.path.join(current_dir,'vdao_object.json')
 layers = ['conv1','residual1','residual2','residual3','residual4','residual5',
           'residual6','residual7','residual8','residual9','residual10','residual11',
           'residual12','residual13','residual14','residual15','residual16']
+
+layers = ['residual3']
 
 folds_to_test = ['fold_1', 'fold_2', 'fold_3', 'fold_4', 'fold_5', 'fold_6', 'fold_7', 'fold_8', 'fold_9']
 
@@ -305,6 +307,9 @@ def get_all_csv_info(csv_dir, frames_multiple_of = None):
     csv_files = glob.glob(csv_dir + '/**/*.csv', recursive=True)
     dict_features = {}
     for csv_path in csv_files:
+        # Make sure it does not read the all_annotated_frames.csv file
+        if os.path.basename(csv_path) == 'all_annotated_frames.csv':
+            continue
         # Get information like table nbr and objet nbr of the csv
         info_csv = get_info_dir_path(csv_path)
         table_number = info_csv['table_number']
