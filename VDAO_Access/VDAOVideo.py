@@ -7,6 +7,8 @@ import cv2
 import imageio
 import numpy as np
 
+import utils
+
 # To get video information
 if __name__ == '__main__':
     from .Annotation import Annotation
