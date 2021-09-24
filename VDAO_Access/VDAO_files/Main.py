@@ -152,7 +152,7 @@ class Main:
 
     def callback_AddVideoPlayer(self, videoPath, annotationPath):
         # If there the player wasnt created yet, let's create one
-        if self.playerWindow == None:
+        if self.playerWindow is None:
             self.playerWindow = tk.Toplevel(self.root)
             # Event to close
             self.playerWindow.protocol("WM_DELETE_WINDOW", self.on_closing)
